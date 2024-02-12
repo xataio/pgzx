@@ -1,0 +1,5 @@
+# pgaudit_zig extension
+comment = 'pgaudit equivalent written in zig. Provides auditing functionality.'
+default_version = '0.1'
+module_pathname = '$libdir/pgaudit_zig'
+relocatable = true

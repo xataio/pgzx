@@ -1,0 +1,69 @@
+CREATE EXTENSION char_count_zig;
+SELECT char_count_zig('aaabccd', 'a');
+INFO:  input_text: aaabccd
+
+INFO:  target_char: a
+
+INFO:  Target char len: 1
+
+ char_count_zig 
+----------------
+              3
+(1 row)
+
+SELECT char_count_zig('aaabccd', 'b');
+INFO:  input_text: aaabccd
+
+INFO:  target_char: b
+
+INFO:  Target char len: 1
+
+ char_count_zig 
+----------------
+              1
+(1 row)
+
+SELECT char_count_zig('aaabccd', 'c');
+INFO:  input_text: aaabccd
+
+INFO:  target_char: c
+
+INFO:  Target char len: 1
+
+ char_count_zig 
+----------------
+              2
+(1 row)
+
+SELECT char_count_zig('aaabccd', 'd');
+INFO:  input_text: aaabccd
+
+INFO:  target_char: d
+
+INFO:  Target char len: 1
+
+ char_count_zig 
+----------------
+              1
+(1 row)
+
+SELECT char_count_zig('aaabccd', 'e');
+INFO:  input_text: aaabccd
+
+INFO:  target_char: e
+
+INFO:  Target char len: 1
+
+ char_count_zig 
+----------------
+              0
+(1 row)
+
+SELECT char_count_zig('aaabccd', 'abc');
+ERROR:  Target char is more than one byte
+SELECT char_count_zig('aaabccd', NULL);
+ERROR:  Unexpected error: UnexpectedNullValue
+SELECT char_count_zig(NULL, 'a');
+ERROR:  Unexpected error: UnexpectedNullValue
+SELECT char_count_zig(NULL, NULL);
+ERROR:  Unexpected error: UnexpectedNullValue
