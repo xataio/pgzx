@@ -20,18 +20,4 @@ pqsrv_connect_params(const char *const *keywords,
 void
 pqsrv_disconnect(void *conn);
 
-void *
-pqsrv_exec(void *conn, const char *query, uint32_t wait_event_info);
-
-void *
-pqsrv_exec_params(void *conn,
-					 const char *command,
-					 int nParams,
-					 const void *paramTypes,
-					 const char *const *paramValues,
-					 const int *paramLengths,
-					 const int *paramFormats,
-					 int resultFormat,
-					 uint32 wait_event_info);
-
 #endif

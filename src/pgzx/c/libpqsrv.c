@@ -25,21 +25,3 @@ void
 pqsrv_disconnect(void *conn)  {
     libpqsrv_disconnect(conn);
 }
-
-void *
-pqsrv_exec(void *conn, const char *query, uint32 wait_event_info) {
-    return libpqsrv_exec(conn, query, wait_event_info);
-}
-
-void *
-pqsrv_exec_params(void *conn,
-					 const char *command,
-					 int nParams,
-					 const void *paramTypes,
-					 const char *const *paramValues,
-					 const int *paramLengths,
-					 const int *paramFormats,
-					 int resultFormat,
-					 uint32 wait_event_info) {
-  return libpqsrv_exec_params(conn, command, nParams, paramTypes, paramValues, paramLengths, paramFormats, resultFormat, wait_event_info);
-}

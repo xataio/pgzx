@@ -218,36 +218,7 @@ pub const AsyncConn = struct {
     // `waitReady` handles signals and will return an error if the postmaster
     // or CheckForInterrupts indicates that we should shutdown.
     pub fn waitReady(self: *Self) !void {
-        try intr.CheckForInterrupts();
-        while (true) {
-            var wait_flag: c_int = 0;
-
-            // In case the send queue is not empty we want to be woken up when
-            // the socket is writable. This ensures that the loop can continue
-            // sending pending messages that are still enqueued in memory only.
-            const send_queue_empty = try self.flush();
-            if (!send_queue_empty) {
-                wait_flag = c.WL_SOCKET_WRITEABLE;
-            }
-
-            try self.consumeInput();
-            if (self.isBusy()) {
-                wait_flag |= c.WL_SOCKET_READABLE;
-            }
-
-            if (wait_flag == 0) {
-                break;
-            }
-
-            const rc = c.WaitLatchOrSocket(c.MyLatch, wait_flag, self.socket(), 0, c.PG_WAIT_EXTENSION);
-            if (checkFlag(c.WL_POSTMASTER_DEATH, rc)) {
-                return Error.PostmasterDied;
-            }
-            if (checkFlag(c.WL_LATCH_SET, rc)) {
-                c.ResetLatch(c.MyLatch);
-                try intr.CheckForInterrupts();
-            }
-        }
+        try self.connWaitReady();
     }
 
     // Flush the send queue. Returns true if the all data has been sent or if the queue is empty.
@@ -328,10 +299,12 @@ pub const Conn = struct {
     }
 
     pub fn exec(self: *Self, query: [:0]const u8) !Result {
-        const res: ?*c.PGresult = @ptrCast(try err.wrap(
-            c.pqsrv_exec,
-            .{ self.conn, query, try pqsrv.get_wait_event_command() },
-        ));
+        const rc = c.PQsendQuery(self.conn, query);
+        if (rc == 0) {
+            pqError(@src()) catch |e| return e;
+            return Error.SendFailed;
+        }
+        const res = self.getResultLast();
         return try Self.initExecResult(self.conn, res);
     }
 
@@ -349,7 +322,7 @@ pub const Conn = struct {
     }
 
     pub fn execParams(self: *Self, command: [:0]const u8, params: PGQueryParams) !Result {
-        const res: ?*c.PGresult = @ptrCast(try err.wrap(c.pqsrv_exec_params, .{
+        const rc = c.PQsendQueryParams(
             self.conn,
             command,
             @as(c_int, @intCast(params.values.len)),
@@ -358,8 +331,12 @@ pub const Conn = struct {
             if (params.lengths) |l| l.ptr else null,
             if (params.formats) |f| f.ptr else null,
             params.result_format,
-            try pqsrv.get_wait_event_command(),
-        }));
+        );
+        if (rc == 0) {
+            pqError(@src(), self.conn) catch |e| return e;
+            return Error.SendFailed;
+        }
+        const res = try self.getResultLast();
         return try Self.initExecResult(self.conn, res);
     }
 
@@ -386,6 +363,39 @@ pub const Conn = struct {
             pqError(@src(), conn) catch |e| return e;
             return error.QueryFailure;
         }
+    }
+
+    fn getResult(self: *Self) !?*c.PGresult {
+        try self.connWaitReady();
+        return c.PQgetResult(self.conn);
+    }
+
+    fn getResultLast(self: *Self) !?*c.PGresult {
+        var last: ?*c.PGresult = null;
+        errdefer {
+            if (last) |r| c.PQclear(r);
+        }
+
+        while (true) {
+            const res = try self.getResult();
+            if (res == null) break;
+
+            if (last) |r| c.PQclear(r);
+            last = res;
+
+            const stopLoop = switch (c.PQresultStatus(res)) {
+                c.PGRES_COPY_IN,
+                c.PGRES_COPY_OUT,
+                c.PGRES_COPY_BOTH,
+                c.CONNECTION_BAD,
+                => true,
+                else => false,
+            };
+            if (stopLoop) {
+                break;
+            }
+        }
+        return last;
     }
 };
 
@@ -465,6 +475,39 @@ inline fn ConnMixin(comptime Self: type) type {
 
         pub fn dbname(self: *Self) [:0]const u8 {
             return std.mem.span(c.PQdb(self.conn));
+        }
+
+        pub fn connWaitReady(self: *Self) !void {
+            try intr.CheckForInterrupts();
+            while (true) {
+                var wait_flag: c_int = 0;
+
+                // In case the send queue is not empty we want to be woken up when
+                // the socket is writable. This ensures that the loop can continue
+                // sending pending messages that are still enqueued in memory only.
+                const send_queue_empty = try self.flush();
+                if (!send_queue_empty) {
+                    wait_flag = c.WL_SOCKET_WRITEABLE;
+                }
+
+                try self.consumeInput();
+                if (self.isBusy()) {
+                    wait_flag |= c.WL_SOCKET_READABLE;
+                }
+
+                if (wait_flag == 0) {
+                    break;
+                }
+
+                const rc = c.WaitLatchOrSocket(c.MyLatch, wait_flag, self.socket(), 0, c.PG_WAIT_EXTENSION);
+                if (checkFlag(c.WL_POSTMASTER_DEATH, rc)) {
+                    return Error.PostmasterDied;
+                }
+                if (checkFlag(c.WL_LATCH_SET, rc)) {
+                    c.ResetLatch(c.MyLatch);
+                    try intr.CheckForInterrupts();
+                }
+            }
         }
     };
 }
