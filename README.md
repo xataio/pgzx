@@ -29,11 +29,11 @@ pgzx is currently under heavy development by the [Xata](https://xata.io) team. I
   * [x] Memory context allocators
   * [x] Function manager
   * [x] Background worker process
-  * [x] Shared memory
   * [x] LWLocks
   * [x] Signals and interrupts
   * [x] String formatting
-  * [x] SPI
+  * [ ] Shared memory
+  * [ ] SPI
   * Postgres data structures wrappers:
     * Array based list (List)
         * [x] Pointer list
