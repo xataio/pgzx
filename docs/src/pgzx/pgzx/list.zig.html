@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>pgzx/list.zig - source view</title>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg==">
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNTMgMTQwIj48ZyBmaWxsPSIjRjdBNDFEIj48Zz48cG9seWdvbiBwb2ludHM9IjQ2LDIyIDI4LDQ0IDE5LDMwIi8+PHBvbHlnb24gcG9pbnRzPSI0NiwyMiAzMywzMyAyOCw0NCAyMiw0NCAyMiw5NSAzMSw5NSAyMCwxMDAgMTIsMTE3IDAsMTE3IDAsMjIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMzEsOTUgMTIsMTE3IDQsMTA2Ii8+PC9nPjxnPjxwb2x5Z29uIHBvaW50cz0iNTYsMjIgNjIsMzYgMzcsNDQiLz48cG9seWdvbiBwb2ludHM9IjU2LDIyIDExMSwyMiAxMTEsNDQgMzcsNDQgNTYsMzIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTE2LDk1IDk3LDExNyA5MCwxMDQiLz48cG9seWdvbiBwb2ludHM9IjExNiw5NSAxMDAsMTA0IDk3LDExNyA0MiwxMTcgNDIsOTUiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTUwLDAgNTIsMTE3IDMsMTQwIDEwMSwyMiIvPjwvZz48Zz48cG9seWdvbiBwb2ludHM9IjE0MSwyMiAxNDAsNDAgMTIyLDQ1Ii8+PHBvbHlnb24gcG9pbnRzPSIxNTMsMjIgMTUzLDExNyAxMDYsMTE3IDEyMCwxMDUgMTI1LDk1IDEzMSw5NSAxMzEsNDUgMTIyLDQ1IDEzMiwzNiAxNDEsMjIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTI1LDk1IDEzMCwxMTAgMTA2LDExNyIvPjwvZz48L2c+PC9zdmc+">
+    <style>
+      body{
+        font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      pre > code {
+        display: block;
+        overflow: auto;
+        line-height: normal;
+        margin: 0em;
+      }
+      .tok-kw {
+          color: #333;
+          font-weight: bold;
+      }
+      .tok-str {
+          color: #d14;
+      }
+      .tok-builtin {
+          color: #005C7A;
+      }
+      .tok-comment {
+          color: #545454;
+          font-style: italic;
+      }
+      .tok-fn {
+          color: #900;
+          font-weight: bold;
+      }
+      .tok-null {
+          color: #005C5C;
+      }
+      .tok-number {
+          color: #005C5C;
+      }
+      .tok-type {
+          color: #458;
+          font-weight: bold;
+      }
+      pre {
+        counter-reset: line;
+      }
+      pre .line:before {
+        counter-increment: line;
+        content: counter(line);
+        display: inline-block;
+        padding-right: 1em;
+        width: 2em;
+        text-align: right;
+        color: #999;
+      }
+      
+      .line {
+        width: 100%;
+        display: inline-block;
+      }
+      .line:target {
+        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        background: #fafafa;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body{
+            background:#222;
+            color: #ccc;
+        }
+        pre > code {
+            color: #ccc;
+            background: #222;
+            border: unset;
+        }
+        .line:target {
+            border-top: 1px solid #444;
+            border-bottom: 1px solid #444;
+            background: #333;
+        }
+        .tok-kw {
+            color: #eee;
+        }
+        .tok-str {
+            color: #2e5;
+        }
+        .tok-builtin {
+            color: #ff894c;
+        }
+        .tok-comment {
+            color: #aa7;
+        }
+        .tok-fn {
+            color: #B1A0F8;
+        }
+        .tok-null {
+            color: #ff8080;
+        }
+        .tok-number {
+            color: #ff8080;
+        }
+        .tok-type {
+            color: #68f;
+        }
+      }
+    </style>
+</head>
+<body>
+<pre><code><span class="line" id="L1"><span class="tok-kw">const</span> c = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;c.zig&quot;</span>);</span>
+<span class="line" id="L2"></span>
+<span class="line" id="L3"><span class="tok-comment">// Wrapper for postgres lists.</span>
+</span>
+<span class="line" id="L4"><span class="tok-comment">//</span>
+</span>
+<span class="line" id="L5"><span class="tok-comment">// Postgres lists are internally implemented as a growing array of pointers. Similar</span>
+</span>
+<span class="line" id="L6"><span class="tok-comment">// to zigs ArrayList.</span>
+</span>
+<span class="line" id="L7"><span class="tok-comment">//</span>
+</span>
+<span class="line" id="L8"><span class="tok-comment">// All allocations are done one the current postgres memory context.</span>
+</span>
+<span class="line" id="L9"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">PointerListOf</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>) <span class="tok-type">type</span> {</span>
+<span class="line" id="L10">    <span class="tok-kw">return</span> <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L11">        list: *c.List,</span>
+<span class="line" id="L12"></span>
+<span class="line" id="L13">        <span class="tok-kw">const</span> Iterator = IteratorOf(T);</span>
+<span class="line" id="L14">        <span class="tok-kw">const</span> ReverseIterator = ReverseIteratorOf(T);</span>
+<span class="line" id="L15"></span>
+<span class="line" id="L16">        <span class="tok-kw">const</span> Self = <span class="tok-builtin">@This</span>();</span>
+<span class="line" id="L17"></span>
+<span class="line" id="L18">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">create1</span>(v: *T) Self {</span>
+<span class="line" id="L19">            <span class="tok-kw">return</span> Self.init(c.list_make1(v));</span>
+<span class="line" id="L20">        }</span>
+<span class="line" id="L21"></span>
+<span class="line" id="L22">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">create2</span>(v1: *T, v2: *T) Self {</span>
+<span class="line" id="L23">            <span class="tok-kw">return</span> Self.init(c.list_make2(v1, v2));</span>
+<span class="line" id="L24">        }</span>
+<span class="line" id="L25"></span>
+<span class="line" id="L26">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">create3</span>(v1: *T, v2: *T, v3: *T) Self {</span>
+<span class="line" id="L27">            <span class="tok-kw">return</span> Self.init(c.list_make3(v1, v2, v3));</span>
+<span class="line" id="L28">        }</span>
+<span class="line" id="L29"></span>
+<span class="line" id="L30">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">create4</span>(v1: *T, v2: *T, v3: *T, v4: *T) Self {</span>
+<span class="line" id="L31">            <span class="tok-kw">return</span> Self.init(c.list_make4(v1, v2, v3, v4));</span>
+<span class="line" id="L32">        }</span>
+<span class="line" id="L33"></span>
+<span class="line" id="L34">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">create5</span>(v1: *T, v2: *T, v3: *T, v4: *T, v5: *T) Self {</span>
+<span class="line" id="L35">            <span class="tok-kw">return</span> Self.init(c.list_make5(v1, v2, v3, v4, v5));</span>
+<span class="line" id="L36">        }</span>
+<span class="line" id="L37"></span>
+<span class="line" id="L38">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">init</span>(l: *c.List) Self {</span>
+<span class="line" id="L39">            <span class="tok-kw">if</span> (l.<span class="tok-type">type</span> != c.T_List) {</span>
+<span class="line" id="L40">                <span class="tok-builtin">@panic</span>(<span class="tok-str">&quot;Expected a pointer list&quot;</span>);</span>
+<span class="line" id="L41">            }</span>
+<span class="line" id="L42">            <span class="tok-kw">return</span> Self{ .list = l };</span>
+<span class="line" id="L43">        }</span>
+<span class="line" id="L44"></span>
+<span class="line" id="L45">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">deinit</span>(self: Self) <span class="tok-type">void</span> {</span>
+<span class="line" id="L46">            c.list_free(self.list);</span>
+<span class="line" id="L47">        }</span>
+<span class="line" id="L48"></span>
+<span class="line" id="L49">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">deinitDeep</span>(self: Self) <span class="tok-type">void</span> {</span>
+<span class="line" id="L50">            c.list_free_deep(self.list);</span>
+<span class="line" id="L51">        }</span>
+<span class="line" id="L52"></span>
+<span class="line" id="L53">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">rawList</span>(self: Self) *c.List {</span>
+<span class="line" id="L54">            <span class="tok-kw">return</span> self.list;</span>
+<span class="line" id="L55">        }</span>
+<span class="line" id="L56"></span>
+<span class="line" id="L57">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">copy</span>(self: Self) Self {</span>
+<span class="line" id="L58">            <span class="tok-kw">return</span> Self.init(c.list_copy(self.list));</span>
+<span class="line" id="L59">        }</span>
+<span class="line" id="L60"></span>
+<span class="line" id="L61">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">copyDeep</span>(self: Self) Self {</span>
+<span class="line" id="L62">            <span class="tok-kw">return</span> Self.init(c.list_copy_deep(self.list));</span>
+<span class="line" id="L63">        }</span>
+<span class="line" id="L64"></span>
+<span class="line" id="L65">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">sort</span>(self: Self, cmp: <span class="tok-kw">fn</span> (?*T, ?*T) <span class="tok-type">c_int</span>) <span class="tok-type">void</span> {</span>
+<span class="line" id="L66">            c.list_sort(self.list, <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L67">                <span class="tok-kw">fn</span> <span class="tok-fn">c_cmp</span>(a: [*c]c.ListCell, b: [*c]c.ListCell) <span class="tok-type">c_int</span> {</span>
+<span class="line" id="L68">                    <span class="tok-kw">const</span> ptrA: ?*T = <span class="tok-builtin">@ptrCast</span>(<span class="tok-builtin">@alignCast</span>(c.lfirst(a)));</span>
+<span class="line" id="L69">                    <span class="tok-kw">const</span> ptrB: ?*T = <span class="tok-builtin">@ptrCast</span>(<span class="tok-builtin">@alignCast</span>(c.lfirst(b)));</span>
+<span class="line" id="L70">                    <span class="tok-kw">return</span> cmp(ptrA, ptrB);</span>
+<span class="line" id="L71">                }</span>
+<span class="line" id="L72">            }.c_cmp);</span>
+<span class="line" id="L73">        }</span>
+<span class="line" id="L74"></span>
+<span class="line" id="L75">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">len</span>(self: Self) <span class="tok-type">usize</span> {</span>
+<span class="line" id="L76">            <span class="tok-kw">return</span> c.list_length(self.list);</span>
+<span class="line" id="L77">        }</span>
+<span class="line" id="L78"></span>
+<span class="line" id="L79">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">iter</span>(self: Self) Iterator {</span>
+<span class="line" id="L80">            <span class="tok-kw">return</span> Iterator.init(self.list);</span>
+<span class="line" id="L81">        }</span>
+<span class="line" id="L82"></span>
+<span class="line" id="L83">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">iterRev</span>(self: Self) ReverseIterator {</span>
+<span class="line" id="L84">            <span class="tok-kw">return</span> ReverseIterator.init(self.list);</span>
+<span class="line" id="L85">        }</span>
+<span class="line" id="L86"></span>
+<span class="line" id="L87">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">member</span>(self: Self, value: *T) <span class="tok-type">bool</span> {</span>
+<span class="line" id="L88">            <span class="tok-kw">return</span> c.list_member(self.list, value);</span>
+<span class="line" id="L89">        }</span>
+<span class="line" id="L90"></span>
+<span class="line" id="L91">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">memberPtr</span>(self: Self, value: *T) <span class="tok-type">bool</span> {</span>
+<span class="line" id="L92">            <span class="tok-kw">return</span> c.list_member_ptr(self.list, value);</span>
+<span class="line" id="L93">        }</span>
+<span class="line" id="L94"></span>
+<span class="line" id="L95">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">del</span>(self: Self, value: *T) Self {</span>
+<span class="line" id="L96">            <span class="tok-kw">return</span> Self.init(c.list_delete(self.list, value));</span>
+<span class="line" id="L97">        }</span>
+<span class="line" id="L98"></span>
+<span class="line" id="L99">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">delPtr</span>(self: Self, value: *T) Self {</span>
+<span class="line" id="L100">            <span class="tok-kw">return</span> Self.init(c.list_delete_ptr(self.list, value));</span>
+<span class="line" id="L101">        }</span>
+<span class="line" id="L102"></span>
+<span class="line" id="L103">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">createUnion</span>(self: Self, other: *Self) Self {</span>
+<span class="line" id="L104">            <span class="tok-kw">return</span> Self.init(c.list_union(self.list, other.list));</span>
+<span class="line" id="L105">        }</span>
+<span class="line" id="L106"></span>
+<span class="line" id="L107">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">createUnionPtr</span>(self: Self, other: Self) Self {</span>
+<span class="line" id="L108">            <span class="tok-kw">return</span> Self.init(c.list_union_ptr(self.list, other.list));</span>
+<span class="line" id="L109">        }</span>
+<span class="line" id="L110"></span>
+<span class="line" id="L111">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">createIntersection</span>(self: Self, other: Self) Self {</span>
+<span class="line" id="L112">            <span class="tok-kw">return</span> Self.init(c.list_intersection(self.list, other.list));</span>
+<span class="line" id="L113">        }</span>
+<span class="line" id="L114"></span>
+<span class="line" id="L115">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">createIntersectionPtr</span>(self: Self, other: Self) Self {</span>
+<span class="line" id="L116">            <span class="tok-kw">return</span> Self.init(c.list_intersection_ptr(self.list, other.list));</span>
+<span class="line" id="L117">        }</span>
+<span class="line" id="L118"></span>
+<span class="line" id="L119">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">createDifference</span>(self: Self, other: Self) Self {</span>
+<span class="line" id="L120">            <span class="tok-kw">return</span> Self.init(c.list_difference(self.list, other.list));</span>
+<span class="line" id="L121">        }</span>
+<span class="line" id="L122"></span>
+<span class="line" id="L123">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">createDifferencePtr</span>(self: Self, other: Self) Self {</span>
+<span class="line" id="L124">            <span class="tok-kw">return</span> Self.init(c.list_difference_ptr(self.list, other.list));</span>
+<span class="line" id="L125">        }</span>
+<span class="line" id="L126"></span>
+<span class="line" id="L127">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">appendUnique</span>(self: Self, other: Self) Self {</span>
+<span class="line" id="L128">            <span class="tok-kw">return</span> Self.init(c.list_concat(self.list, other.list));</span>
+<span class="line" id="L129">        }</span>
+<span class="line" id="L130"></span>
+<span class="line" id="L131">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">appendUniquePtr</span>(self: Self, other: Self) Self {</span>
+<span class="line" id="L132">            <span class="tok-kw">return</span> Self.init(c.list_concat_ptr(self.list, other.list));</span>
+<span class="line" id="L133">        }</span>
+<span class="line" id="L134"></span>
+<span class="line" id="L135">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">concatUnique</span>(self: Self, other: Self) Self {</span>
+<span class="line" id="L136">            <span class="tok-kw">return</span> Self.init(c.list_concat_unique(self.list, other.list));</span>
+<span class="line" id="L137">        }</span>
+<span class="line" id="L138"></span>
+<span class="line" id="L139">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">concatUniquePtr</span>(self: Self, other: Self) Self {</span>
+<span class="line" id="L140">            <span class="tok-kw">return</span> Self.init(c.list_concat_unique_ptr(self.list, other.list));</span>
+<span class="line" id="L141">        }</span>
+<span class="line" id="L142">    };</span>
+<span class="line" id="L143">}</span>
+<span class="line" id="L144"></span>
+<span class="line" id="L145"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">IteratorOf</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>) <span class="tok-type">type</span> {</span>
+<span class="line" id="L146">    <span class="tok-kw">return</span> IteratorOfWith(T, c.list_head, c.lnext);</span>
+<span class="line" id="L147">}</span>
+<span class="line" id="L148"></span>
+<span class="line" id="L149"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">ReverseIteratorOf</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>) <span class="tok-type">type</span> {</span>
+<span class="line" id="L150">    <span class="tok-kw">return</span> IteratorOfWith(T, c.list_last_cell, lprev);</span>
+<span class="line" id="L151">}</span>
+<span class="line" id="L152"></span>
+<span class="line" id="L153"><span class="tok-kw">fn</span> <span class="tok-fn">lprev</span>(list: *c.List, cell: *c.ListCell) ?*c.ListCell {</span>
+<span class="line" id="L154">    <span class="tok-kw">const</span> idx = c.list_cell_number(list, cell);</span>
+<span class="line" id="L155">    <span class="tok-kw">if</span> (idx &lt;= <span class="tok-number">0</span>) {</span>
+<span class="line" id="L156">        <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L157">    }</span>
+<span class="line" id="L158">    <span class="tok-kw">return</span> c.list_nth_cell(list, idx - <span class="tok-number">1</span>);</span>
+<span class="line" id="L159">}</span>
+<span class="line" id="L160"></span>
+<span class="line" id="L161"><span class="tok-kw">fn</span> <span class="tok-fn">IteratorOfWith</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>, <span class="tok-kw">comptime</span> fn_init: <span class="tok-kw">anytype</span>, <span class="tok-kw">comptime</span> fn_next: <span class="tok-kw">anytype</span>) <span class="tok-type">type</span> {</span>
+<span class="line" id="L162">    <span class="tok-kw">return</span> <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L163">        list: *c.List,</span>
+<span class="line" id="L164">        cell: ?*c.ListCell,</span>
+<span class="line" id="L165"></span>
+<span class="line" id="L166">        <span class="tok-kw">const</span> Self = <span class="tok-builtin">@This</span>();</span>
+<span class="line" id="L167"></span>
+<span class="line" id="L168">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">init</span>(l: *c.List) Self {</span>
+<span class="line" id="L169">            <span class="tok-kw">if</span> (l.<span class="tok-type">type</span> != c.T_List) {</span>
+<span class="line" id="L170">                <span class="tok-builtin">@panic</span>(<span class="tok-str">&quot;Expected a pointer list&quot;</span>);</span>
+<span class="line" id="L171">            }</span>
+<span class="line" id="L172">            <span class="tok-kw">return</span> Self{</span>
+<span class="line" id="L173">                .list = l,</span>
+<span class="line" id="L174">                .cell = fn_init(l),</span>
+<span class="line" id="L175">            };</span>
+<span class="line" id="L176">        }</span>
+<span class="line" id="L177"></span>
+<span class="line" id="L178">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">next</span>(self: *Self) ??*T {</span>
+<span class="line" id="L179">            <span class="tok-kw">if</span> (self.cell) |cell| {</span>
+<span class="line" id="L180">                self.cell = fn_next(self.list, cell);</span>
+<span class="line" id="L181">                <span class="tok-kw">const</span> value: ?*T = <span class="tok-builtin">@ptrCast</span>(<span class="tok-builtin">@alignCast</span>(c.lfirst(cell)));</span>
+<span class="line" id="L182">                <span class="tok-kw">return</span> value;</span>
+<span class="line" id="L183">            }</span>
+<span class="line" id="L184">            <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L185">        }</span>
+<span class="line" id="L186">    };</span>
+<span class="line" id="L187">}</span>
+<span class="line" id="L188"></span>
+</code></pre></body>
+</html>

@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>pgzx/spi.zig - source view</title>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg==">
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNTMgMTQwIj48ZyBmaWxsPSIjRjdBNDFEIj48Zz48cG9seWdvbiBwb2ludHM9IjQ2LDIyIDI4LDQ0IDE5LDMwIi8+PHBvbHlnb24gcG9pbnRzPSI0NiwyMiAzMywzMyAyOCw0NCAyMiw0NCAyMiw5NSAzMSw5NSAyMCwxMDAgMTIsMTE3IDAsMTE3IDAsMjIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMzEsOTUgMTIsMTE3IDQsMTA2Ii8+PC9nPjxnPjxwb2x5Z29uIHBvaW50cz0iNTYsMjIgNjIsMzYgMzcsNDQiLz48cG9seWdvbiBwb2ludHM9IjU2LDIyIDExMSwyMiAxMTEsNDQgMzcsNDQgNTYsMzIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTE2LDk1IDk3LDExNyA5MCwxMDQiLz48cG9seWdvbiBwb2ludHM9IjExNiw5NSAxMDAsMTA0IDk3LDExNyA0MiwxMTcgNDIsOTUiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTUwLDAgNTIsMTE3IDMsMTQwIDEwMSwyMiIvPjwvZz48Zz48cG9seWdvbiBwb2ludHM9IjE0MSwyMiAxNDAsNDAgMTIyLDQ1Ii8+PHBvbHlnb24gcG9pbnRzPSIxNTMsMjIgMTUzLDExNyAxMDYsMTE3IDEyMCwxMDUgMTI1LDk1IDEzMSw5NSAxMzEsNDUgMTIyLDQ1IDEzMiwzNiAxNDEsMjIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTI1LDk1IDEzMCwxMTAgMTA2LDExNyIvPjwvZz48L2c+PC9zdmc+">
+    <style>
+      body{
+        font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      pre > code {
+        display: block;
+        overflow: auto;
+        line-height: normal;
+        margin: 0em;
+      }
+      .tok-kw {
+          color: #333;
+          font-weight: bold;
+      }
+      .tok-str {
+          color: #d14;
+      }
+      .tok-builtin {
+          color: #005C7A;
+      }
+      .tok-comment {
+          color: #545454;
+          font-style: italic;
+      }
+      .tok-fn {
+          color: #900;
+          font-weight: bold;
+      }
+      .tok-null {
+          color: #005C5C;
+      }
+      .tok-number {
+          color: #005C5C;
+      }
+      .tok-type {
+          color: #458;
+          font-weight: bold;
+      }
+      pre {
+        counter-reset: line;
+      }
+      pre .line:before {
+        counter-increment: line;
+        content: counter(line);
+        display: inline-block;
+        padding-right: 1em;
+        width: 2em;
+        text-align: right;
+        color: #999;
+      }
+      
+      .line {
+        width: 100%;
+        display: inline-block;
+      }
+      .line:target {
+        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        background: #fafafa;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body{
+            background:#222;
+            color: #ccc;
+        }
+        pre > code {
+            color: #ccc;
+            background: #222;
+            border: unset;
+        }
+        .line:target {
+            border-top: 1px solid #444;
+            border-bottom: 1px solid #444;
+            background: #333;
+        }
+        .tok-kw {
+            color: #eee;
+        }
+        .tok-str {
+            color: #2e5;
+        }
+        .tok-builtin {
+            color: #ff894c;
+        }
+        .tok-comment {
+            color: #aa7;
+        }
+        .tok-fn {
+            color: #B1A0F8;
+        }
+        .tok-null {
+            color: #ff8080;
+        }
+        .tok-number {
+            color: #ff8080;
+        }
+        .tok-type {
+            color: #68f;
+        }
+      }
+    </style>
+</head>
+<body>
+<pre><code><span class="line" id="L1"><span class="tok-kw">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>);</span>
+<span class="line" id="L2"><span class="tok-kw">const</span> mem = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;mem.zig&quot;</span>);</span>
+<span class="line" id="L3"><span class="tok-kw">const</span> err = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;err.zig&quot;</span>);</span>
+<span class="line" id="L4"><span class="tok-kw">const</span> c = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;c.zig&quot;</span>);</span>
+<span class="line" id="L5"><span class="tok-kw">const</span> fmgr = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;fmgr.zig&quot;</span>);</span>
+<span class="line" id="L6"></span>
+<span class="line" id="L7"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">connect</span>() err.PGError!<span class="tok-type">void</span> {</span>
+<span class="line" id="L8">    <span class="tok-kw">const</span> status = c.SPI_connect();</span>
+<span class="line" id="L9">    <span class="tok-kw">if</span> (status == c.SPI_ERROR_CONNECT) {</span>
+<span class="line" id="L10">        <span class="tok-kw">return</span> err.PGError.SPIConnectFailed;</span>
+<span class="line" id="L11">    }</span>
+<span class="line" id="L12">}</span>
+<span class="line" id="L13"></span>
+<span class="line" id="L14"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">connectNonAtomic</span>() err.PGError!<span class="tok-type">void</span> {</span>
+<span class="line" id="L15">    <span class="tok-kw">const</span> status = c.SPI_connect_ext(c.SPI_OPT_NONATOMIC);</span>
+<span class="line" id="L16">    <span class="tok-kw">try</span> checkStatus(status);</span>
+<span class="line" id="L17">}</span>
+<span class="line" id="L18"></span>
+<span class="line" id="L19"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">finish</span>() <span class="tok-type">void</span> {</span>
+<span class="line" id="L20">    _ = c.SPI_finish();</span>
+<span class="line" id="L21">}</span>
+<span class="line" id="L22"></span>
+<span class="line" id="L23"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Args = <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L24">    types: []<span class="tok-kw">const</span> c.Oid,</span>
+<span class="line" id="L25">    values: []<span class="tok-kw">const</span> c.NullableDatum,</span>
+<span class="line" id="L26"></span>
+<span class="line" id="L27">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">has_nulls</span>(self: *<span class="tok-kw">const</span> Args) <span class="tok-type">bool</span> {</span>
+<span class="line" id="L28">        <span class="tok-kw">for</span> (self.values) |value| {</span>
+<span class="line" id="L29">            <span class="tok-kw">if</span> (value.isnull) {</span>
+<span class="line" id="L30">                <span class="tok-kw">return</span> <span class="tok-null">true</span>;</span>
+<span class="line" id="L31">            }</span>
+<span class="line" id="L32">        }</span>
+<span class="line" id="L33">        <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
+<span class="line" id="L34">    }</span>
+<span class="line" id="L35">};</span>
+<span class="line" id="L36"></span>
+<span class="line" id="L37"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> ExecOptions = <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L38">    read_only: <span class="tok-type">bool</span> = <span class="tok-null">false</span>,</span>
+<span class="line" id="L39">    limit: <span class="tok-type">c_long</span> = <span class="tok-number">0</span>,</span>
+<span class="line" id="L40">    args: ?Args = <span class="tok-null">null</span>,</span>
+<span class="line" id="L41">};</span>
+<span class="line" id="L42"></span>
+<span class="line" id="L43"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">exec</span>(sql: [:<span class="tok-number">0</span>]<span class="tok-kw">const</span> <span class="tok-type">u8</span>, options: ExecOptions) !<span class="tok-type">c_int</span> {</span>
+<span class="line" id="L44">    <span class="tok-kw">if</span> (options.args) |args| {</span>
+<span class="line" id="L45">        <span class="tok-kw">if</span> (args.types.len != args.values.len) {</span>
+<span class="line" id="L46">            <span class="tok-kw">return</span> err.PGError.SPIArgument;</span>
+<span class="line" id="L47">        }</span>
+<span class="line" id="L48"></span>
+<span class="line" id="L49">        <span class="tok-kw">var</span> arena = std.heap.ArenaAllocator.init(mem.PGCurrentContextAllocator);</span>
+<span class="line" id="L50">        <span class="tok-kw">defer</span> arena.deinit();</span>
+<span class="line" id="L51">        <span class="tok-kw">const</span> allocator = arena.allocator();</span>
+<span class="line" id="L52"></span>
+<span class="line" id="L53">        <span class="tok-kw">const</span> n = args.types.len;</span>
+<span class="line" id="L54">        <span class="tok-kw">const</span> nulls: [*c]<span class="tok-kw">const</span> <span class="tok-type">u8</span> = blk: {</span>
+<span class="line" id="L55">            <span class="tok-kw">if</span> (args.has_nulls()) {</span>
+<span class="line" id="L56">                <span class="tok-kw">var</span> buf = <span class="tok-kw">try</span> allocator.alloc(<span class="tok-type">u8</span>, n);</span>
+<span class="line" id="L57">                <span class="tok-kw">for</span> (args.values, <span class="tok-number">0</span>..) |value, i| {</span>
+<span class="line" id="L58">                    buf[i] = <span class="tok-kw">if</span> (value.isnull) <span class="tok-str">'n'</span> <span class="tok-kw">else</span> <span class="tok-str">' '</span>;</span>
+<span class="line" id="L59">                }</span>
+<span class="line" id="L60">                <span class="tok-kw">break</span> :blk buf.ptr;</span>
+<span class="line" id="L61">            } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L62">                <span class="tok-kw">break</span> :blk <span class="tok-null">null</span>;</span>
+<span class="line" id="L63">            }</span>
+<span class="line" id="L64">        };</span>
+<span class="line" id="L65"></span>
+<span class="line" id="L66">        <span class="tok-kw">const</span> values: [*c]c.Datum = blk: {</span>
+<span class="line" id="L67">            <span class="tok-kw">var</span> buf = <span class="tok-kw">try</span> allocator.alloc(c.Datum, n);</span>
+<span class="line" id="L68">            <span class="tok-kw">for</span> (args.values, <span class="tok-number">0</span>..) |arg, i| {</span>
+<span class="line" id="L69">                buf[i] = arg.value;</span>
+<span class="line" id="L70">            }</span>
+<span class="line" id="L71">            <span class="tok-kw">break</span> :blk buf.ptr;</span>
+<span class="line" id="L72">        };</span>
+<span class="line" id="L73"></span>
+<span class="line" id="L74">        <span class="tok-kw">const</span> status = c.SPI_execute_with_args(</span>
+<span class="line" id="L75">            sql.ptr,</span>
+<span class="line" id="L76">            <span class="tok-builtin">@intCast</span>(n),</span>
+<span class="line" id="L77">            <span class="tok-builtin">@constCast</span>(args.types.ptr),</span>
+<span class="line" id="L78">            values,</span>
+<span class="line" id="L79">            nulls,</span>
+<span class="line" id="L80">            options.read_only,</span>
+<span class="line" id="L81">            options.limit,</span>
+<span class="line" id="L82">        );</span>
+<span class="line" id="L83">        <span class="tok-kw">try</span> checkStatus(status);</span>
+<span class="line" id="L84">        <span class="tok-kw">return</span> status;</span>
+<span class="line" id="L85">    } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L86">        <span class="tok-kw">const</span> status = c.SPI_execute(sql.ptr, options.read_only, options.limit);</span>
+<span class="line" id="L87">        <span class="tok-kw">try</span> checkStatus(status);</span>
+<span class="line" id="L88">        <span class="tok-kw">return</span> status;</span>
+<span class="line" id="L89">    }</span>
+<span class="line" id="L90">}</span>
+<span class="line" id="L91"></span>
+<span class="line" id="L92"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">query</span>(sql: [:<span class="tok-number">0</span>]<span class="tok-kw">const</span> <span class="tok-type">u8</span>, options: ExecOptions) !Rows {</span>
+<span class="line" id="L93">    _ = <span class="tok-kw">try</span> exec(sql, options);</span>
+<span class="line" id="L94">    <span class="tok-kw">return</span> Rows.init();</span>
+<span class="line" id="L95">}</span>
+<span class="line" id="L96"></span>
+<span class="line" id="L97"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">scanProcessed</span>(row: <span class="tok-type">usize</span>, values: <span class="tok-kw">anytype</span>) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L98">    <span class="tok-kw">if</span> (c.SPI_processed &lt;= row) {</span>
+<span class="line" id="L99">        <span class="tok-kw">return</span> err.PGError.SPIInvalidRowIndex;</span>
+<span class="line" id="L100">    }</span>
+<span class="line" id="L101"></span>
+<span class="line" id="L102">    <span class="tok-kw">var</span> column: <span class="tok-type">c_int</span> = <span class="tok-number">1</span>;</span>
+<span class="line" id="L103">    <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (std.meta.fields(<span class="tok-builtin">@TypeOf</span>(values)), <span class="tok-number">0</span>..) |field, i| {</span>
+<span class="line" id="L104">        column = <span class="tok-kw">try</span> scanField(field.<span class="tok-type">type</span>, values[i], row, column);</span>
+<span class="line" id="L105">    }</span>
+<span class="line" id="L106">}</span>
+<span class="line" id="L107"></span>
+<span class="line" id="L108"><span class="tok-kw">fn</span> <span class="tok-fn">scanField</span>(<span class="tok-kw">comptime</span> fieldType: <span class="tok-type">type</span>, to: <span class="tok-kw">anytype</span>, row: <span class="tok-type">usize</span>, column: <span class="tok-type">c_int</span>) !<span class="tok-type">c_int</span> {</span>
+<span class="line" id="L109">    <span class="tok-kw">const</span> fieldInfo = <span class="tok-builtin">@typeInfo</span>(fieldType);</span>
+<span class="line" id="L110">    <span class="tok-kw">if</span> (fieldInfo != .Pointer) {</span>
+<span class="line" id="L111">        <span class="tok-builtin">@compileError</span>(<span class="tok-str">&quot;scanField requires a pointer&quot;</span>);</span>
+<span class="line" id="L112">    }</span>
+<span class="line" id="L113">    <span class="tok-kw">if</span> (fieldInfo.Pointer.size == .Slice) {</span>
+<span class="line" id="L114">        <span class="tok-builtin">@compileError</span>(<span class="tok-str">&quot;scanField requires a single pointer, not a slice&quot;</span>);</span>
+<span class="line" id="L115">    }</span>
+<span class="line" id="L116"></span>
+<span class="line" id="L117">    <span class="tok-kw">const</span> childType = fieldInfo.Pointer.child;</span>
+<span class="line" id="L118">    <span class="tok-kw">if</span> (<span class="tok-builtin">@typeInfo</span>(childType) == .Struct) {</span>
+<span class="line" id="L119">        <span class="tok-kw">var</span> structColumn = column;</span>
+<span class="line" id="L120">        <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (std.meta.fields(childType)) |field| {</span>
+<span class="line" id="L121">            <span class="tok-kw">const</span> childPtr = &amp;<span class="tok-builtin">@field</span>(to.*, field.name);</span>
+<span class="line" id="L122">            structColumn = <span class="tok-kw">try</span> scanField(<span class="tok-builtin">@TypeOf</span>(childPtr), childPtr, row, structColumn);</span>
+<span class="line" id="L123">        }</span>
+<span class="line" id="L124">        <span class="tok-kw">return</span> structColumn;</span>
+<span class="line" id="L125">    } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L126">        <span class="tok-kw">const</span> value = <span class="tok-kw">try</span> convBinValue(childType, c.SPI_tuptable, row, column);</span>
+<span class="line" id="L127">        to.* = value;</span>
+<span class="line" id="L128">        <span class="tok-kw">return</span> column + <span class="tok-number">1</span>;</span>
+<span class="line" id="L129">    }</span>
+<span class="line" id="L130">}</span>
+<span class="line" id="L131"></span>
+<span class="line" id="L132"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Rows = <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L133">    row: <span class="tok-type">isize</span> = -<span class="tok-number">1</span>,</span>
+<span class="line" id="L134"></span>
+<span class="line" id="L135">    <span class="tok-kw">const</span> Self = <span class="tok-builtin">@This</span>();</span>
+<span class="line" id="L136"></span>
+<span class="line" id="L137">    <span class="tok-kw">fn</span> <span class="tok-fn">init</span>() Self {</span>
+<span class="line" id="L138">        <span class="tok-kw">return</span> .{};</span>
+<span class="line" id="L139">    }</span>
+<span class="line" id="L140"></span>
+<span class="line" id="L141">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">deinit</span>(self: *Self) <span class="tok-type">void</span> {</span>
+<span class="line" id="L142">        c.SPI_freetuptable(c.SPI_tuptable);</span>
+<span class="line" id="L143">        self.row = -<span class="tok-number">1</span>;</span>
+<span class="line" id="L144">    }</span>
+<span class="line" id="L145"></span>
+<span class="line" id="L146">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">next</span>(self: *Self) <span class="tok-type">bool</span> {</span>
+<span class="line" id="L147">        <span class="tok-kw">const</span> next_idx = self.row + <span class="tok-number">1</span>;</span>
+<span class="line" id="L148">        <span class="tok-kw">if</span> (next_idx &gt;= c.SPI_processed) {</span>
+<span class="line" id="L149">            <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
+<span class="line" id="L150">        }</span>
+<span class="line" id="L151">        self.row = next_idx;</span>
+<span class="line" id="L152">        <span class="tok-kw">return</span> <span class="tok-null">true</span>;</span>
+<span class="line" id="L153">    }</span>
+<span class="line" id="L154"></span>
+<span class="line" id="L155">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">scan</span>(self: *Self, values: <span class="tok-kw">anytype</span>) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L156">        <span class="tok-kw">if</span> (self.row &lt; <span class="tok-number">0</span>) {</span>
+<span class="line" id="L157">            <span class="tok-kw">return</span> err.PGError.SPIInvalidRowIndex;</span>
+<span class="line" id="L158">        }</span>
+<span class="line" id="L159">        <span class="tok-kw">try</span> scanProcessed(<span class="tok-builtin">@intCast</span>(self.row), values);</span>
+<span class="line" id="L160">    }</span>
+<span class="line" id="L161">};</span>
+<span class="line" id="L162"></span>
+<span class="line" id="L163"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">RowsOf</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>) <span class="tok-type">type</span> {</span>
+<span class="line" id="L164">    <span class="tok-kw">return</span> <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L165">        rows: Rows,</span>
+<span class="line" id="L166"></span>
+<span class="line" id="L167">        <span class="tok-kw">const</span> Self = <span class="tok-builtin">@This</span>();</span>
+<span class="line" id="L168"></span>
+<span class="line" id="L169">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">init</span>(rows: Rows) Self {</span>
+<span class="line" id="L170">            <span class="tok-kw">return</span> .{ .rows = rows };</span>
+<span class="line" id="L171">        }</span>
+<span class="line" id="L172"></span>
+<span class="line" id="L173">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">deinit</span>(self: *Self) <span class="tok-type">void</span> {</span>
+<span class="line" id="L174">            self.rows.deinit();</span>
+<span class="line" id="L175">        }</span>
+<span class="line" id="L176"></span>
+<span class="line" id="L177">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">next</span>(self: *Self) !?T {</span>
+<span class="line" id="L178">            <span class="tok-kw">if</span> (!self.rows.next()) {</span>
+<span class="line" id="L179">                <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L180">            }</span>
+<span class="line" id="L181">            <span class="tok-kw">var</span> value: T = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L182">            <span class="tok-kw">try</span> self.rows.scan(.{&amp;value});</span>
+<span class="line" id="L183">            <span class="tok-kw">return</span> value;</span>
+<span class="line" id="L184">        }</span>
+<span class="line" id="L185">    };</span>
+<span class="line" id="L186">}</span>
+<span class="line" id="L187"></span>
+<span class="line" id="L188"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">convProcessed</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>, row: <span class="tok-type">c_int</span>, col: <span class="tok-type">c_int</span>) !T {</span>
+<span class="line" id="L189">    <span class="tok-kw">if</span> (c.SPI_processed &lt;= row) {</span>
+<span class="line" id="L190">        <span class="tok-kw">return</span> err.PGError.SPIInvalidRowIndex;</span>
+<span class="line" id="L191">    }</span>
+<span class="line" id="L192">    <span class="tok-kw">return</span> convBinValue(T, c.SPI_tuptable, row, col);</span>
+<span class="line" id="L193">}</span>
+<span class="line" id="L194"></span>
+<span class="line" id="L195"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">convBinValue</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>, table: *c.SPITupleTable, row: <span class="tok-type">usize</span>, col: <span class="tok-type">c_int</span>) !T {</span>
+<span class="line" id="L196">    <span class="tok-comment">// TODO: check index?</span>
+</span>
+<span class="line" id="L197"></span>
+<span class="line" id="L198">    <span class="tok-kw">var</span> datum: c.NullableDatum = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L199">    datum.value = c.SPI_getbinval(table.*.vals[row], table.*.tupdesc, col, <span class="tok-builtin">@ptrCast</span>(&amp;datum.isnull));</span>
+<span class="line" id="L200">    <span class="tok-kw">try</span> checkStatus(c.SPI_result);</span>
+<span class="line" id="L201">    <span class="tok-kw">return</span> <span class="tok-kw">try</span> fmgr.conv.fromNullableDatum(T, datum);</span>
+<span class="line" id="L202">}</span>
+<span class="line" id="L203"></span>
+<span class="line" id="L204"><span class="tok-kw">fn</span> <span class="tok-fn">checkStatus</span>(st: <span class="tok-type">c_int</span>) err.PGError!<span class="tok-type">void</span> {</span>
+<span class="line" id="L205">    <span class="tok-kw">switch</span> (st) {</span>
+<span class="line" id="L206">        c.SPI_ERROR_CONNECT =&gt; <span class="tok-kw">return</span> err.PGError.SPIConnectFailed,</span>
+<span class="line" id="L207">        c.SPI_ERROR_ARGUMENT =&gt; <span class="tok-kw">return</span> err.PGError.SPIArgument,</span>
+<span class="line" id="L208">        c.SPI_ERROR_COPY =&gt; <span class="tok-kw">return</span> err.PGError.SPICopy,</span>
+<span class="line" id="L209">        c.SPI_ERROR_TRANSACTION =&gt; <span class="tok-kw">return</span> err.PGError.SPITransaction,</span>
+<span class="line" id="L210">        c.SPI_ERROR_OPUNKNOWN =&gt; <span class="tok-kw">return</span> err.PGError.SPIOpUnknown,</span>
+<span class="line" id="L211">        c.SPI_ERROR_UNCONNECTED =&gt; <span class="tok-kw">return</span> err.PGError.SPIUnconnected,</span>
+<span class="line" id="L212">        c.SPI_ERROR_NOATTRIBUTE =&gt; <span class="tok-kw">return</span> err.PGError.SPINoAttribute,</span>
+<span class="line" id="L213">        <span class="tok-kw">else</span> =&gt; {</span>
+<span class="line" id="L214">            <span class="tok-kw">if</span> (st &lt; <span class="tok-number">0</span>) {</span>
+<span class="line" id="L215">                <span class="tok-kw">return</span> err.PGError.SPIError;</span>
+<span class="line" id="L216">            }</span>
+<span class="line" id="L217">        },</span>
+<span class="line" id="L218">    }</span>
+<span class="line" id="L219">}</span>
+<span class="line" id="L220"></span>
+</code></pre></body>
+</html>

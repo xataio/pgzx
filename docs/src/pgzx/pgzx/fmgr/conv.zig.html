@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>pgzx/fmgr/conv.zig - source view</title>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg==">
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNTMgMTQwIj48ZyBmaWxsPSIjRjdBNDFEIj48Zz48cG9seWdvbiBwb2ludHM9IjQ2LDIyIDI4LDQ0IDE5LDMwIi8+PHBvbHlnb24gcG9pbnRzPSI0NiwyMiAzMywzMyAyOCw0NCAyMiw0NCAyMiw5NSAzMSw5NSAyMCwxMDAgMTIsMTE3IDAsMTE3IDAsMjIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMzEsOTUgMTIsMTE3IDQsMTA2Ii8+PC9nPjxnPjxwb2x5Z29uIHBvaW50cz0iNTYsMjIgNjIsMzYgMzcsNDQiLz48cG9seWdvbiBwb2ludHM9IjU2LDIyIDExMSwyMiAxMTEsNDQgMzcsNDQgNTYsMzIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTE2LDk1IDk3LDExNyA5MCwxMDQiLz48cG9seWdvbiBwb2ludHM9IjExNiw5NSAxMDAsMTA0IDk3LDExNyA0MiwxMTcgNDIsOTUiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTUwLDAgNTIsMTE3IDMsMTQwIDEwMSwyMiIvPjwvZz48Zz48cG9seWdvbiBwb2ludHM9IjE0MSwyMiAxNDAsNDAgMTIyLDQ1Ii8+PHBvbHlnb24gcG9pbnRzPSIxNTMsMjIgMTUzLDExNyAxMDYsMTE3IDEyMCwxMDUgMTI1LDk1IDEzMSw5NSAxMzEsNDUgMTIyLDQ1IDEzMiwzNiAxNDEsMjIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTI1LDk1IDEzMCwxMTAgMTA2LDExNyIvPjwvZz48L2c+PC9zdmc+">
+    <style>
+      body{
+        font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      pre > code {
+        display: block;
+        overflow: auto;
+        line-height: normal;
+        margin: 0em;
+      }
+      .tok-kw {
+          color: #333;
+          font-weight: bold;
+      }
+      .tok-str {
+          color: #d14;
+      }
+      .tok-builtin {
+          color: #005C7A;
+      }
+      .tok-comment {
+          color: #545454;
+          font-style: italic;
+      }
+      .tok-fn {
+          color: #900;
+          font-weight: bold;
+      }
+      .tok-null {
+          color: #005C5C;
+      }
+      .tok-number {
+          color: #005C5C;
+      }
+      .tok-type {
+          color: #458;
+          font-weight: bold;
+      }
+      pre {
+        counter-reset: line;
+      }
+      pre .line:before {
+        counter-increment: line;
+        content: counter(line);
+        display: inline-block;
+        padding-right: 1em;
+        width: 2em;
+        text-align: right;
+        color: #999;
+      }
+      
+      .line {
+        width: 100%;
+        display: inline-block;
+      }
+      .line:target {
+        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        background: #fafafa;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body{
+            background:#222;
+            color: #ccc;
+        }
+        pre > code {
+            color: #ccc;
+            background: #222;
+            border: unset;
+        }
+        .line:target {
+            border-top: 1px solid #444;
+            border-bottom: 1px solid #444;
+            background: #333;
+        }
+        .tok-kw {
+            color: #eee;
+        }
+        .tok-str {
+            color: #2e5;
+        }
+        .tok-builtin {
+            color: #ff894c;
+        }
+        .tok-comment {
+            color: #aa7;
+        }
+        .tok-fn {
+            color: #B1A0F8;
+        }
+        .tok-null {
+            color: #ff8080;
+        }
+        .tok-number {
+            color: #ff8080;
+        }
+        .tok-type {
+            color: #68f;
+        }
+      }
+    </style>
+</head>
+<body>
+<pre><code><span class="line" id="L1"><span class="tok-kw">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>);</span>
+<span class="line" id="L2"></span>
+<span class="line" id="L3"><span class="tok-kw">const</span> c = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;../c.zig&quot;</span>);</span>
+<span class="line" id="L4"><span class="tok-kw">const</span> err = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;../err.zig&quot;</span>);</span>
+<span class="line" id="L5"><span class="tok-kw">const</span> mem = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;../mem.zig&quot;</span>);</span>
+<span class="line" id="L6"><span class="tok-kw">const</span> varatt = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;../varatt.zig&quot;</span>);</span>
+<span class="line" id="L7"></span>
+<span class="line" id="L8"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Conv</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>, <span class="tok-kw">comptime</span> from: <span class="tok-kw">anytype</span>, <span class="tok-kw">comptime</span> to: <span class="tok-kw">anytype</span>) <span class="tok-type">type</span> {</span>
+<span class="line" id="L9">    <span class="tok-kw">return</span> <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L10">        <span class="tok-kw">pub</span> <span class="tok-kw">const</span> Type = T;</span>
+<span class="line" id="L11">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">fromNullableDatum</span>(d: c.NullableDatum) !Type {</span>
+<span class="line" id="L12">            <span class="tok-kw">if</span> (d.isnull) {</span>
+<span class="line" id="L13">                <span class="tok-kw">return</span> err.PGError.UnexpectedNullValue;</span>
+<span class="line" id="L14">            }</span>
+<span class="line" id="L15">            <span class="tok-kw">return</span> <span class="tok-kw">try</span> from(d.value);</span>
+<span class="line" id="L16">        }</span>
+<span class="line" id="L17">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">toNullableDatum</span>(v: Type) !c.NullableDatum {</span>
+<span class="line" id="L18">            <span class="tok-kw">return</span> .{</span>
+<span class="line" id="L19">                .value = <span class="tok-kw">try</span> to(v),</span>
+<span class="line" id="L20">                .isnull = <span class="tok-null">false</span>,</span>
+<span class="line" id="L21">            };</span>
+<span class="line" id="L22">        }</span>
+<span class="line" id="L23">    };</span>
+<span class="line" id="L24">}</span>
+<span class="line" id="L25"></span>
+<span class="line" id="L26"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">ConvNoFail</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>, <span class="tok-kw">comptime</span> from: <span class="tok-kw">anytype</span>, <span class="tok-kw">comptime</span> to: <span class="tok-kw">anytype</span>) <span class="tok-type">type</span> {</span>
+<span class="line" id="L27">    <span class="tok-kw">return</span> <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L28">        <span class="tok-kw">pub</span> <span class="tok-kw">const</span> Type = T;</span>
+<span class="line" id="L29">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">fromNullableDatum</span>(d: c.NullableDatum) !T {</span>
+<span class="line" id="L30">            <span class="tok-kw">if</span> (d.isnull) {</span>
+<span class="line" id="L31">                <span class="tok-kw">return</span> err.PGError.UnexpectedNullValue;</span>
+<span class="line" id="L32">            }</span>
+<span class="line" id="L33">            <span class="tok-kw">return</span> from(d.value);</span>
+<span class="line" id="L34">        }</span>
+<span class="line" id="L35">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">toNullableDatum</span>(v: T) !c.NullableDatum {</span>
+<span class="line" id="L36">            <span class="tok-kw">return</span> .{</span>
+<span class="line" id="L37">                .value = to(v),</span>
+<span class="line" id="L38">                .isnull = <span class="tok-null">false</span>,</span>
+<span class="line" id="L39">            };</span>
+<span class="line" id="L40">        }</span>
+<span class="line" id="L41">    };</span>
+<span class="line" id="L42">}</span>
+<span class="line" id="L43"></span>
+<span class="line" id="L44"><span class="tok-comment">/// Conversion decorator for optional types.</span></span>
+<span class="line" id="L45"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">OptConv</span>(<span class="tok-kw">comptime</span> C: <span class="tok-kw">anytype</span>) <span class="tok-type">type</span> {</span>
+<span class="line" id="L46">    <span class="tok-kw">return</span> <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L47">        <span class="tok-kw">pub</span> <span class="tok-kw">const</span> Type = ?C.Type;</span>
+<span class="line" id="L48">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">fromNullableDatum</span>(d: c.NullableDatum) !Type {</span>
+<span class="line" id="L49">            <span class="tok-kw">if</span> (d.isnull) {</span>
+<span class="line" id="L50">                <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L51">            }</span>
+<span class="line" id="L52">            <span class="tok-kw">return</span> <span class="tok-kw">try</span> C.fromNullableDatum(d);</span>
+<span class="line" id="L53">        }</span>
+<span class="line" id="L54">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">toNullableDatum</span>(v: Type) !c.NullableDatum {</span>
+<span class="line" id="L55">            <span class="tok-kw">if</span> (v) |value| {</span>
+<span class="line" id="L56">                <span class="tok-kw">return</span> <span class="tok-kw">try</span> C.toNullableDatum(value);</span>
+<span class="line" id="L57">            } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L58">                <span class="tok-kw">return</span> .{</span>
+<span class="line" id="L59">                    .value = <span class="tok-number">0</span>,</span>
+<span class="line" id="L60">                    .isnull = <span class="tok-null">true</span>,</span>
+<span class="line" id="L61">                };</span>
+<span class="line" id="L62">            }</span>
+<span class="line" id="L63">        }</span>
+<span class="line" id="L64">    };</span>
+<span class="line" id="L65">}</span>
+<span class="line" id="L66"></span>
+<span class="line" id="L67"><span class="tok-comment">/// Map concrete type to their converters.</span></span>
+<span class="line" id="L68"><span class="tok-comment">/// This allows us find to return pre-defined converters besides relying on</span></span>
+<span class="line" id="L69"><span class="tok-comment">/// reflection only.</span></span>
+<span class="line" id="L70"><span class="tok-kw">var</span> directMappings = .{</span>
+<span class="line" id="L71">    .{ c.Datum, PGDatum },</span>
+<span class="line" id="L72">    .{ c.NullableDatum, PGNullableDatum },</span>
+<span class="line" id="L73">};</span>
+<span class="line" id="L74"></span>
+<span class="line" id="L75"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">fromNullableDatum</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>, d: c.NullableDatum) !T {</span>
+<span class="line" id="L76">    <span class="tok-kw">return</span> find(T).fromNullableDatum(d);</span>
+<span class="line" id="L77">}</span>
+<span class="line" id="L78"></span>
+<span class="line" id="L79"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">fromDatum</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>, d: c.Datum, is_null: <span class="tok-type">bool</span>) !T {</span>
+<span class="line" id="L80">    <span class="tok-kw">return</span> find(T).fromNullableDatum(.{ .value = d, .isnull = is_null });</span>
+<span class="line" id="L81">}</span>
+<span class="line" id="L82"></span>
+<span class="line" id="L83"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">toNullableDatum</span>(v: <span class="tok-kw">anytype</span>) !c.NullableDatum {</span>
+<span class="line" id="L84">    <span class="tok-kw">return</span> find(<span class="tok-builtin">@TypeOf</span>(v)).toNullableDatum(v);</span>
+<span class="line" id="L85">}</span>
+<span class="line" id="L86"></span>
+<span class="line" id="L87"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">find</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>) <span class="tok-type">type</span> {</span>
+<span class="line" id="L88">    <span class="tok-kw">if</span> (isConv(T)) { <span class="tok-comment">// is T already a converter?</span>
+</span>
+<span class="line" id="L89">        <span class="tok-kw">return</span> T;</span>
+<span class="line" id="L90">    }</span>
+<span class="line" id="L91">    <span class="tok-kw">comptime</span> <span class="tok-kw">for</span> (directMappings) |e| {</span>
+<span class="line" id="L92">        <span class="tok-kw">if</span> (e[<span class="tok-number">0</span>] == T) {</span>
+<span class="line" id="L93">            <span class="tok-kw">return</span> e[<span class="tok-number">1</span>];</span>
+<span class="line" id="L94">        }</span>
+<span class="line" id="L95">    };</span>
+<span class="line" id="L96"></span>
+<span class="line" id="L97">    <span class="tok-comment">// TODO:</span>
+</span>
+<span class="line" id="L98">    <span class="tok-comment">// allow types to implement conversion functions directly</span>
+</span>
+<span class="line" id="L99">    <span class="tok-comment">// in that case we will return the original type by wrapping it in</span>
+</span>
+<span class="line" id="L100">    <span class="tok-comment">// Conv</span>
+</span>
+<span class="line" id="L101"></span>
+<span class="line" id="L102">    <span class="tok-kw">return</span> <span class="tok-kw">switch</span> (<span class="tok-builtin">@typeInfo</span>(T)) {</span>
+<span class="line" id="L103">        .Void =&gt; Void,</span>
+<span class="line" id="L104">        .Bool =&gt; Bool,</span>
+<span class="line" id="L105">        .Int =&gt; |i| <span class="tok-kw">switch</span> (i.signedness) {</span>
+<span class="line" id="L106">            .signed =&gt; <span class="tok-kw">switch</span> (i.bits) {</span>
+<span class="line" id="L107">                <span class="tok-number">8</span> =&gt; Int8,</span>
+<span class="line" id="L108">                <span class="tok-number">16</span> =&gt; Int16,</span>
+<span class="line" id="L109">                <span class="tok-number">32</span> =&gt; Int32,</span>
+<span class="line" id="L110">                <span class="tok-number">64</span> =&gt; Int64,</span>
+<span class="line" id="L111">                <span class="tok-kw">else</span> =&gt; <span class="tok-builtin">@compileError</span>(<span class="tok-str">&quot;unsupported int type&quot;</span>),</span>
+<span class="line" id="L112">            },</span>
+<span class="line" id="L113">            .unsigned =&gt; <span class="tok-kw">switch</span> (i.bits) {</span>
+<span class="line" id="L114">                <span class="tok-number">8</span> =&gt; UInt8,</span>
+<span class="line" id="L115">                <span class="tok-number">16</span> =&gt; UInt16,</span>
+<span class="line" id="L116">                <span class="tok-number">32</span> =&gt; UInt32,</span>
+<span class="line" id="L117">                <span class="tok-number">64</span> =&gt; UInt64,</span>
+<span class="line" id="L118">                <span class="tok-kw">else</span> =&gt; <span class="tok-builtin">@compileError</span>(<span class="tok-str">&quot;unsupported unsigned int type&quot;</span>),</span>
+<span class="line" id="L119">            },</span>
+<span class="line" id="L120">        },</span>
+<span class="line" id="L121">        .Float =&gt; |f| <span class="tok-kw">switch</span> (f.bits) {</span>
+<span class="line" id="L122">            <span class="tok-number">32</span> =&gt; Float32,</span>
+<span class="line" id="L123">            <span class="tok-number">64</span> =&gt; Float64,</span>
+<span class="line" id="L124">            <span class="tok-kw">else</span> =&gt; <span class="tok-builtin">@compileError</span>(<span class="tok-str">&quot;unsupported float type&quot;</span>),</span>
+<span class="line" id="L125">        },</span>
+<span class="line" id="L126">        .Optional =&gt; |opt| OptConv(find(opt.child)),</span>
+<span class="line" id="L127">        .Array =&gt; <span class="tok-builtin">@compileLog</span>(<span class="tok-str">&quot;fixed size arrays not supported&quot;</span>),</span>
+<span class="line" id="L128">        .Pointer =&gt; |ptrInfo| blk: {</span>
+<span class="line" id="L129">            <span class="tok-kw">if</span> (ptrInfo.size != .Slice <span class="tok-kw">or</span> ptrInfo.child != <span class="tok-type">u8</span>) {</span>
+<span class="line" id="L130">                <span class="tok-builtin">@compileError</span>(<span class="tok-str">&quot;unsupported ptr type&quot;</span>);</span>
+<span class="line" id="L131">            }</span>
+<span class="line" id="L132">            <span class="tok-kw">if</span> (ptrInfo.sentinel) |_| {</span>
+<span class="line" id="L133">                <span class="tok-kw">break</span> :blk SliceU8Z;</span>
+<span class="line" id="L134">            } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L135">                <span class="tok-kw">break</span> :blk SliceU8;</span>
+<span class="line" id="L136">            }</span>
+<span class="line" id="L137">        },</span>
+<span class="line" id="L138">        <span class="tok-kw">else</span> =&gt; {</span>
+<span class="line" id="L139">            <span class="tok-builtin">@compileLog</span>(<span class="tok-str">&quot;type:&quot;</span>, T);</span>
+<span class="line" id="L140">            <span class="tok-builtin">@compileError</span>(<span class="tok-str">&quot;type not supported&quot;</span>);</span>
+<span class="line" id="L141">        },</span>
+<span class="line" id="L142">    };</span>
+<span class="line" id="L143">}</span>
+<span class="line" id="L144"></span>
+<span class="line" id="L145"><span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">isConv</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>) <span class="tok-type">bool</span> {</span>
+<span class="line" id="L146">    <span class="tok-comment">// we require T to be a struct with the following fields:</span>
+</span>
+<span class="line" id="L147">    <span class="tok-comment">// Type: type</span>
+</span>
+<span class="line" id="L148">    <span class="tok-comment">// fromDatum: fn(d: c.Datum) !Type</span>
+</span>
+<span class="line" id="L149">    <span class="tok-comment">// toDatum: fn(v: Type) !c.Datum</span>
+</span>
+<span class="line" id="L150"></span>
+<span class="line" id="L151">    <span class="tok-kw">if</span> (<span class="tok-builtin">@typeInfo</span>(T) != .Struct) {</span>
+<span class="line" id="L152">        <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
+<span class="line" id="L153">    }</span>
+<span class="line" id="L154"></span>
+<span class="line" id="L155">    <span class="tok-comment">// TODO: improve checks</span>
+</span>
+<span class="line" id="L156">    <span class="tok-kw">return</span> <span class="tok-builtin">@hasDecl</span>(T, <span class="tok-str">&quot;Type&quot;</span>) <span class="tok-kw">and</span> <span class="tok-builtin">@hasDecl</span>(T, <span class="tok-str">&quot;fromNullableDatum&quot;</span>) <span class="tok-kw">and</span> <span class="tok-builtin">@hasDecl</span>(T, <span class="tok-str">&quot;toNullableDatum&quot;</span>);</span>
+<span class="line" id="L157">}</span>
+<span class="line" id="L158"></span>
+<span class="line" id="L159"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Void = ConvNoFail(<span class="tok-type">void</span>, idDatum, toVoid);</span>
+<span class="line" id="L160"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Bool = ConvNoFail(<span class="tok-type">bool</span>, c.DatumGetBool, c.BoolGetDatum);</span>
+<span class="line" id="L161"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Int8 = ConvNoFail(<span class="tok-type">i8</span>, datumGetInt8, c.Int8GetDatum);</span>
+<span class="line" id="L162"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Int16 = ConvNoFail(<span class="tok-type">i16</span>, c.DatumGetInt16, c.Int16GetDatum);</span>
+<span class="line" id="L163"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Int32 = ConvNoFail(<span class="tok-type">i32</span>, c.DatumGetInt32, c.Int32GetDatum);</span>
+<span class="line" id="L164"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Int64 = ConvNoFail(<span class="tok-type">i64</span>, c.DatumGetInt64, c.Int64GetDatum);</span>
+<span class="line" id="L165"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> UInt8 = ConvNoFail(<span class="tok-type">u8</span>, c.DatumGetUInt8, c.UInt8GetDatum);</span>
+<span class="line" id="L166"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> UInt16 = ConvNoFail(<span class="tok-type">u16</span>, c.DatumGetUInt16, c.UInt16GetDatum);</span>
+<span class="line" id="L167"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> UInt32 = ConvNoFail(<span class="tok-type">u32</span>, c.DatumGetUInt32, c.UInt32GetDatum);</span>
+<span class="line" id="L168"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> UInt64 = ConvNoFail(<span class="tok-type">u64</span>, c.DatumGetUInt64, c.UInt64GetDatum);</span>
+<span class="line" id="L169"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Float32 = ConvNoFail(<span class="tok-type">f32</span>, c.DatumGetFloat4, c.Float4GetDatum);</span>
+<span class="line" id="L170"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Float64 = ConvNoFail(<span class="tok-type">f64</span>, c.DatumGetFloat8, c.Float8GetDatum);</span>
+<span class="line" id="L171"></span>
+<span class="line" id="L172"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> SliceU8 = Conv([]<span class="tok-kw">const</span> <span class="tok-type">u8</span>, getDatumTextSlice, sliceToDatumText);</span>
+<span class="line" id="L173"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> SliceU8Z = Conv([:<span class="tok-number">0</span>]<span class="tok-kw">const</span> <span class="tok-type">u8</span>, getDatumTextSliceZ, sliceToDatumText);</span>
+<span class="line" id="L174"></span>
+<span class="line" id="L175"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> PGDatum = ConvNoFail(c.Datum, idDatum, idDatum);</span>
+<span class="line" id="L176"><span class="tok-kw">const</span> PGNullableDatum = <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L177">    <span class="tok-kw">pub</span> <span class="tok-kw">const</span> Type = c.NullableDatum;</span>
+<span class="line" id="L178">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">fromNullableDatum</span>(d: c.NullableDatum) !Type {</span>
+<span class="line" id="L179">        <span class="tok-kw">return</span> d;</span>
+<span class="line" id="L180">    }</span>
+<span class="line" id="L181">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">toNullableDatum</span>(v: Type) !c.NullableDatum {</span>
+<span class="line" id="L182">        <span class="tok-kw">return</span> v;</span>
+<span class="line" id="L183">    }</span>
+<span class="line" id="L184">};</span>
+<span class="line" id="L185"></span>
+<span class="line" id="L186"><span class="tok-comment">// TODO: conversion decorator for array types</span>
+</span>
+<span class="line" id="L187"></span>
+<span class="line" id="L188"><span class="tok-comment">// TODO: conversion decorator for jsonb decoding/encoding types</span>
+</span>
+<span class="line" id="L189"></span>
+<span class="line" id="L190"><span class="tok-kw">fn</span> <span class="tok-fn">idDatum</span>(d: c.Datum) c.Datum {</span>
+<span class="line" id="L191">    <span class="tok-kw">return</span> d;</span>
+<span class="line" id="L192">}</span>
+<span class="line" id="L193"></span>
+<span class="line" id="L194"><span class="tok-kw">fn</span> <span class="tok-fn">toVoid</span>(d: <span class="tok-type">void</span>) c.Datum {</span>
+<span class="line" id="L195">    _ = d;</span>
+<span class="line" id="L196">    <span class="tok-kw">return</span> <span class="tok-number">0</span>;</span>
+<span class="line" id="L197">}</span>
+<span class="line" id="L198"></span>
+<span class="line" id="L199"><span class="tok-kw">fn</span> <span class="tok-fn">datumGetInt8</span>(d: c.Datum) <span class="tok-type">i8</span> {</span>
+<span class="line" id="L200">    <span class="tok-kw">return</span> <span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, <span class="tok-builtin">@bitCast</span>(<span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, <span class="tok-builtin">@truncate</span>(d))));</span>
+<span class="line" id="L201">}</span>
+<span class="line" id="L202"></span>
+<span class="line" id="L203"><span class="tok-comment">/// Convert a datum to a TEXT slice. This function detoast the datum if necessary.</span></span>
+<span class="line" id="L204"><span class="tok-comment">/// All allocations will be performed in the Current Memory Context.</span></span>
+<span class="line" id="L205"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">getDatumTextSlice</span>(datum: c.Datum) ![]<span class="tok-kw">const</span> <span class="tok-type">u8</span> {</span>
+<span class="line" id="L206">    <span class="tok-kw">return</span> getDatumTextSliceZ(datum);</span>
+<span class="line" id="L207">}</span>
+<span class="line" id="L208"></span>
+<span class="line" id="L209"><span class="tok-comment">/// Convert a datum to a TEXT slice. This function detoast the datum if necessary.</span></span>
+<span class="line" id="L210"><span class="tok-comment">/// All allocations will be performed in the Current Memory Context.</span></span>
+<span class="line" id="L211"><span class="tok-comment">///</span></span>
+<span class="line" id="L212"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">getDatumTextSliceZ</span>(datum: c.Datum) ![:<span class="tok-number">0</span>]<span class="tok-kw">const</span> <span class="tok-type">u8</span> {</span>
+<span class="line" id="L213">    <span class="tok-kw">const</span> ptr = c.DatumGetTextPP(datum);</span>
+<span class="line" id="L214"></span>
+<span class="line" id="L215">    <span class="tok-kw">const</span> unpacked = <span class="tok-kw">try</span> err.wrap(c.pg_detoast_datum_packed, .{ptr});</span>
+<span class="line" id="L216">    <span class="tok-kw">const</span> len = varatt.VARSIZE_ANY_EXHDR(unpacked);</span>
+<span class="line" id="L217">    <span class="tok-kw">var</span> buffer = <span class="tok-kw">try</span> mem.PGCurrentContextAllocator.alloc(<span class="tok-type">u8</span>, len + <span class="tok-number">1</span>);</span>
+<span class="line" id="L218">    std.mem.copyForwards(<span class="tok-type">u8</span>, buffer, varatt.VARDATA_ANY(unpacked)[<span class="tok-number">0</span>..len]);</span>
+<span class="line" id="L219">    buffer[len] = <span class="tok-number">0</span>;</span>
+<span class="line" id="L220">    <span class="tok-kw">if</span> (unpacked != ptr) {</span>
+<span class="line" id="L221">        c.pfree(unpacked);</span>
+<span class="line" id="L222">    }</span>
+<span class="line" id="L223">    <span class="tok-kw">return</span> buffer[<span class="tok-number">0</span>..len :<span class="tok-number">0</span>];</span>
+<span class="line" id="L224">}</span>
+<span class="line" id="L225"></span>
+<span class="line" id="L226"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">sliceToDatumText</span>(slice: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) !c.Datum {</span>
+<span class="line" id="L227">    <span class="tok-kw">const</span> text = c.cstring_to_text_with_len(slice.ptr, <span class="tok-builtin">@intCast</span>(slice.len));</span>
+<span class="line" id="L228">    <span class="tok-kw">return</span> c.PointerGetDatum(text);</span>
+<span class="line" id="L229">}</span>
+<span class="line" id="L230"></span>
+<span class="line" id="L231"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">sliceToDatumTextZ</span>(slice: [:<span class="tok-number">0</span>]<span class="tok-kw">const</span> <span class="tok-type">u8</span>) !c.Datum {</span>
+<span class="line" id="L232">    <span class="tok-kw">return</span> sliceToDatumText(slice);</span>
+<span class="line" id="L233">}</span>
+<span class="line" id="L234"></span>
+</code></pre></body>
+</html>
