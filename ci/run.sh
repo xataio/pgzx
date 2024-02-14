@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+#set -e
 set -o pipefail
 
 echo "Build and install extension"
@@ -25,6 +25,8 @@ pgstart || {
   exit 1
 }
 trap pgstop TERM INT EXIT
+
+cat $cluster_dir/log/server.log
 
 echo "Create extension"
 psql -U postgres -c "CREATE EXTENSION char_count_zig"
