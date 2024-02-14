@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+set -e
+set -x
+set -o pipefail
+
+# Ignore nix specific env var so we can ask pg_config for the correct paths
+unset NIX_PGLIBDIR
+
+PG_CONFIG=$(which pg_config)
+
+rootdir=${PRJ_ROOT:-$(git rev-parse --show-toplevel)}
+outdir=${1:-$rootdir/out}
+
+postgres_major_version=$($PG_CONFIG --version | awk '{print $2}' | sed 's/\..*$//')
+new_install_dir=$outdir/$postgres_major_version
+
+cp_direct_files() {
+  local dest_dir=$1
+  local src_dir=$2
+  mkdir -p $dest_dir
+  for file in $(find $src_dir -maxdepth 1 -type f); do
+    cp $file $dest_dir
+  done
+}
+
+cp_recursive() {
+  local dest_dir=$1
+  local src_dir=$2
+  mkdir -p $dest_dir
+  for file in $(ls $src_dir); do
+    cp -r $src_dir/$file $dest_dir/$file
+  done
+}
+
+mkdir -p $new_install_dir
+
+# copy bin
+mkdir -p $new_install_dir/bin
+cp_direct_files  $new_install_dir/bin $($PG_CONFIG --bindir)
+
+# copy headers from include dir
+mkdir -p $new_install_dir/include
+mkdir -p $new_install_dir/include/server
+($PG_CONFIG --includedir; $PG_CONFIG --pkgincludedir) | sort -u | while read dir; do
+  cp_direct_files $new_install_dir/include $dir
+done
+cp_recursive $new_install_dir/include/server $($PG_CONFIG --includedir-server)
+
+# copy libs
+($PG_CONFIG --libdir; $PG_CONFIG --pkglibdir) | sort -u | while read dir; do
+  cp_direct_files $new_install_dir/lib $dir
+done
+
+# copy locale
+cp_recursive $new_install_dir/share/locale $($PG_CONFIG --localedir)
+
+# copy share
+cp_recursive $new_install_dir/share/postgresql $($PG_CONFIG --sharedir)
+
+chmod -R +w $new_install_dir
+
+# link outdir/default if not exists
+if [ ! -e $outdir/default ]; then
+  ln -s $new_install_dir $outdir/default
+fi

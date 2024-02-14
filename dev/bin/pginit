@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+set -e
+set -x
+set -o pipefail
+
+cluster_name=${1:-"postgres"}
+database=${2:-"postgres"}
+user=${3:-"postgres"}
+
+# TODO:
+# - configurable init scipts
+# - custom postgresql.conf
+
+rootdir=${PRJ_ROOT:-$(git rev-parse --show-toplevel)}
+outdir=${1:-$rootdir/out}
+
+PG_HOME=${PG_HOME:-$outdir/default}
+PG_BIN=$PG_HOME/bin
+PATH=$PG_BIN:$PATH
+
+cluster_dir=$PG_HOME/var/$cluster_name
+data_dir=$cluster_dir/data
+log_dir=$cluster_dir/log
+log_file=$log_dir/server.log
+
+# create the database
+mkdir -p $cluster_dir
+mkdir -p $data_dir
+mkdir -p $log_dir
+pg_ctl initdb -D $data_dir -o "--encoding=UTF8"
+
+# create database user
+pg_ctl -D $data_dir -l $log_file start
+# createdb $database
+createuser -d -e -i -l -r -s $user
+pg_ctl -D $data_dir stop

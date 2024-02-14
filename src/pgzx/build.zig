@@ -53,7 +53,7 @@ pub const InstallExtension = struct {
 
     pub fn create(b: *Build, options: Options) *InstallExtension {
         const PGIncludeServerDir: LazyPath = .{
-            .cwd_relative = b.getIncludeServerDir(),
+            .path = b.getIncludeServerDir(),
         };
 
         const root_dir = options.root_dir orelse
@@ -286,7 +286,6 @@ pub fn getBinDir(self: *Build) []const u8 {
 pub fn getExtensionDir(self: *Build) []const u8 {
     self.paths.extension_dir = self.paths.extension_dir orelse blk: {
         const shared = self.getSharedDir();
-        // break :blk self.std_build.pathJoin(shared, "extension");
         break :blk self.std_build.pathJoin(&[_][]const u8{ shared, "extension" });
     };
     return self.paths.extension_dir.?;

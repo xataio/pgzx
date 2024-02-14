@@ -10,6 +10,11 @@
 
     Available commands:
       menu        - show this menu
+      pglocal     - Create local installation from existing postgresql installation
+      pguse       - Change default local installation to use
+      pginit      - Initialize new test database in local installation
+      pgstart     - Start local installation
+      pgstop      - Stop local installation
 
     Shell aliases (might not work with direnv):
       root        - cd to project root
@@ -48,9 +53,14 @@ in {
 
   shellHook = ''
     export PRJ_ROOT=$PWD
-    export PG_HOME=$PRJ_ROOT/workdir/system
+    export PG_HOME=$PRJ_ROOT/out/default
     export PATH="$PG_HOME/lib/postgresql/pgxs/src/test/regress:$PATH"
-    export PATH="$PG_HOME/bin:$PRJ_ROOT/dev/scripts:$PATH"
+    export PATH="$PG_HOME/bin:$PRJ_ROOT/dev/bin:$PATH"
+
+    # Nix postgres is patched to find and install libraries into another directory
+    # than the default. For our local setup we must overwrite the default location by using
+    # the NIX_PGLIBDIR environment variable.
+    export NIX_PGLIBDIR=$PG_HOME/lib
 
     alias root='cd $PRJ_ROOT'
 
