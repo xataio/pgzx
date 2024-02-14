@@ -1,6 +1,5 @@
 const std = @import("std");
 const pgzx = @import("pgzx");
-const elog = pgzx.elog;
 
 comptime {
     pgzx.PG_MODULE_MAGIC();
@@ -10,12 +9,12 @@ comptime {
 
 fn char_count_zig(input_text: []const u8, target_char: []const u8) !u32 {
     if (target_char.len > 1) {
-        return elog.Error(@src(), "Target char is more than one byte", .{});
+        return pgzx.elog.Error(@src(), "Target char is more than one byte", .{});
     }
 
-    elog.Info(@src(), "input_text: {s}\n", .{input_text});
-    elog.Info(@src(), "target_char: {s}\n", .{target_char});
-    elog.Info(@src(), "Target char len: {}\n", .{target_char.len});
+    pgzx.elog.Info(@src(), "input_text: {s}\n", .{input_text});
+    pgzx.elog.Info(@src(), "target_char: {s}\n", .{target_char});
+    pgzx.elog.Info(@src(), "Target char len: {}\n", .{target_char.len});
 
     var count: u32 = 0;
     for (input_text) |char| {
