@@ -29,7 +29,8 @@ jobs:
           nix develop --command -- pre-commit run --all-files --color always
       - name: Update user
         run: |
-          sudo usermod -aG postgres $USER
+          # sudo usermod -aG postgres $USER
+          sudo chown $USER /run/postgresql
       - name: Create local postgres installation
         run: |
           nix develop --command -- ./ci/setup.sh
