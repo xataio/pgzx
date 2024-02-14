@@ -11,13 +11,19 @@ zig build -freference-trace -p $PG_HOME
 cd $PRJ_ROOT/examples/pgaudit_zig
 zig build -freference-trace -p $PG_HOME
 
-PGDATA=$PG_HOME/var/postgres/data
+cluster_dir=$PG_HOME/var/postgres
+PGDATA=$cluster_dir/data
 
 echo "Configure postgresql.conf"
 echo "shared_preload_libraries = 'pg_audit_zig'" >> $PGDATA/postgresql.conf
 
 echo "Start PostgreSQL"
-pgstart
+pgstart || {
+  echo "Failed to start PostgreSQL"
+  echo "Printing server log:"
+  cat $cluster_dir/log/server.log
+  exit 1
+}
 trap pgstop TERM INT EXIT
 
 echo "Create extension"
