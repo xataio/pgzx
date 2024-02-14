@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>pgzx/err.zig - source view</title>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg==">
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNTMgMTQwIj48ZyBmaWxsPSIjRjdBNDFEIj48Zz48cG9seWdvbiBwb2ludHM9IjQ2LDIyIDI4LDQ0IDE5LDMwIi8+PHBvbHlnb24gcG9pbnRzPSI0NiwyMiAzMywzMyAyOCw0NCAyMiw0NCAyMiw5NSAzMSw5NSAyMCwxMDAgMTIsMTE3IDAsMTE3IDAsMjIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMzEsOTUgMTIsMTE3IDQsMTA2Ii8+PC9nPjxnPjxwb2x5Z29uIHBvaW50cz0iNTYsMjIgNjIsMzYgMzcsNDQiLz48cG9seWdvbiBwb2ludHM9IjU2LDIyIDExMSwyMiAxMTEsNDQgMzcsNDQgNTYsMzIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTE2LDk1IDk3LDExNyA5MCwxMDQiLz48cG9seWdvbiBwb2ludHM9IjExNiw5NSAxMDAsMTA0IDk3LDExNyA0MiwxMTcgNDIsOTUiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTUwLDAgNTIsMTE3IDMsMTQwIDEwMSwyMiIvPjwvZz48Zz48cG9seWdvbiBwb2ludHM9IjE0MSwyMiAxNDAsNDAgMTIyLDQ1Ii8+PHBvbHlnb24gcG9pbnRzPSIxNTMsMjIgMTUzLDExNyAxMDYsMTE3IDEyMCwxMDUgMTI1LDk1IDEzMSw5NSAxMzEsNDUgMTIyLDQ1IDEzMiwzNiAxNDEsMjIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTI1LDk1IDEzMCwxMTAgMTA2LDExNyIvPjwvZz48L2c+PC9zdmc+">
+    <style>
+      body{
+        font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      pre > code {
+        display: block;
+        overflow: auto;
+        line-height: normal;
+        margin: 0em;
+      }
+      .tok-kw {
+          color: #333;
+          font-weight: bold;
+      }
+      .tok-str {
+          color: #d14;
+      }
+      .tok-builtin {
+          color: #005C7A;
+      }
+      .tok-comment {
+          color: #545454;
+          font-style: italic;
+      }
+      .tok-fn {
+          color: #900;
+          font-weight: bold;
+      }
+      .tok-null {
+          color: #005C5C;
+      }
+      .tok-number {
+          color: #005C5C;
+      }
+      .tok-type {
+          color: #458;
+          font-weight: bold;
+      }
+      pre {
+        counter-reset: line;
+      }
+      pre .line:before {
+        counter-increment: line;
+        content: counter(line);
+        display: inline-block;
+        padding-right: 1em;
+        width: 2em;
+        text-align: right;
+        color: #999;
+      }
+      
+      .line {
+        width: 100%;
+        display: inline-block;
+      }
+      .line:target {
+        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        background: #fafafa;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body{
+            background:#222;
+            color: #ccc;
+        }
+        pre > code {
+            color: #ccc;
+            background: #222;
+            border: unset;
+        }
+        .line:target {
+            border-top: 1px solid #444;
+            border-bottom: 1px solid #444;
+            background: #333;
+        }
+        .tok-kw {
+            color: #eee;
+        }
+        .tok-str {
+            color: #2e5;
+        }
+        .tok-builtin {
+            color: #ff894c;
+        }
+        .tok-comment {
+            color: #aa7;
+        }
+        .tok-fn {
+            color: #B1A0F8;
+        }
+        .tok-null {
+            color: #ff8080;
+        }
+        .tok-number {
+            color: #ff8080;
+        }
+        .tok-type {
+            color: #68f;
+        }
+      }
+    </style>
+</head>
+<body>
+<pre><code><span class="line" id="L1"><span class="tok-kw">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>);</span>
+<span class="line" id="L2"></span>
+<span class="line" id="L3"><span class="tok-kw">const</span> c = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;c.zig&quot;</span>);</span>
+<span class="line" id="L4"><span class="tok-kw">const</span> mem = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;mem.zig&quot;</span>);</span>
+<span class="line" id="L5"></span>
+<span class="line" id="L6"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> PGError = <span class="tok-kw">error</span>{</span>
+<span class="line" id="L7">    <span class="tok-comment">// error from calling a postgres function. The actual error message</span>
+</span>
+<span class="line" id="L8">    <span class="tok-comment">// is stored on the postgres errordata stack.</span>
+</span>
+<span class="line" id="L9">    PGErrorStack,</span>
+<span class="line" id="L10"></span>
+<span class="line" id="L11">    <span class="tok-comment">// Background worker errors</span>
+</span>
+<span class="line" id="L12">    SignalFlagAlreadyConfigured,</span>
+<span class="line" id="L13">    FailStartBackgroundWorker,</span>
+<span class="line" id="L14">    WorkerNotRunning,</span>
+<span class="line" id="L15">    PostmasterDied,</span>
+<span class="line" id="L16"></span>
+<span class="line" id="L17">    <span class="tok-comment">// Datum value conversion errors</span>
+</span>
+<span class="line" id="L18">    NotEnoughArguments,</span>
+<span class="line" id="L19">    UnexpectedNullValue,</span>
+<span class="line" id="L20">    StringLengthMismatch,</span>
+<span class="line" id="L21"></span>
+<span class="line" id="L22">    <span class="tok-comment">// SPI</span>
+</span>
+<span class="line" id="L23">    SPIError,</span>
+<span class="line" id="L24">    SPIConnectFailed,</span>
+<span class="line" id="L25">    SPIUnconnected,</span>
+<span class="line" id="L26">    SPINoAttribute,</span>
+<span class="line" id="L27">    SPIArgument,</span>
+<span class="line" id="L28">    SPICopy,</span>
+<span class="line" id="L29">    SPITransaction,</span>
+<span class="line" id="L30">    SPIOpUnknown,</span>
+<span class="line" id="L31">    SPIInvalidRowIndex,</span>
+<span class="line" id="L32"></span>
+<span class="line" id="L33">    <span class="tok-comment">// Signaling</span>
+</span>
+<span class="line" id="L34">    OperationCanceled,</span>
+<span class="line" id="L35">};</span>
+<span class="line" id="L36"></span>
+<span class="line" id="L37"><span class="tok-comment">/// Rethrow a postgres error.</span></span>
+<span class="line" id="L38"><span class="tok-comment">/// Do not use PG_RE_THROW directly. Use `pg_re_throw` instead to ensure</span></span>
+<span class="line" id="L39"><span class="tok-comment">/// that the PostgreSQL error handlers find the correct error state and</span></span>
+<span class="line" id="L40"><span class="tok-comment">/// memory context it would expect.</span></span>
+<span class="line" id="L41"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">pgRethrow</span>() <span class="tok-kw">callconv</span>(.C) <span class="tok-type">void</span> {</span>
+<span class="line" id="L42">    <span class="tok-comment">// Postgres error handling does set the active memory context to the</span>
+</span>
+<span class="line" id="L43">    <span class="tok-comment">// ErrorContext when calling longjmp.</span>
+</span>
+<span class="line" id="L44">    <span class="tok-comment">// Because we did restore the memory context we want to make sure that we</span>
+</span>
+<span class="line" id="L45">    <span class="tok-comment">// set it back to ErrorContext before we rethrow the error</span>
+</span>
+<span class="line" id="L46">    _ = c.MemoryContextSwitchTo(c.ErrorContext);</span>
+<span class="line" id="L47">    c.PG_RE_THROW();</span>
+<span class="line" id="L48">}</span>
+<span class="line" id="L49"></span>
+<span class="line" id="L50"><span class="tok-comment">/// Capture the postgres error context when calling into postgres functions.</span></span>
+<span class="line" id="L51"><span class="tok-comment">/// Postgres uses setjmp and longjmp to handle errors. This might cause</span></span>
+<span class="line" id="L52"><span class="tok-comment">/// problems for defer and errdefer statements in zig code.</span></span>
+<span class="line" id="L53"><span class="tok-comment">///</span></span>
+<span class="line" id="L54"><span class="tok-comment">/// In Postgres one uses PG_TRY, PG_CATCH, PG_FINALLY, and PG_END_TRY to capture errors</span></span>
+<span class="line" id="L55"><span class="tok-comment">/// to ensure that functions can cleanup before they re-throw the error.</span></span>
+<span class="line" id="L56"><span class="tok-comment">///</span></span>
+<span class="line" id="L57"><span class="tok-comment">/// Use PGErrorContext.capture() and pg_try_end to capture the error context.</span></span>
+<span class="line" id="L58"><span class="tok-comment">/// Use `if (err_context.pg_try()) { ... }` to start a try block. `pg_try` will</span></span>
+<span class="line" id="L59"><span class="tok-comment">/// return false if the enclosed code did throw a Postgres ERROR.</span></span>
+<span class="line" id="L60"><span class="tok-comment">///</span></span>
+<span class="line" id="L61"><span class="tok-comment">/// Postgres error handling does set the active memory context to the ErrorContext.</span></span>
+<span class="line" id="L62"><span class="tok-comment">/// For this reason we also capture the MemoryContext and pg_try_end it at then end.</span></span>
+<span class="line" id="L63"><span class="tok-comment">///</span></span>
+<span class="line" id="L64"><span class="tok-comment">/// Postgres stores the error message in the `errordata` variable, which holds</span></span>
+<span class="line" id="L65"><span class="tok-comment">/// a limit stack of error messages. Use `ignore_err()` if you don't want to</span></span>
+<span class="line" id="L66"><span class="tok-comment">/// bubble up the error to Postgres later on. `ignore_err()` will clean up the</span></span>
+<span class="line" id="L67"><span class="tok-comment">/// errordata stack in case an error was thrown. Otherwise `ignore_err()` will</span></span>
+<span class="line" id="L68"><span class="tok-comment">/// do nothing.</span></span>
+<span class="line" id="L69"><span class="tok-comment">///</span></span>
+<span class="line" id="L70"><span class="tok-comment">/// Example: rethrow</span></span>
+<span class="line" id="L71"><span class="tok-comment">/// Capture error and &quot;rethrow&quot; as normal zig error. Postgres error stack still exists</span></span>
+<span class="line" id="L72"><span class="tok-comment">/// and we should rethrow the error before returning to postgres via `pgRethrow`.</span></span>
+<span class="line" id="L73"><span class="tok-comment">/// By converting the error to a zig error we ensure that defer and errdefer statements</span></span>
+<span class="line" id="L74"><span class="tok-comment">/// in the call chain will be executed correctly.</span></span>
+<span class="line" id="L75"><span class="tok-comment">///</span></span>
+<span class="line" id="L76"><span class="tok-comment">///   result = {</span></span>
+<span class="line" id="L77"><span class="tok-comment">///       var err_context = PGErrorContext.capture();</span></span>
+<span class="line" id="L78"><span class="tok-comment">///       defer err_context.pg_try_end();</span></span>
+<span class="line" id="L79"><span class="tok-comment">///       if (err_context.pg_try()) {</span></span>
+<span class="line" id="L80"><span class="tok-comment">///           pg.&lt;postgres function&gt;(...);</span></span>
+<span class="line" id="L81"><span class="tok-comment">///       } else {</span></span>
+<span class="line" id="L82"><span class="tok-comment">///         return error.PGErrorStack;</span></span>
+<span class="line" id="L83"><span class="tok-comment">///       }</span></span>
+<span class="line" id="L84"><span class="tok-comment">///   }</span></span>
+<span class="line" id="L85"><span class="tok-comment">///</span></span>
+<span class="line" id="L86"><span class="tok-comment">/// Example: catch and ignore.</span></span>
+<span class="line" id="L87"><span class="tok-comment">/// We catch the error and clean the postgres error stack. There will be no evidence</span></span>
+<span class="line" id="L88"><span class="tok-comment">/// that something went wrong.</span></span>
+<span class="line" id="L89"><span class="tok-comment">///</span></span>
+<span class="line" id="L90"><span class="tok-comment">///   var err_context = PGErrorContext.capture();</span></span>
+<span class="line" id="L91"><span class="tok-comment">///   defer err_context.pg_try_end();</span></span>
+<span class="line" id="L92"><span class="tok-comment">///   if (err_context.pg_try()) {</span></span>
+<span class="line" id="L93"><span class="tok-comment">///     return pg.&lt;postgres function&gt;(...);</span></span>
+<span class="line" id="L94"><span class="tok-comment">///   } else {</span></span>
+<span class="line" id="L95"><span class="tok-comment">///     c.pg.FlushErrorState();</span></span>
+<span class="line" id="L96"><span class="tok-comment">///     return &lt;default value&gt;;</span></span>
+<span class="line" id="L97"><span class="tok-comment">///   }</span></span>
+<span class="line" id="L98"><span class="tok-comment">///</span></span>
+<span class="line" id="L99"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Context = <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L100">    exception_stack: [*c]c.sigjmp_buf,</span>
+<span class="line" id="L101">    context_stack: [*c]c.ErrorContextCallback,</span>
+<span class="line" id="L102">    memory_context: c.MemoryContext,</span>
+<span class="line" id="L103">    local_sigjump_buf: c.sigjmp_buf,</span>
+<span class="line" id="L104"></span>
+<span class="line" id="L105">    <span class="tok-kw">const</span> Self = <span class="tok-builtin">@This</span>();</span>
+<span class="line" id="L106">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">init</span>() Self {</span>
+<span class="line" id="L107">        <span class="tok-kw">return</span> .{</span>
+<span class="line" id="L108">            .exception_stack = c.PG_exception_stack,</span>
+<span class="line" id="L109">            .context_stack = c.error_context_stack,</span>
+<span class="line" id="L110">            .memory_context = c.CurrentMemoryContext,</span>
+<span class="line" id="L111">            .local_sigjump_buf = <span class="tok-null">undefined</span>,</span>
+<span class="line" id="L112">        };</span>
+<span class="line" id="L113">    }</span>
+<span class="line" id="L114"></span>
+<span class="line" id="L115">    <span class="tok-comment">/// Install the local error context with Postgres and return `true`.</span></span>
+<span class="line" id="L116">    <span class="tok-comment">/// In case Postgres throws an error, `pg_try` will return `false`.</span></span>
+<span class="line" id="L117">    <span class="tok-comment">///</span></span>
+<span class="line" id="L118">    <span class="tok-comment">/// IMPORTANT:</span></span>
+<span class="line" id="L119">    <span class="tok-comment">/// - `pg_try_end` must be used to properly cleanup the error handler stack.</span></span>
+<span class="line" id="L120">    <span class="tok-comment">///</span></span>
+<span class="line" id="L121">    <span class="tok-comment">/// WARNING:</span></span>
+<span class="line" id="L122">    <span class="tok-comment">/// NEVER RENMOVE THE 'inline'. `sigsetjmp` will will not work correctly if used</span></span>
+<span class="line" id="L123">    <span class="tok-comment">/// within a function as we do here. By forcing the function to be inline</span></span>
+<span class="line" id="L124">    <span class="tok-comment">/// the `sigsetjmp` happens correctly within the stack context of the caller.</span></span>
+<span class="line" id="L125">    <span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">pg_try</span>(self: *Self) <span class="tok-type">bool</span> {</span>
+<span class="line" id="L126">        <span class="tok-kw">if</span> (c.sigsetjmp(&amp;self.local_sigjump_buf, <span class="tok-number">0</span>) == <span class="tok-number">0</span>) {</span>
+<span class="line" id="L127">            c.PG_exception_stack = &amp;self.local_sigjump_buf;</span>
+<span class="line" id="L128">            <span class="tok-kw">return</span> <span class="tok-null">true</span>;</span>
+<span class="line" id="L129">        } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L130">            <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
+<span class="line" id="L131">        }</span>
+<span class="line" id="L132">    }</span>
+<span class="line" id="L133"></span>
+<span class="line" id="L134">    <span class="tok-comment">/// Restore the error context to the state before `pg_try` was called.</span></span>
+<span class="line" id="L135">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">deinit</span>(self: *Self) <span class="tok-type">void</span> {</span>
+<span class="line" id="L136">        self.pg_try_end();</span>
+<span class="line" id="L137">    }</span>
+<span class="line" id="L138"></span>
+<span class="line" id="L139">    <span class="tok-comment">/// Restore the error context to the state before `pg_try` was called.</span></span>
+<span class="line" id="L140">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">pg_try_end</span>(self: *Self) <span class="tok-type">void</span> {</span>
+<span class="line" id="L141">        c.PG_exception_stack = self.exception_stack;</span>
+<span class="line" id="L142">        c.error_context_stack = self.context_stack;</span>
+<span class="line" id="L143">        _ = c.MemoryContextSwitchTo(self.memory_context);</span>
+<span class="line" id="L144">    }</span>
+<span class="line" id="L145"></span>
+<span class="line" id="L146">    <span class="tok-comment">/// Error handler to ignore the postgres error.</span></span>
+<span class="line" id="L147">    <span class="tok-comment">/// The error stack with pending error messages will be cleaned up.</span></span>
+<span class="line" id="L148">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">ignore_err</span>(self: *Self) <span class="tok-type">void</span> {</span>
+<span class="line" id="L149">        _ = self;</span>
+<span class="line" id="L150">        c.FlushErrorState();</span>
+<span class="line" id="L151">    }</span>
+<span class="line" id="L152"></span>
+<span class="line" id="L153">    <span class="tok-comment">/// Turn a postgres longjmp based error into a zig error.</span></span>
+<span class="line" id="L154">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">errorValue</span>(self: *Self) <span class="tok-kw">error</span>{PGErrorStack} {</span>
+<span class="line" id="L155">        _ = self;</span>
+<span class="line" id="L156">        <span class="tok-kw">return</span> <span class="tok-kw">error</span>.PGErrorStack;</span>
+<span class="line" id="L157">    }</span>
+<span class="line" id="L158"></span>
+<span class="line" id="L159">    <span class="tok-comment">/// Rethrow the error as a Postgres error including the longjmp.</span></span>
+<span class="line" id="L160">    <span class="tok-comment">///</span></span>
+<span class="line" id="L161">    <span class="tok-comment">/// This will call deinit automatically before rethrowing the error.</span></span>
+<span class="line" id="L162">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">rethrow</span>(self: *Self) <span class="tok-type">noreturn</span> {</span>
+<span class="line" id="L163">        self.deinit();</span>
+<span class="line" id="L164">        pgRethrow();</span>
+<span class="line" id="L165">        <span class="tok-kw">unreachable</span>;</span>
+<span class="line" id="L166">    }</span>
+<span class="line" id="L167">};</span>
+<span class="line" id="L168"></span>
+<span class="line" id="L169"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">wrap</span>(<span class="tok-kw">comptime</span> f: <span class="tok-kw">anytype</span>, args: <span class="tok-kw">anytype</span>) <span class="tok-kw">error</span>{PGErrorStack}!wrap_ret(<span class="tok-builtin">@TypeOf</span>(f)) {</span>
+<span class="line" id="L170">    <span class="tok-kw">var</span> errctx = Context.init();</span>
+<span class="line" id="L171">    <span class="tok-kw">defer</span> errctx.deinit();</span>
+<span class="line" id="L172">    <span class="tok-kw">if</span> (errctx.pg_try()) {</span>
+<span class="line" id="L173">        <span class="tok-kw">return</span> <span class="tok-builtin">@call</span>(.auto, f, args);</span>
+<span class="line" id="L174">    } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L175">        <span class="tok-kw">return</span> errctx.errorValue();</span>
+<span class="line" id="L176">    }</span>
+<span class="line" id="L177">}</span>
+<span class="line" id="L178"></span>
+<span class="line" id="L179"><span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">wrap_ret</span>(<span class="tok-kw">comptime</span> f: <span class="tok-type">type</span>) <span class="tok-type">type</span> {</span>
+<span class="line" id="L180">    <span class="tok-kw">const</span> ti = <span class="tok-builtin">@typeInfo</span>(f);</span>
+<span class="line" id="L181">    <span class="tok-kw">if</span> (ti != .Fn) {</span>
+<span class="line" id="L182">        <span class="tok-builtin">@compileError</span>(<span class="tok-str">&quot;wrap only works with functions&quot;</span>);</span>
+<span class="line" id="L183">    }</span>
+<span class="line" id="L184">    <span class="tok-kw">return</span> ti.Fn.return_type.?;</span>
+<span class="line" id="L185">}</span>
+<span class="line" id="L186"></span>
+</code></pre></body>
+</html>

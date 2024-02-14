@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>pgzx/lwlock.zig - source view</title>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg==">
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNTMgMTQwIj48ZyBmaWxsPSIjRjdBNDFEIj48Zz48cG9seWdvbiBwb2ludHM9IjQ2LDIyIDI4LDQ0IDE5LDMwIi8+PHBvbHlnb24gcG9pbnRzPSI0NiwyMiAzMywzMyAyOCw0NCAyMiw0NCAyMiw5NSAzMSw5NSAyMCwxMDAgMTIsMTE3IDAsMTE3IDAsMjIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMzEsOTUgMTIsMTE3IDQsMTA2Ii8+PC9nPjxnPjxwb2x5Z29uIHBvaW50cz0iNTYsMjIgNjIsMzYgMzcsNDQiLz48cG9seWdvbiBwb2ludHM9IjU2LDIyIDExMSwyMiAxMTEsNDQgMzcsNDQgNTYsMzIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTE2LDk1IDk3LDExNyA5MCwxMDQiLz48cG9seWdvbiBwb2ludHM9IjExNiw5NSAxMDAsMTA0IDk3LDExNyA0MiwxMTcgNDIsOTUiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTUwLDAgNTIsMTE3IDMsMTQwIDEwMSwyMiIvPjwvZz48Zz48cG9seWdvbiBwb2ludHM9IjE0MSwyMiAxNDAsNDAgMTIyLDQ1Ii8+PHBvbHlnb24gcG9pbnRzPSIxNTMsMjIgMTUzLDExNyAxMDYsMTE3IDEyMCwxMDUgMTI1LDk1IDEzMSw5NSAxMzEsNDUgMTIyLDQ1IDEzMiwzNiAxNDEsMjIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTI1LDk1IDEzMCwxMTAgMTA2LDExNyIvPjwvZz48L2c+PC9zdmc+">
+    <style>
+      body{
+        font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      pre > code {
+        display: block;
+        overflow: auto;
+        line-height: normal;
+        margin: 0em;
+      }
+      .tok-kw {
+          color: #333;
+          font-weight: bold;
+      }
+      .tok-str {
+          color: #d14;
+      }
+      .tok-builtin {
+          color: #005C7A;
+      }
+      .tok-comment {
+          color: #545454;
+          font-style: italic;
+      }
+      .tok-fn {
+          color: #900;
+          font-weight: bold;
+      }
+      .tok-null {
+          color: #005C5C;
+      }
+      .tok-number {
+          color: #005C5C;
+      }
+      .tok-type {
+          color: #458;
+          font-weight: bold;
+      }
+      pre {
+        counter-reset: line;
+      }
+      pre .line:before {
+        counter-increment: line;
+        content: counter(line);
+        display: inline-block;
+        padding-right: 1em;
+        width: 2em;
+        text-align: right;
+        color: #999;
+      }
+      
+      .line {
+        width: 100%;
+        display: inline-block;
+      }
+      .line:target {
+        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        background: #fafafa;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body{
+            background:#222;
+            color: #ccc;
+        }
+        pre > code {
+            color: #ccc;
+            background: #222;
+            border: unset;
+        }
+        .line:target {
+            border-top: 1px solid #444;
+            border-bottom: 1px solid #444;
+            background: #333;
+        }
+        .tok-kw {
+            color: #eee;
+        }
+        .tok-str {
+            color: #2e5;
+        }
+        .tok-builtin {
+            color: #ff894c;
+        }
+        .tok-comment {
+            color: #aa7;
+        }
+        .tok-fn {
+            color: #B1A0F8;
+        }
+        .tok-null {
+            color: #ff8080;
+        }
+        .tok-number {
+            color: #ff8080;
+        }
+        .tok-type {
+            color: #68f;
+        }
+      }
+    </style>
+</head>
+<body>
+<pre><code><span class="line" id="L1"><span class="tok-comment">//! Provides wrappers and helpers for Postgres LWLocks.</span></span>
+<span class="line" id="L2"><span class="tok-comment">//!</span></span>
+<span class="line" id="L3"><span class="tok-comment">//! NOTE:</span></span>
+<span class="line" id="L4"><span class="tok-comment">//! The global locks like `AddinShmemInitLock` are not directly accessible from</span></span>
+<span class="line" id="L5"><span class="tok-comment">//! the generated C bindings. We provide wrapper functions for them here.</span></span>
+<span class="line" id="L6"></span>
+<span class="line" id="L7"><span class="tok-kw">const</span> c = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;c.zig&quot;</span>);</span>
+<span class="line" id="L8"></span>
+<span class="line" id="L9"><span class="tok-comment">// access `MainLWLockArray`.</span>
+</span>
+<span class="line" id="L10"><span class="tok-comment">//</span>
+</span>
+<span class="line" id="L11"><span class="tok-comment">// We use a function because the Zig compiler currently complains that it can</span>
+</span>
+<span class="line" id="L12"><span class="tok-comment">// access the ID only at runtime.</span>
+</span>
+<span class="line" id="L13"><span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">mainLock</span>(id: <span class="tok-type">usize</span>) <span class="tok-kw">fn</span> () *c.LWLock {</span>
+<span class="line" id="L14">    <span class="tok-kw">return</span> <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L15">        <span class="tok-kw">fn</span> <span class="tok-fn">call</span>() *c.LWLock {</span>
+<span class="line" id="L16">            <span class="tok-kw">return</span> &amp;c.MainLWLockArray[id].lock;</span>
+<span class="line" id="L17">        }</span>
+<span class="line" id="L18">    }.call;</span>
+<span class="line" id="L19">}</span>
+<span class="line" id="L20"></span>
+<span class="line" id="L21"><span class="tok-comment">// names and IDs takend from lwlocknames.txt</span>
+</span>
+<span class="line" id="L22"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> ShmemIndex = mainLock(<span class="tok-number">1</span>);</span>
+<span class="line" id="L23"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> OidGen = mainLock(<span class="tok-number">2</span>);</span>
+<span class="line" id="L24"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> XidGen = mainLock(<span class="tok-number">3</span>);</span>
+<span class="line" id="L25"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> ProcArray = mainLock(<span class="tok-number">4</span>);</span>
+<span class="line" id="L26"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> SInvalRead = mainLock(<span class="tok-number">5</span>);</span>
+<span class="line" id="L27"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> SInvalWrite = mainLock(<span class="tok-number">6</span>);</span>
+<span class="line" id="L28"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> WALBufMapping = mainLock(<span class="tok-number">7</span>);</span>
+<span class="line" id="L29"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> WALWrite = mainLock(<span class="tok-number">8</span>);</span>
+<span class="line" id="L30"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> ControlFile = mainLock(<span class="tok-number">9</span>);</span>
+<span class="line" id="L31"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> XactSLRU = mainLock(<span class="tok-number">11</span>);</span>
+<span class="line" id="L32"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> SubtransSLRU = mainLock(<span class="tok-number">12</span>);</span>
+<span class="line" id="L33"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> MultiXactGen = mainLock(<span class="tok-number">13</span>);</span>
+<span class="line" id="L34"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> MultiXactOffsetSLRU = mainLock(<span class="tok-number">14</span>);</span>
+<span class="line" id="L35"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> MultiXactMemberSLRU = mainLock(<span class="tok-number">15</span>);</span>
+<span class="line" id="L36"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> RelCacheInit = mainLock(<span class="tok-number">16</span>);</span>
+<span class="line" id="L37"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> CheckpointerComm = mainLock(<span class="tok-number">17</span>);</span>
+<span class="line" id="L38"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> TwoPhaseState = mainLock(<span class="tok-number">18</span>);</span>
+<span class="line" id="L39"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> TablespaceCreate = mainLock(<span class="tok-number">19</span>);</span>
+<span class="line" id="L40"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> BtreeVacuum = mainLock(<span class="tok-number">20</span>);</span>
+<span class="line" id="L41"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> AddinShmemInit = mainLock(<span class="tok-number">21</span>);</span>
+<span class="line" id="L42"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Autovacuum = mainLock(<span class="tok-number">22</span>);</span>
+<span class="line" id="L43"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> AutovacuumSchedule = mainLock(<span class="tok-number">23</span>);</span>
+<span class="line" id="L44"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> SyncScan = mainLock(<span class="tok-number">24</span>);</span>
+<span class="line" id="L45"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> RelationMapping = mainLock(<span class="tok-number">25</span>);</span>
+<span class="line" id="L46"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> NotifySLRU = mainLock(<span class="tok-number">26</span>);</span>
+<span class="line" id="L47"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> NotifyQueue = mainLock(<span class="tok-number">27</span>);</span>
+<span class="line" id="L48"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> SerializableXactHash = mainLock(<span class="tok-number">28</span>);</span>
+<span class="line" id="L49"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> SerializableFinishedList = mainLock(<span class="tok-number">29</span>);</span>
+<span class="line" id="L50"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> SerializablePredicateList = mainLock(<span class="tok-number">30</span>);</span>
+<span class="line" id="L51"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> SerialSLRU = mainLock(<span class="tok-number">31</span>);</span>
+<span class="line" id="L52"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> SyncRep = mainLock(<span class="tok-number">32</span>);</span>
+<span class="line" id="L53"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> BackgroundWorker = mainLock(<span class="tok-number">33</span>);</span>
+<span class="line" id="L54"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> DynamicSharedMemoryControl = mainLock(<span class="tok-number">34</span>);</span>
+<span class="line" id="L55"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> AutoFile = mainLock(<span class="tok-number">35</span>);</span>
+<span class="line" id="L56"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> ReplicationSlotAllocation = mainLock(<span class="tok-number">36</span>);</span>
+<span class="line" id="L57"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> ReplicationSlotControl = mainLock(<span class="tok-number">37</span>);</span>
+<span class="line" id="L58"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> CommitTsSLRU = mainLock(<span class="tok-number">38</span>);</span>
+<span class="line" id="L59"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> CommitTs = mainLock(<span class="tok-number">39</span>);</span>
+<span class="line" id="L60"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> ReplicationOrigin = mainLock(<span class="tok-number">40</span>);</span>
+<span class="line" id="L61"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> MultiXactTruncation = mainLock(<span class="tok-number">41</span>);</span>
+<span class="line" id="L62"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> LogicalRepWorker = mainLock(<span class="tok-number">43</span>);</span>
+<span class="line" id="L63"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> XactTruncation = mainLock(<span class="tok-number">44</span>);</span>
+<span class="line" id="L64"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> WrapLimitsVacuum = mainLock(<span class="tok-number">46</span>);</span>
+<span class="line" id="L65"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> NotifyQueueTail = mainLock(<span class="tok-number">47</span>);</span>
+<span class="line" id="L66"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> WaitEventExtension = mainLock(<span class="tok-number">48</span>);</span>
+<span class="line" id="L67"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> WALSummarizer = mainLock(<span class="tok-number">49</span>);</span>
+<span class="line" id="L68"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> DSMRegistry = mainLock(<span class="tok-number">50</span>);</span>
+<span class="line" id="L69"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> InjectionPoint = mainLock(<span class="tok-number">51</span>);</span>
+<span class="line" id="L70"></span>
+</code></pre></body>
+</html>

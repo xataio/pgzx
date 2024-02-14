@@ -11,6 +11,11 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    // docs step
+    const build_docs = b.addSystemCommand(&[_][]const u8{ "zig", "test", "src/pgzx.zig", "-femit-docs", "-fno-emit-bin" });
+    const docs = b.step("docs", "Generate documentation");
+    docs.dependOn(&build_docs.step);
+
     // Reusable modules
     const pgzx = b.addModule("pgzx", .{
         .root_source_file = .{ .path = "./src/pgzx.zig" },

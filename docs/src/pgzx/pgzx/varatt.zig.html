@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>pgzx/varatt.zig - source view</title>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg==">
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNTMgMTQwIj48ZyBmaWxsPSIjRjdBNDFEIj48Zz48cG9seWdvbiBwb2ludHM9IjQ2LDIyIDI4LDQ0IDE5LDMwIi8+PHBvbHlnb24gcG9pbnRzPSI0NiwyMiAzMywzMyAyOCw0NCAyMiw0NCAyMiw5NSAzMSw5NSAyMCwxMDAgMTIsMTE3IDAsMTE3IDAsMjIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMzEsOTUgMTIsMTE3IDQsMTA2Ii8+PC9nPjxnPjxwb2x5Z29uIHBvaW50cz0iNTYsMjIgNjIsMzYgMzcsNDQiLz48cG9seWdvbiBwb2ludHM9IjU2LDIyIDExMSwyMiAxMTEsNDQgMzcsNDQgNTYsMzIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTE2LDk1IDk3LDExNyA5MCwxMDQiLz48cG9seWdvbiBwb2ludHM9IjExNiw5NSAxMDAsMTA0IDk3LDExNyA0MiwxMTcgNDIsOTUiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTUwLDAgNTIsMTE3IDMsMTQwIDEwMSwyMiIvPjwvZz48Zz48cG9seWdvbiBwb2ludHM9IjE0MSwyMiAxNDAsNDAgMTIyLDQ1Ii8+PHBvbHlnb24gcG9pbnRzPSIxNTMsMjIgMTUzLDExNyAxMDYsMTE3IDEyMCwxMDUgMTI1LDk1IDEzMSw5NSAxMzEsNDUgMTIyLDQ1IDEzMiwzNiAxNDEsMjIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTI1LDk1IDEzMCwxMTAgMTA2LDExNyIvPjwvZz48L2c+PC9zdmc+">
+    <style>
+      body{
+        font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      pre > code {
+        display: block;
+        overflow: auto;
+        line-height: normal;
+        margin: 0em;
+      }
+      .tok-kw {
+          color: #333;
+          font-weight: bold;
+      }
+      .tok-str {
+          color: #d14;
+      }
+      .tok-builtin {
+          color: #005C7A;
+      }
+      .tok-comment {
+          color: #545454;
+          font-style: italic;
+      }
+      .tok-fn {
+          color: #900;
+          font-weight: bold;
+      }
+      .tok-null {
+          color: #005C5C;
+      }
+      .tok-number {
+          color: #005C5C;
+      }
+      .tok-type {
+          color: #458;
+          font-weight: bold;
+      }
+      pre {
+        counter-reset: line;
+      }
+      pre .line:before {
+        counter-increment: line;
+        content: counter(line);
+        display: inline-block;
+        padding-right: 1em;
+        width: 2em;
+        text-align: right;
+        color: #999;
+      }
+      
+      .line {
+        width: 100%;
+        display: inline-block;
+      }
+      .line:target {
+        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        background: #fafafa;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body{
+            background:#222;
+            color: #ccc;
+        }
+        pre > code {
+            color: #ccc;
+            background: #222;
+            border: unset;
+        }
+        .line:target {
+            border-top: 1px solid #444;
+            border-bottom: 1px solid #444;
+            background: #333;
+        }
+        .tok-kw {
+            color: #eee;
+        }
+        .tok-str {
+            color: #2e5;
+        }
+        .tok-builtin {
+            color: #ff894c;
+        }
+        .tok-comment {
+            color: #aa7;
+        }
+        .tok-fn {
+            color: #B1A0F8;
+        }
+        .tok-null {
+            color: #ff8080;
+        }
+        .tok-number {
+            color: #ff8080;
+        }
+        .tok-type {
+            color: #68f;
+        }
+      }
+    </style>
+</head>
+<body>
+<pre><code><span class="line" id="L1"><span class="tok-comment">//! varatt replaces the VA&lt;...&gt; macros from utils/varattr.h that Zig didn't</span></span>
+<span class="line" id="L2"><span class="tok-comment">//! compile correctly.</span></span>
+<span class="line" id="L3"></span>
+<span class="line" id="L4"><span class="tok-kw">const</span> c = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;c.zig&quot;</span>);</span>
+<span class="line" id="L5"></span>
+<span class="line" id="L6"><span class="tok-comment">// WARNING:</span>
+</span>
+<span class="line" id="L7"><span class="tok-comment">// Taken from translated C code and mostly untested.</span>
+</span>
+<span class="line" id="L8"><span class="tok-comment">// The zig compiler will not complain about errors if inline functions are not used.</span>
+</span>
+<span class="line" id="L9"><span class="tok-comment">//</span>
+</span>
+<span class="line" id="L10"><span class="tok-comment">// TODO:</span>
+</span>
+<span class="line" id="L11"><span class="tok-comment">// We do not want to expose these directly, but we must make sure that we test</span>
+</span>
+<span class="line" id="L12"><span class="tok-comment">// all variable conversions to make sure that code actually compiles.</span>
+</span>
+<span class="line" id="L13"></span>
+<span class="line" id="L14"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> VARHDRSZ = c.VARHDRSZ;</span>
+<span class="line" id="L15"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> VARHDRSZ_SHORT = <span class="tok-builtin">@sizeOf</span>(varattrib_1b);</span>
+<span class="line" id="L16"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> VARHDRSZ_EXTERNAL = <span class="tok-builtin">@sizeOf</span>(varattrib_1b_e);</span>
+<span class="line" id="L17"></span>
+<span class="line" id="L18"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> VARLENA_EXTSIZE_BITS = c.VARLENA_EXTSIZE_BITS;</span>
+<span class="line" id="L19"></span>
+<span class="line" id="L20"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> VARTAG_EXPANDED_RO = c.VARTAG_EXPANDED_RO;</span>
+<span class="line" id="L21"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> VARTAG_EXPANDED_RW = c.VARTAG_EXPANDED_RW;</span>
+<span class="line" id="L22"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> VARTAG_INDIRECT = c.VARTAG_INDIRECT;</span>
+<span class="line" id="L23"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> VARTAG_ONDISK = c.VARTAG_ONDISK;</span>
+<span class="line" id="L24"></span>
+<span class="line" id="L25"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> SET_VARSIZE_4B = c.SET_VARSIZE_4B;</span>
+<span class="line" id="L26"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> SET_VARSIZE_1B = c.SET_VARSIZE_1B;</span>
+<span class="line" id="L27"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> SET_VARSIZE_4B_C = c.SET_VARSIZE_4B_C;</span>
+<span class="line" id="L28"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> SET_VARTAG_1B_E = c.SET_VARTAG_1B_E;</span>
+<span class="line" id="L29"></span>
+<span class="line" id="L30"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> varatt_indirect = c.varatt_indirect;</span>
+<span class="line" id="L31"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> varatt_expanded = c.varatt_expanded;</span>
+<span class="line" id="L32"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> varatt_external = c.varatt_external;</span>
+<span class="line" id="L33"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> varattrib_1b = c.varattrib_1b;</span>
+<span class="line" id="L34"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> varattrib_4b = c.varattrib_4b;</span>
+<span class="line" id="L35"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> varattrib_1b_e = c.varattrib_1b_e;</span>
+<span class="line" id="L36"></span>
+<span class="line" id="L37"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> VARLENA_EXTSIZE_MASK = (<span class="tok-builtin">@as</span>(<span class="tok-type">c_uint</span>, <span class="tok-number">1</span>) &lt;&lt; VARLENA_EXTSIZE_BITS) - <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">1</span>);</span>
+<span class="line" id="L38"></span>
+<span class="line" id="L39"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> @&quot;true&quot; = <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">1</span>);</span>
+<span class="line" id="L40"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> @&quot;false&quot; = <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0</span>);</span>
+<span class="line" id="L41"></span>
+<span class="line" id="L42"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARTAG_IS_EXPANDED</span>(tag: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>((tag &amp; ~<span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">1</span>)) == VARTAG_EXPANDED_RO) {</span>
+<span class="line" id="L43">    <span class="tok-kw">return</span> (tag &amp; ~<span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">1</span>)) == VARTAG_EXPANDED_RO;</span>
+<span class="line" id="L44">}</span>
+<span class="line" id="L45"></span>
+<span class="line" id="L46"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARTAG_SIZE</span>(tag: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(<span class="tok-kw">if</span> (tag == VARTAG_INDIRECT) <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.sizeof(varatt_indirect) <span class="tok-kw">else</span> <span class="tok-kw">if</span> (VARTAG_IS_EXPANDED(tag)) <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.sizeof(varatt_expanded) <span class="tok-kw">else</span> <span class="tok-kw">if</span> (tag == VARTAG_ONDISK) <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.sizeof(varatt_external) <span class="tok-kw">else</span> blk_2: {</span>
+<span class="line" id="L47">    <span class="tok-kw">break</span> :blk_2 <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0</span>);</span>
+<span class="line" id="L48">}) {</span>
+<span class="line" id="L49">    <span class="tok-kw">return</span> <span class="tok-kw">if</span> (tag == VARTAG_INDIRECT) <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.sizeof(varatt_indirect) <span class="tok-kw">else</span> <span class="tok-kw">if</span> (VARTAG_IS_EXPANDED(tag)) <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.sizeof(varatt_expanded) <span class="tok-kw">else</span> <span class="tok-kw">if</span> (tag == VARTAG_ONDISK) <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.sizeof(varatt_external) <span class="tok-kw">else</span> blk_2: {</span>
+<span class="line" id="L50">        <span class="tok-kw">break</span> :blk_2 <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0</span>);</span>
+<span class="line" id="L51">    };</span>
+<span class="line" id="L52">}</span>
+<span class="line" id="L53"></span>
+<span class="line" id="L54"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARATT_IS_4B</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>((<span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_1b, PTR).*.va_header &amp; <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0x01</span>)) == <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0x00</span>)) {</span>
+<span class="line" id="L55">    <span class="tok-kw">return</span> (<span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_1b, PTR).*.va_header &amp; <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0x01</span>)) == <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0x00</span>);</span>
+<span class="line" id="L56">}</span>
+<span class="line" id="L57"></span>
+<span class="line" id="L58"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARATT_IS_4B_U</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>((<span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_1b, PTR).*.va_header &amp; <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0x03</span>)) == <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0x00</span>)) {</span>
+<span class="line" id="L59">    <span class="tok-kw">return</span> (<span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_1b, PTR).*.va_header &amp; <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0x03</span>)) == <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0x00</span>);</span>
+<span class="line" id="L60">}</span>
+<span class="line" id="L61"></span>
+<span class="line" id="L62"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARATT_IS_4B_C</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>((<span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_1b, PTR).*.va_header &amp; <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0x03</span>)) == <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0x02</span>)) {</span>
+<span class="line" id="L63">    <span class="tok-kw">return</span> (<span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_1b, PTR).*.va_header &amp; <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0x03</span>)) == <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0x02</span>);</span>
+<span class="line" id="L64">}</span>
+<span class="line" id="L65"></span>
+<span class="line" id="L66"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARATT_IS_1B</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>((<span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_1b, PTR).*.va_header &amp; <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0x01</span>)) == <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0x01</span>)) {</span>
+<span class="line" id="L67">    <span class="tok-kw">return</span> (<span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_1b, PTR).*.va_header &amp; <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0x01</span>)) == <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0x01</span>);</span>
+<span class="line" id="L68">}</span>
+<span class="line" id="L69"></span>
+<span class="line" id="L70"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARATT_IS_1B_E</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(<span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_1b, PTR).*.va_header == <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0x01</span>)) {</span>
+<span class="line" id="L71">    <span class="tok-kw">return</span> <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_1b, PTR).*.va_header == <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0x01</span>);</span>
+<span class="line" id="L72">}</span>
+<span class="line" id="L73"></span>
+<span class="line" id="L74"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARATT_NOT_PAD_BYTE</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(<span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]c.uint8, PTR).* != <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0</span>)) {</span>
+<span class="line" id="L75">    <span class="tok-kw">return</span> <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]c.uint8, PTR).* != <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0</span>);</span>
+<span class="line" id="L76">}</span>
+<span class="line" id="L77"></span>
+<span class="line" id="L78"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARSIZE_4B</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>((<span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_4b, PTR).*.va_4byte.va_header &gt;&gt; <span class="tok-builtin">@as</span>(c.uint32, <span class="tok-number">2</span>)) &amp; <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.promoteIntLiteral(c.uint32, <span class="tok-number">0x3FFFFFFF</span>, .hex)) {</span>
+<span class="line" id="L79">    _ = &amp;PTR;</span>
+<span class="line" id="L80">    <span class="tok-kw">return</span> (<span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_4b, PTR).*.va_4byte.va_header &gt;&gt; <span class="tok-builtin">@as</span>(c.uint32, <span class="tok-number">2</span>)) &amp; <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.promoteIntLiteral(c.uint32, <span class="tok-number">0x3FFFFFFF</span>, .hex);</span>
+<span class="line" id="L81">}</span>
+<span class="line" id="L82"></span>
+<span class="line" id="L83"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARSIZE_1B</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>((<span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_1b, PTR).*.va_header &gt;&gt; <span class="tok-builtin">@as</span>(c.uint32, <span class="tok-number">1</span>)) &amp; <span class="tok-builtin">@as</span>(c.uint32, <span class="tok-number">0x7F</span>)) {</span>
+<span class="line" id="L84">    <span class="tok-kw">return</span> (<span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_1b, PTR).*.va_header &gt;&gt; <span class="tok-builtin">@as</span>(c.uint32, <span class="tok-number">1</span>)) &amp; <span class="tok-builtin">@as</span>(c.uint32, <span class="tok-number">0x7F</span>);</span>
+<span class="line" id="L85">}</span>
+<span class="line" id="L86"></span>
+<span class="line" id="L87"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARTAG_1B_E</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(<span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_1b_e, PTR).*.va_tag) {</span>
+<span class="line" id="L88">    <span class="tok-kw">return</span> <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_1b_e, PTR).*.va_tag;</span>
+<span class="line" id="L89">}</span>
+<span class="line" id="L90"></span>
+<span class="line" id="L91"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARDATA_4B</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(<span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_4b, PTR).*.va_4byte.va_data()) {</span>
+<span class="line" id="L92">    <span class="tok-kw">return</span> <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_4b, PTR).*.va_4byte.va_data();</span>
+<span class="line" id="L93">}</span>
+<span class="line" id="L94"></span>
+<span class="line" id="L95"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARDATA_4B_C</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(<span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_4b, PTR).*.va_compressed.va_data) {</span>
+<span class="line" id="L96">    <span class="tok-kw">return</span> <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_4b, PTR).*.va_compressed.va_data;</span>
+<span class="line" id="L97">}</span>
+<span class="line" id="L98"></span>
+<span class="line" id="L99"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARDATA_1B</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(<span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_1b, PTR).*.va_data()) {</span>
+<span class="line" id="L100">    <span class="tok-kw">return</span> <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_1b, PTR).*.va_data();</span>
+<span class="line" id="L101">}</span>
+<span class="line" id="L102"></span>
+<span class="line" id="L103"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARDATA_1B_E</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(<span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_1b_e, PTR).*.va_data()) {</span>
+<span class="line" id="L104">    <span class="tok-kw">return</span> <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_1b_e, PTR).*.va_data;</span>
+<span class="line" id="L105">}</span>
+<span class="line" id="L106"></span>
+<span class="line" id="L107"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> VARATT_SHORT_MAX = <span class="tok-builtin">@as</span>(<span class="tok-type">c_int</span>, <span class="tok-number">0x7F</span>);</span>
+<span class="line" id="L108"></span>
+<span class="line" id="L109"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARATT_CAN_MAKE_SHORT</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>((VARATT_IS_4B_U(PTR) != <span class="tok-number">0</span>) <span class="tok-kw">and</span> (((VARSIZE(PTR) - VARHDRSZ) + VARHDRSZ_SHORT) &lt;= VARATT_SHORT_MAX)) {</span>
+<span class="line" id="L110">    <span class="tok-kw">return</span> (VARATT_IS_4B_U(PTR) != <span class="tok-number">0</span>) <span class="tok-kw">and</span> (((VARSIZE(PTR) - VARHDRSZ) + VARHDRSZ_SHORT) &lt;= VARATT_SHORT_MAX);</span>
+<span class="line" id="L111">}</span>
+<span class="line" id="L112"></span>
+<span class="line" id="L113"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARATT_CONVERTED_SHORT_SIZE</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>((VARSIZE(PTR) - VARHDRSZ) + VARHDRSZ_SHORT) {</span>
+<span class="line" id="L114">    <span class="tok-kw">return</span> (VARSIZE(PTR) - VARHDRSZ) + VARHDRSZ_SHORT;</span>
+<span class="line" id="L115">}</span>
+<span class="line" id="L116"></span>
+<span class="line" id="L117"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARDATA</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(VARDATA_4B(PTR)) {</span>
+<span class="line" id="L118">    <span class="tok-kw">return</span> VARDATA_4B(PTR);</span>
+<span class="line" id="L119">}</span>
+<span class="line" id="L120"></span>
+<span class="line" id="L121"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARSIZE</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(VARSIZE_4B(PTR)) {</span>
+<span class="line" id="L122">    <span class="tok-kw">return</span> VARSIZE_4B(PTR);</span>
+<span class="line" id="L123">}</span>
+<span class="line" id="L124"></span>
+<span class="line" id="L125"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARSIZE_SHORT</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(VARSIZE_1B(PTR)) {</span>
+<span class="line" id="L126">    <span class="tok-kw">return</span> VARSIZE_1B(PTR);</span>
+<span class="line" id="L127">}</span>
+<span class="line" id="L128"></span>
+<span class="line" id="L129"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARDATA_SHORT</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(VARDATA_1B(PTR)) {</span>
+<span class="line" id="L130">    <span class="tok-kw">return</span> VARDATA_1B(PTR);</span>
+<span class="line" id="L131">}</span>
+<span class="line" id="L132"></span>
+<span class="line" id="L133"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARTAG_EXTERNAL</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(VARTAG_1B_E(PTR)) {</span>
+<span class="line" id="L134">    <span class="tok-kw">return</span> VARTAG_1B_E(PTR);</span>
+<span class="line" id="L135">}</span>
+<span class="line" id="L136"></span>
+<span class="line" id="L137"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARSIZE_EXTERNAL</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(VARHDRSZ_EXTERNAL + VARTAG_SIZE(VARTAG_EXTERNAL(PTR))) {</span>
+<span class="line" id="L138">    <span class="tok-kw">return</span> VARHDRSZ_EXTERNAL + VARTAG_SIZE(VARTAG_EXTERNAL(PTR));</span>
+<span class="line" id="L139">}</span>
+<span class="line" id="L140"></span>
+<span class="line" id="L141"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARDATA_EXTERNAL</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(VARDATA_1B_E(PTR)) {</span>
+<span class="line" id="L142">    <span class="tok-kw">return</span> VARDATA_1B_E(PTR);</span>
+<span class="line" id="L143">}</span>
+<span class="line" id="L144"></span>
+<span class="line" id="L145"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARATT_IS_COMPRESSED</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(VARATT_IS_4B_C(PTR)) {</span>
+<span class="line" id="L146">    <span class="tok-kw">return</span> VARATT_IS_4B_C(PTR);</span>
+<span class="line" id="L147">}</span>
+<span class="line" id="L148"></span>
+<span class="line" id="L149"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARATT_IS_EXTERNAL</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(VARATT_IS_1B_E(PTR)) {</span>
+<span class="line" id="L150">    <span class="tok-kw">return</span> VARATT_IS_1B_E(PTR);</span>
+<span class="line" id="L151">}</span>
+<span class="line" id="L152"></span>
+<span class="line" id="L153"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARATT_IS_EXTERNAL_ONDISK</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>((VARATT_IS_EXTERNAL(PTR) != <span class="tok-number">0</span>) <span class="tok-kw">and</span> (VARTAG_EXTERNAL(PTR) == VARTAG_ONDISK)) {</span>
+<span class="line" id="L154">    <span class="tok-kw">return</span> (VARATT_IS_EXTERNAL(PTR) != <span class="tok-number">0</span>) <span class="tok-kw">and</span> (VARTAG_EXTERNAL(PTR) == VARTAG_ONDISK);</span>
+<span class="line" id="L155">}</span>
+<span class="line" id="L156"></span>
+<span class="line" id="L157"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARATT_IS_EXTERNAL_INDIRECT</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>((VARATT_IS_EXTERNAL(PTR) != <span class="tok-number">0</span>) <span class="tok-kw">and</span> (VARTAG_EXTERNAL(PTR) == VARTAG_INDIRECT)) {</span>
+<span class="line" id="L158">    <span class="tok-kw">return</span> (VARATT_IS_EXTERNAL(PTR) != <span class="tok-number">0</span>) <span class="tok-kw">and</span> (VARTAG_EXTERNAL(PTR) == VARTAG_INDIRECT);</span>
+<span class="line" id="L159">}</span>
+<span class="line" id="L160"></span>
+<span class="line" id="L161"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARATT_IS_EXTERNAL_EXPANDED_RO</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>((VARATT_IS_EXTERNAL(PTR) != <span class="tok-number">0</span>) <span class="tok-kw">and</span> (VARTAG_EXTERNAL(PTR) == VARTAG_EXPANDED_RO)) {</span>
+<span class="line" id="L162">    <span class="tok-kw">return</span> (VARATT_IS_EXTERNAL(PTR) != <span class="tok-number">0</span>) <span class="tok-kw">and</span> (VARTAG_EXTERNAL(PTR) == VARTAG_EXPANDED_RO);</span>
+<span class="line" id="L163">}</span>
+<span class="line" id="L164"></span>
+<span class="line" id="L165"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARATT_IS_EXTERNAL_EXPANDED_RW</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>((VARATT_IS_EXTERNAL(PTR) != <span class="tok-number">0</span>) <span class="tok-kw">and</span> (VARTAG_EXTERNAL(PTR) == VARTAG_EXPANDED_RW)) {</span>
+<span class="line" id="L166">    <span class="tok-kw">return</span> (VARATT_IS_EXTERNAL(PTR) != <span class="tok-number">0</span>) <span class="tok-kw">and</span> (VARTAG_EXTERNAL(PTR) == VARTAG_EXPANDED_RW);</span>
+<span class="line" id="L167">}</span>
+<span class="line" id="L168"></span>
+<span class="line" id="L169"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARATT_IS_EXTERNAL_EXPANDED</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>((VARATT_IS_EXTERNAL(PTR) != <span class="tok-number">0</span>) <span class="tok-kw">and</span> (VARTAG_IS_EXPANDED(VARTAG_EXTERNAL(PTR)) != <span class="tok-number">0</span>)) {</span>
+<span class="line" id="L170">    <span class="tok-kw">return</span> (VARATT_IS_EXTERNAL(PTR) != <span class="tok-number">0</span>) <span class="tok-kw">and</span> (VARTAG_IS_EXPANDED(VARTAG_EXTERNAL(PTR)) != <span class="tok-number">0</span>);</span>
+<span class="line" id="L171">}</span>
+<span class="line" id="L172"></span>
+<span class="line" id="L173"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARATT_IS_EXTERNAL_NON_EXPANDED</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>((VARATT_IS_EXTERNAL(PTR) != <span class="tok-number">0</span>) <span class="tok-kw">and</span> !(VARTAG_IS_EXPANDED(VARTAG_EXTERNAL(PTR)) != <span class="tok-number">0</span>)) {</span>
+<span class="line" id="L174">    <span class="tok-kw">return</span> (VARATT_IS_EXTERNAL(PTR) != <span class="tok-number">0</span>) <span class="tok-kw">and</span> !(VARTAG_IS_EXPANDED(VARTAG_EXTERNAL(PTR)) != <span class="tok-number">0</span>);</span>
+<span class="line" id="L175">}</span>
+<span class="line" id="L176"></span>
+<span class="line" id="L177"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARATT_IS_SHORT</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(VARATT_IS_1B(PTR)) {</span>
+<span class="line" id="L178">    <span class="tok-kw">return</span> VARATT_IS_1B(PTR);</span>
+<span class="line" id="L179">}</span>
+<span class="line" id="L180"></span>
+<span class="line" id="L181"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARATT_IS_EXTENDED</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(!(VARATT_IS_4B_U(PTR) != <span class="tok-number">0</span>)) {</span>
+<span class="line" id="L182">    <span class="tok-kw">return</span> !(VARATT_IS_4B_U(PTR) != <span class="tok-number">0</span>);</span>
+<span class="line" id="L183">}</span>
+<span class="line" id="L184"></span>
+<span class="line" id="L185"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">SET_VARSIZE</span>(PTR: <span class="tok-kw">anytype</span>, len: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(SET_VARSIZE_4B(PTR, len)) {</span>
+<span class="line" id="L186">    <span class="tok-kw">return</span> SET_VARSIZE_4B(PTR, len);</span>
+<span class="line" id="L187">}</span>
+<span class="line" id="L188"></span>
+<span class="line" id="L189"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">SET_VARSIZE_SHORT</span>(PTR: <span class="tok-kw">anytype</span>, len: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(SET_VARSIZE_1B(PTR, len)) {</span>
+<span class="line" id="L190">    <span class="tok-kw">return</span> SET_VARSIZE_1B(PTR, len);</span>
+<span class="line" id="L191">}</span>
+<span class="line" id="L192"></span>
+<span class="line" id="L193"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">SET_VARSIZE_COMPRESSED</span>(PTR: <span class="tok-kw">anytype</span>, len: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(SET_VARSIZE_4B_C(PTR, len)) {</span>
+<span class="line" id="L194">    <span class="tok-kw">return</span> SET_VARSIZE_4B_C(PTR, len);</span>
+<span class="line" id="L195">}</span>
+<span class="line" id="L196"></span>
+<span class="line" id="L197"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">SET_VARTAG_EXTERNAL</span>(PTR: <span class="tok-kw">anytype</span>, tag: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(SET_VARTAG_1B_E(PTR, tag)) {</span>
+<span class="line" id="L198">    <span class="tok-kw">return</span> SET_VARTAG_1B_E(PTR, tag);</span>
+<span class="line" id="L199">}</span>
+<span class="line" id="L200"></span>
+<span class="line" id="L201"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARSIZE_ANY</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(<span class="tok-kw">if</span> (VARATT_IS_1B_E(PTR)) VARSIZE_EXTERNAL(PTR) <span class="tok-kw">else</span> <span class="tok-kw">if</span> (VARATT_IS_1B(PTR)) VARSIZE_1B(PTR) <span class="tok-kw">else</span> VARSIZE_4B(PTR)) {</span>
+<span class="line" id="L202">    <span class="tok-kw">return</span> <span class="tok-kw">if</span> (VARATT_IS_1B_E(PTR)) VARSIZE_EXTERNAL(PTR) <span class="tok-kw">else</span> <span class="tok-kw">if</span> (VARATT_IS_1B(PTR)) VARSIZE_1B(PTR) <span class="tok-kw">else</span> VARSIZE_4B(PTR);</span>
+<span class="line" id="L203">}</span>
+<span class="line" id="L204"></span>
+<span class="line" id="L205"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARSIZE_ANY_EXHDR</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(<span class="tok-kw">if</span> (VARATT_IS_1B_E(PTR)) VARSIZE_EXTERNAL(PTR) - VARHDRSZ_EXTERNAL <span class="tok-kw">else</span> <span class="tok-kw">if</span> (VARATT_IS_1B(PTR)) VARSIZE_1B(PTR) - VARHDRSZ_SHORT <span class="tok-kw">else</span> VARSIZE_4B(PTR) - VARHDRSZ) {</span>
+<span class="line" id="L206">    _ = &amp;PTR;</span>
+<span class="line" id="L207">    <span class="tok-kw">return</span> <span class="tok-kw">if</span> (VARATT_IS_1B_E(PTR)) VARSIZE_EXTERNAL(PTR) - VARHDRSZ_EXTERNAL <span class="tok-kw">else</span> <span class="tok-kw">if</span> (VARATT_IS_1B(PTR)) VARSIZE_1B(PTR) - VARHDRSZ_SHORT <span class="tok-kw">else</span> VARSIZE_4B(PTR) - VARHDRSZ;</span>
+<span class="line" id="L208">}</span>
+<span class="line" id="L209"></span>
+<span class="line" id="L210"><span class="tok-comment">// pub inline fn VARSIZE_ANY_EXHDR(PTR: anytype) @TypeOf(if (VARATT_IS_1B_E(PTR)) VARSIZE_EXTERNAL(PTR) - VARHDRSZ_EXTERNAL else if (VARATT_IS_1B(PTR)) VARSIZE_1B(PTR) - VARHDRSZ_SHORT else VARSIZE_4B(PTR) - VARHDRSZ) {</span>
+</span>
+<span class="line" id="L211"><span class="tok-comment">//     return if (VARATT_IS_1B_E(PTR)) VARSIZE_EXTERNAL(PTR) - VARHDRSZ_EXTERNAL else if (VARATT_IS_1B(PTR)) VARSIZE_1B(PTR) - VARHDRSZ_SHORT else VARSIZE_4B(PTR) - VARHDRSZ;</span>
+</span>
+<span class="line" id="L212"><span class="tok-comment">// }</span>
+</span>
+<span class="line" id="L213"></span>
+<span class="line" id="L214"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARDATA_ANY</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(<span class="tok-kw">if</span> (VARATT_IS_1B(PTR)) VARDATA_1B(PTR) <span class="tok-kw">else</span> VARDATA_4B(PTR)) {</span>
+<span class="line" id="L215">    <span class="tok-kw">return</span> <span class="tok-kw">if</span> (VARATT_IS_1B(PTR)) VARDATA_1B(PTR) <span class="tok-kw">else</span> VARDATA_4B(PTR);</span>
+<span class="line" id="L216">}</span>
+<span class="line" id="L217"></span>
+<span class="line" id="L218"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARDATA_COMPRESSED_GET_EXTSIZE</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(<span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_4b, PTR).*.va_compressed.va_tcinfo &amp; VARLENA_EXTSIZE_MASK) {</span>
+<span class="line" id="L219">    <span class="tok-kw">return</span> <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_4b, PTR).*.va_compressed.va_tcinfo &amp; VARLENA_EXTSIZE_MASK;</span>
+<span class="line" id="L220">}</span>
+<span class="line" id="L221"></span>
+<span class="line" id="L222"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARDATA_COMPRESSED_GET_COMPRESS_METHOD</span>(PTR: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(<span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_4b, PTR).*.va_compressed.va_tcinfo &gt;&gt; VARLENA_EXTSIZE_BITS) {</span>
+<span class="line" id="L223">    <span class="tok-kw">return</span> <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>).zig.c_translation.cast([*c]varattrib_4b, PTR).*.va_compressed.va_tcinfo &gt;&gt; VARLENA_EXTSIZE_BITS;</span>
+<span class="line" id="L224">}</span>
+<span class="line" id="L225"></span>
+<span class="line" id="L226"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARATT_EXTERNAL_GET_EXTSIZE</span>(toast_pointer: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(toast_pointer.va_extinfo &amp; VARLENA_EXTSIZE_MASK) {</span>
+<span class="line" id="L227">    <span class="tok-kw">return</span> toast_pointer.va_extinfo &amp; VARLENA_EXTSIZE_MASK;</span>
+<span class="line" id="L228">}</span>
+<span class="line" id="L229"></span>
+<span class="line" id="L230"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARATT_EXTERNAL_GET_COMPRESS_METHOD</span>(toast_pointer: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(toast_pointer.va_extinfo &gt;&gt; VARLENA_EXTSIZE_BITS) {</span>
+<span class="line" id="L231">    <span class="tok-kw">return</span> toast_pointer.va_extinfo &gt;&gt; VARLENA_EXTSIZE_BITS;</span>
+<span class="line" id="L232">}</span>
+<span class="line" id="L233"></span>
+<span class="line" id="L234"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">VARATT_EXTERNAL_IS_COMPRESSED</span>(toast_pointer: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(VARATT_EXTERNAL_GET_EXTSIZE(toast_pointer) &lt; (toast_pointer.va_rawsize - VARHDRSZ)) {</span>
+<span class="line" id="L235">    <span class="tok-kw">return</span> VARATT_EXTERNAL_GET_EXTSIZE(toast_pointer) &lt; (toast_pointer.va_rawsize - VARHDRSZ);</span>
+<span class="line" id="L236">}</span>
+<span class="line" id="L237"></span>
+</code></pre></body>
+</html>
