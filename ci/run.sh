@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#set -e
-#set -o pipefail
+set -e
+set -o pipefail
 
 echo "Test test"
 echo "Build and install extension"
@@ -19,12 +19,7 @@ echo "Configure postgresql.conf"
 echo "shared_preload_libraries = 'pg_audit_zig'" >> $PGDATA/postgresql.conf
 
 echo "Start PostgreSQL"
-pgstart || {
-  echo "Failed to start PostgreSQL"
-  echo "Printing server log:"
-  cat $cluster_dir/log/server.log
-  exit 1
-}
+pgstart
 trap pgstop TERM INT EXIT
 
 echo "Print server log"
