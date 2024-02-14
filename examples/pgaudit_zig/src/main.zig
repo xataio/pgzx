@@ -69,7 +69,7 @@ const settings = struct {
 
 pub export fn _PG_init() void {
     // Setup logging. We want to see all messages in the client session ;)
-    pgzx.elog.options.postgresLogFnLeven = pg.NOTICE;
+    pgzx.elog.options.postgresLogFnLeven = pg.LOG;
 
     prev_ExecutorStart_hook = pg.ExecutorStart_hook;
     pg.ExecutorStart_hook = pgaudit_zig_ExecutorStart_hook;
