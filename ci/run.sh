@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #set -e
-set -o pipefail
+#set -o pipefail
 
 echo "Build and install extension"
 
@@ -26,6 +26,7 @@ pgstart || {
 }
 trap pgstop TERM INT EXIT
 
+echo "Print server log"
 cat $cluster_dir/log/server.log
 
 echo "Create extension"
