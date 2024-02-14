@@ -1,0 +1,36 @@
+---
+name: Check
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*.*.*"
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check_project:
+    name: Check
+    runs-on: ubuntu-22.04
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - name: Init Nix environment
+        run:
+          nix develop --command -- echo "Done"
+      - name: Run Commit checks
+        run: |
+          nix develop --command -- pre-commit run --all-files --color always
+      - name: Create local postgres installation
+        run: |
+          sudo chown $USER /run/postgresql
+          nix develop --command -- ./ci/setup.sh
+      - name: Build and run tests
+        run: |
+          nix develop --command -- ./ci/run.sh
