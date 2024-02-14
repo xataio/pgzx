@@ -46,6 +46,7 @@ in {
 
       pkgs.postgresql_16_jit
       pkgs.openssl
+      pkgs.gss
 
       pkgs.zigpkgs.master
       pkgs.zls
