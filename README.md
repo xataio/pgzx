@@ -137,4 +137,10 @@ INFO:  Target char len: 1
 
 The sample extension also supports pg_regress bases testing:
 
-TODO: fix me currently broken with the local setup. 
+```
+$ zig build pg_regress --verbose
+# using postmaster on Unix socket, port 5432
+ok 1         - char_count_test                            10 ms
+1..1
+# All 1 tests passed.
+```

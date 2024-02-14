@@ -32,7 +32,7 @@ pub fn build(b: *std.Build) void {
 
     // Configure pg_regress based testing for the current extension.
     const extest = pgbuild.addRegress(.{
-        .db_user = "pgdc",
+        .db_user = "postgres",
         .db_port = 5432,
         .root_dir = ".",
         .scripts = &[_][]const u8{
