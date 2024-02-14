@@ -29,6 +29,7 @@ jobs:
           nix develop --command -- pre-commit run --all-files --color always
       - name: Create local postgres installation
         run: |
+          sudo chown $USER /run/postgresql
           nix develop --command -- ./ci/setup.sh
       - name: Build and run tests
         run: |
