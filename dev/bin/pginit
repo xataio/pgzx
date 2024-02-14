@@ -31,8 +31,10 @@ mkdir -p $log_dir
 pg_ctl initdb -D $data_dir -o "--encoding=UTF8"
 
 # create database user
-pg_ctl -D $data_dir -l $log_file start || {
+date
+pg_ctl -t 60 -D $data_dir -l $log_file start || {
   echo "Failed to start PostgreSQL"
+  date
   cat $log_file
   exit 1
 }
