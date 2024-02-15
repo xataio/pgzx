@@ -21,7 +21,7 @@ The following sample extensions (ordered from simple to complex) show how to use
 
 ## Docs
 
-The reference documentation is available at [docs/](docs/).
+The reference documentation is available at [docs/](https://xataio.github.io/pgzx/).
 
 We recommend checking the examples in the section above to understand how to use pgzx. The next sections contain a high-level walkthrough of the most important utilities and how they relate to the Postgres internals.
 
@@ -29,7 +29,7 @@ We recommend checking the examples in the section above to understand how to use
 
 Postgres [error reporting functions](https://www.postgresql.org/docs/current/error-message-reporting.html) are used to report errors and log messages. They have usual logging functionality like log levels and formatting, but also Postgres specific functionality, like error reports that can be thrown and caught like exceptions. `pgzx` provides a wrapper around these functions that makes it easier to use from Zig.
 
-Simple logging can be done with functions like [Debug](), [Info](), [Notice](), [Warning](), for example:
+Simple logging can be done with functions like [Log][docs_Log], [Info][docs_Info], [Notice][docs_Notice], [Warning][docs_Warning], for example:
 
 ```zig
     elog.Info(@src(), "input_text: {s}\n", .{input_text});
@@ -228,3 +228,8 @@ ok 1         - char_count_test                            10 ms
 1..1
 # All 1 tests passed.
 ```
+
+[docs_Log]: https://xataio.github.io/pgzx/#A;pgzx:elog.Log
+[docs_Info]: https://xataio.github.io/pgzx/#A;pgzx:elog.Info
+[docs_Notice]: https://xataio.github.io/pgzx/#A;pgzx:elog.Notice
+[docs_Warning]: https://xataio.github.io/pgzx/#A;pgzx:elog.Warning
