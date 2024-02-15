@@ -21,7 +21,7 @@ The following sample extensions (ordered from simple to complex) show how to use
 
 ## Docs
 
-The reference documentation is available at [docs/](https://xataio.github.io/pgzx/).
+The reference documentation is available at [here](https://xataio.github.io/pgzx/).
 
 We recommend checking the examples in the section above to understand how to use pgzx. The next sections contain a high-level walkthrough of the most important utilities and how they relate to the Postgres internals.
 
@@ -37,7 +37,7 @@ Simple logging can be done with functions like [Log][docs_Log], [Info][docs_Info
 
 Note the `@src()` built-in which provides the file location. This will be stored in the error report.
 
-To report errors during execution, use the [Error]() or [ErrorThrow]() functions. The latter will throw an error report, which can be caught by the Postgres error handling system (explained) below). Example with `Error`:
+To report errors during execution, use the [Error][docs_Error] or [ErrorThrow][docs_ErrorThrow] functions. The latter will throw an error report, which can be caught by the Postgres error handling system (explained) below). Example with `Error`:
 
 ```zig
     if (target_char.len > 1) {
@@ -59,9 +59,9 @@ pgzx offers an alternative Zig implementation for the PG_TRY family of macros. T
     }
 ```
 
-The above code pattern makes sure that we catch any errors raised by Postgres functions and return them as Zig errors. This way, we make sure that all the `defer` and `errdefer` code in the caller(s) is executed as expected. For more details, see the documentation for the [pgzx.err.Context]() struct.
+The above code pattern makes sure that we catch any errors raised by Postgres functions and return them as Zig errors. This way, we make sure that all the `defer` and `errdefer` code in the caller(s) is executed as expected. For more details, see the documentation for the [pgzx.err.Context][docs_Context] struct.
 
-The above code pattern is implemented in a [wrap]() convenience function which takes a function and its arguments, and executes it in a block like the above. For example:
+The above code pattern is implemented in a [wrap][docs_wrap] convenience function which takes a function and its arguments, and executes it in a block like the above. For example:
 
 ```zig
     try pgzx.err.wrap(myFunction, .{arg1, arg2});
@@ -71,7 +71,7 @@ The above code pattern is implemented in a [wrap]() convenience function which t
 
 Postgres uses a [memory context system](https://github.com/postgres/postgres/blob/master/src/backend/utils/mmgr/README) to manage memory. Memory allocated in a context can be freed all at once (for example, when a query execution is finished), which simplifies memory management significantly, because you only need to track contexts, not individual allocations. Contexts are also hierarchical, so you can create a context that is a child of another context, and when the parent context is freed, all children are freed as well.
 
-pgzx offers custom wrapper Zig allocators that use Postgres' memory context system. The [pgzx.mem.createAllocSetContext]() function creates an [pgzx.mem.MemoryContextAllocator]() that you can use as a Zig allocator. For example:
+pgzx offers custom wrapper Zig allocators that use Postgres' memory context system. The [pgzx.mem.createAllocSetContext][docs_createAllocSetContext] function creates an [pgzx.mem.MemoryContextAllocator][docs_MemoryContextAllocator] that you can use as a Zig allocator. For example:
 
 ```zig
     var memctx = try pgzx.mem.createAllocSetContext("zig_context", .{ .parent = pg.CurrentMemoryContext });
@@ -91,7 +91,7 @@ It's also possible to register a callback for when the memory context is destroy
 
 ### Function manager
 
-pgzx has utilities for registering functions, written Zig, that are then available to call over SQL. This is done, for example, via the [PG_FUNCTION_V1]() function:
+pgzx has utilities for registering functions, written Zig, that are then available to call over SQL. This is done, for example, via the [PG_FUNCTION_V1][docs_PG_FUNCTION_V1] function:
 
 ```
 comptime {
@@ -233,3 +233,10 @@ ok 1         - char_count_test                            10 ms
 [docs_Info]: https://xataio.github.io/pgzx/#A;pgzx:elog.Info
 [docs_Notice]: https://xataio.github.io/pgzx/#A;pgzx:elog.Notice
 [docs_Warning]: https://xataio.github.io/pgzx/#A;pgzx:elog.Warning
+[docs_Error]: https://xataio.github.io/pgzx/#A;pgzx:elog.Error
+[docs_ErrorThrow]: https://xataio.github.io/pgzx/#A;pgzx:elog.ErrorThrow
+[docs_Context]: https://xataio.github.io/pgzx/#A;pgzx:err.Context
+[docs_wrap]: https://xataio.github.io/pgzx/#A;pgzx:err.wrap
+[docs_createAllocSetContext]: https://xataio.github.io/pgzx/#A;pgzx:mem.createAllocSetContext
+[docs_MemoryContextAllocator]: https://xataio.github.io/pgzx/#A;pgzx:mem.MemoryContextAllocator
+[docs_PG_FUNCTION_V1]: https://xataio.github.io/pgzx/#A;pgzx:PG_FUNCTION_V1
