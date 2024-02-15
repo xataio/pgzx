@@ -144,9 +144,11 @@ pgzx is currently under heavy development by the [Xata](https://xata.io) team. I
 We use Nix to provide a local development shell. But you should be able to run
 the following scripts without the development shell.
 
-TODO: test the scripts without development shell
+We would recommend the [nix-installer from DeterminateSystems](https://github.com/DeterminateSystems/nix-installer). The
+installer enables Nix Flakes (used by this project) out of the box and also
+provides an uninstaller.
 
-TODO: recommend nix installer
+TODO: test the scripts without development shell
 
 TODO: support to create develpment shell in docker container
 
