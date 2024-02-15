@@ -48,11 +48,9 @@ zig build -freference-trace -p $PG_HOME
 
 This will build the extension and install the extension in the Postgres instance.
 
-Then, start and connect to Postgres:
+Then, connect to the Postgres instance:
 
 ```sh
-pgstart
-
 psql -U postgres
 ```
 

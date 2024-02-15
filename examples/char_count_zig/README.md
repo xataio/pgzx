@@ -27,19 +27,16 @@ zig build -freference-trace -p $PG_HOME
 
 This will build the extension and install the extension in the Postgres instance.
 
-Then, start and connect to Postgres:
+Then, connect to the Postgres instance:
 
 ```sh
-pgstart
-
 psql -U postgres
 ```
 
-At the Postgres prompt, load the library and create the extension:
+At the Postgres prompt, create the extension:
 
 ```sql
-LOAD 'pg_audit_zig.dylib';
-CREATE EXTENSION pgaudit_zig;
+CREATE EXTENSION char_count_zig;
 ```
 
 ## Code walkthrough
@@ -98,19 +95,7 @@ In the above, note the use of [pgzx.elog.Error][docs_Error] and [pgzx.elog.Info]
 
 ### Testing
 
-The extension contains a sample Zig unit test:
-
-```zig
-test "char_count_zig happy path" {
-    const input_text = "Hello World";
-    const target_char = "l";
-    const expected_count: u32 = 3;
-    const actual_count = try char_count_zig(input_text, target_char);
-    try std.testing.expectEqual(expected_count, actual_count);
-}
-```
-
-And a regression test using the `pg_regress` tool, see the `sql` and `expected` folders. To run the regression tests, use the following command:
+The extensions contains regression tests using the `pg_regress` tool, see the `sql` and `expected` folders. To run the regression tests, use the following command:
 
 ```sh
 zig build pg_regress
