@@ -19,6 +19,89 @@ The following sample extensions (ordered from simple to complex) show how to use
 | [char_count_zig](examples/char_count_zig/) | Adds a function that counts how many times a particular character shows up in a string. Shows how to register a function and how to interpret the parameters. |
 | [pg_audit_zig](examples/pgaudit_zig/)      | Inspired by the pgaudit C extension, this one registers callbacks to multiple hooks and uses more advanced error handling and memory allocation patterns |
 
+## Docs
+
+The reference documentation is available at [here](https://xataio.github.io/pgzx/).
+
+We recommend checking the examples in the section above to understand how to use pgzx. The next sections contain a high-level walkthrough of the most important utilities and how they relate to the Postgres internals.
+
+### Logging and error handling
+
+Postgres [error reporting functions](https://www.postgresql.org/docs/current/error-message-reporting.html) are used to report errors and log messages. They have usual logging functionality like log levels and formatting, but also Postgres specific functionality, like error reports that can be thrown and caught like exceptions. `pgzx` provides a wrapper around these functions that makes it easier to use from Zig.
+
+Simple logging can be done with functions like [Log][docs_Log], [Info][docs_Info], [Notice][docs_Notice], [Warning][docs_Warning], for example:
+
+```zig
+    elog.Info(@src(), "input_text: {s}\n", .{input_text});
+```
+
+Note the `@src()` built-in which provides the file location. This will be stored in the error report.
+
+To report errors during execution, use the [Error][docs_Error] or [ErrorThrow][docs_ErrorThrow] functions. The latter will throw an error report, which can be caught by the Postgres error handling system (explained) below). Example with `Error`:
+
+```zig
+    if (target_char.len > 1) {
+        return elog.Error(@src(), "Target char is more than one byte", .{});
+    }
+```
+
+If you browse through the Postgres source code, you'll see the [PG_TRY / PG_CATCH / PG_FINALLY](https://github.com/postgres/postgres/blob/master/src/include/utils/elog.h#L318) macros used as a form of "exception handling" in C, catching errors raised by the [ereport](https://www.postgresql.org/docs/current/error-message-reporting.html) family of functions. These macros make use of long jumps (i.e. jumps across function boundaries) to the "catch/finally" destination. This means we need to be careful when calling Postgres functions from Zig. For example, if the called C function raises an `ereport` error, the long jump might skip the Zig code that would have cleaned up resources (e.g. `errdefer`).
+
+pgzx offers an alternative Zig implementation for the PG_TRY family of macros. This typically looks in code something like this:
+
+```zig
+    var errctx = pgzx.err.Context.init();
+    defer errctx.deinit();
+    if (errctx.pg_try()) {
+        // zig code that calls several Postgres C functions.
+    } else {
+        return errctx.errorValue();
+    }
+```
+
+The above code pattern makes sure that we catch any errors raised by Postgres functions and return them as Zig errors. This way, we make sure that all the `defer` and `errdefer` code in the caller(s) is executed as expected. For more details, see the documentation for the [pgzx.err.Context][docs_Context] struct.
+
+The above code pattern is implemented in a [wrap][docs_wrap] convenience function which takes a function and its arguments, and executes it in a block like the above. For example:
+
+```zig
+    try pgzx.err.wrap(myFunction, .{arg1, arg2});
+```
+
+### Memory context allocators
+
+Postgres uses a [memory context system](https://github.com/postgres/postgres/blob/master/src/backend/utils/mmgr/README) to manage memory. Memory allocated in a context can be freed all at once (for example, when a query execution is finished), which simplifies memory management significantly, because you only need to track contexts, not individual allocations. Contexts are also hierarchical, so you can create a context that is a child of another context, and when the parent context is freed, all children are freed as well.
+
+pgzx offers custom wrapper Zig allocators that use Postgres' memory context system. The [pgzx.mem.createAllocSetContext][docs_createAllocSetContext] function creates an [pgzx.mem.MemoryContextAllocator][docs_MemoryContextAllocator] that you can use as a Zig allocator. For example:
+
+```zig
+    var memctx = try pgzx.mem.createAllocSetContext("zig_context", .{ .parent = pg.CurrentMemoryContext });
+    const allocator = memctx.allocator();
+```
+
+In the above, note the use of `pg.CurrentMemoryContext` as the parent context. This is the context of the current query execution, and it will be freed when the query is finished. This means that the memory allocated with `allocator` will be freed at the same time.
+
+It's also possible to register a callback for when the memory context is destroyed or reset. This is useful to free or close resources that are tied to the context (e.g. sockets). pgzx provides an utility to register a callback:
+
+```zig
+    try memctx.registerAllocResetCallback(
+        queryDesc.*.estate.*.es_query_cxt,
+        pgaudit_zig_MemoryContextCallback,
+    );
+```
+
+### Function manager
+
+pgzx has utilities for registering functions, written Zig, that are then available to call over SQL. This is done, for example, via the [PG_FUNCTION_V1][docs_PG_FUNCTION_V1] function:
+
+```
+comptime {
+    pgzx.PG_FUNCTION_V1("my_function", myFunction);
+}
+```
+
+The parameters are received from Postgres serialized, but pgzx automatically deserializes them into Zig types.
+
+
 ## Status/Roadmap
 
 pgzx is currently under heavy development by the [Xata](https://xata.io) team. If you want to try Zig for writing PostgreSQL extensions, it is easier with pgzx than without, but expect breaking changes and potential instability. If you need help, join us on the [Xata discord](https://xata.io/discord).
@@ -44,12 +127,15 @@ pgzx is currently under heavy development by the [Xata](https://xata.io) team. I
     * [ ] Double list
     * [ ] Hash tables
 * Development environment
-  * [ ] Download and vendor Postgres source code
-  * [ ] Compile extensions against the Postgres source code
+  * [x] Download and vendor Postgres source code
+  * [x] Compile example extensions against the Postgres source code
+  * [x] Build target to run Postgres regression tests
+  * [ ] Run Zig unit tests in the Postgres environment
+  * [ ] Provide a standard way to test extensions from separate repos
 * Packaging
   * [x] Add support for Zig packaging
 
-## Docs
+
 
 ## Contributing
 
@@ -117,7 +203,7 @@ $ psql  -U postgres -c 'select version()'
 
 This project has a few example extensions. We will install and test the `char_count_zig` extension next:
 
-```
+```sh
 $ cd examples/char_count_zig
 $ zig build -freference-trace -p $PG_HOME
 $ psql  -U postgres -c 'CREATE EXTENSION char_count_zig;'
@@ -144,3 +230,15 @@ ok 1         - char_count_test                            10 ms
 1..1
 # All 1 tests passed.
 ```
+
+[docs_Log]: https://xataio.github.io/pgzx/#A;pgzx:elog.Log
+[docs_Info]: https://xataio.github.io/pgzx/#A;pgzx:elog.Info
+[docs_Notice]: https://xataio.github.io/pgzx/#A;pgzx:elog.Notice
+[docs_Warning]: https://xataio.github.io/pgzx/#A;pgzx:elog.Warning
+[docs_Error]: https://xataio.github.io/pgzx/#A;pgzx:elog.Error
+[docs_ErrorThrow]: https://xataio.github.io/pgzx/#A;pgzx:elog.ErrorThrow
+[docs_Context]: https://xataio.github.io/pgzx/#A;pgzx:err.Context
+[docs_wrap]: https://xataio.github.io/pgzx/#A;pgzx:err.wrap
+[docs_createAllocSetContext]: https://xataio.github.io/pgzx/#A;pgzx:mem.createAllocSetContext
+[docs_MemoryContextAllocator]: https://xataio.github.io/pgzx/#A;pgzx:mem.MemoryContextAllocator
+[docs_PG_FUNCTION_V1]: https://xataio.github.io/pgzx/#A;pgzx:PG_FUNCTION_V1

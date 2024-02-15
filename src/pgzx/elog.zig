@@ -46,6 +46,7 @@ pub fn throwAsPostgresError(src: SourceLocation, e: anyerror) noreturn {
     unreachable;
 }
 
+/// This function returns true if the error is PGError.PGErrorStack.
 pub fn isPostgresError(e: anyerror) bool {
     return e == error.PGErrorStack;
 }
