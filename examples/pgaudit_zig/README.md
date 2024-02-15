@@ -35,6 +35,47 @@ It logs, as json:
 
 Note that tables (relations in internal Postgres terminology) accessed are logged in an array.
 
+## Running
+
+To test the extenstion, follow first the development shell instructions from the [pgzx README][pgzx_Development]. The following commands assume you are in the nix shell (run `nix develop`).
+
+Run in the folder of the extension:
+
+```sh
+cd examples/pgaudit_zig
+zig build -freference-trace -p $PG_HOME
+```
+
+This will build the extension and install the extension in the Postgres instance.
+
+Then, start and connect to Postgres:
+
+```sh
+pgstart
+
+psql -U postgres
+```
+
+At the Postgres prompt, load the library and create the extension:
+
+```sql
+LOAD 'pg_audit_zig.dylib';
+CREATE EXTENSION pgaudit_zig;
+```
+
+Now, create a table and run a query:
+
+```sql
+CREATE TABLE foo(id text);
+SELECT * FROM foo;
+```
+
+You should see a set of logs, including:
+
+```
+NOTICE:  Internal [debug] default pgaudit_zig: logAuditEvent: {"operation": "CMD_SELECT", "relations": [{"relOid": 16403, "relname": "foo", "namespaceOid": 2200, "relnamespaceName": "public"}], "commandText": "SELECT * FROM foo;"}
+```
+
 ## Code walkthrough
 
 Here are the key code elements and how they make use of the pgzx helpers. When reviewing the code, it is helpful to have a look at the C code in the pgaudit extension, as well as at the Postgres source code.
@@ -224,3 +265,5 @@ The `executorCheckPermsHook` function receives the list of tables (`rangeTable`)
         ...
     }
 ```
+
+[pgzx_Development]: https://github.com/xataio/pgzx/tree/main?tab=readme-ov-file#develpment-shell-and-local-installation
