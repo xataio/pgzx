@@ -24,13 +24,3 @@ fn char_count_zig(input_text: []const u8, target_char: []const u8) !u32 {
     }
     return count;
 }
-
-// TODO:
-// how can we compile these into the lib and run them from within postgres?
-test "char_count_zig happy path" {
-    const input_text = "Hello World";
-    const target_char = "l";
-    const expected_count: u32 = 3;
-    const actual_count = try char_count_zig(input_text, target_char);
-    try std.testing.expectEqual(expected_count, actual_count);
-}

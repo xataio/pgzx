@@ -127,9 +127,11 @@ pgzx is currently under heavy development by the [Xata](https://xata.io) team. I
     * [ ] Double list
     * [ ] Hash tables
 * Development environment
-  * [ ] Download and vendor Postgres source code
-  * [ ] Compile extensions against the Postgres source code
+  * [x] Download and vendor Postgres source code
+  * [x] Compile example extensions against the Postgres source code
+  * [x] Build target to run Postgres regression tests
   * [ ] Run Zig unit tests in the Postgres environment
+  * [ ] Provide a standard way to test extensions from separate repos
 * Packaging
   * [x] Add support for Zig packaging
 
@@ -201,7 +203,7 @@ $ psql  -U postgres -c 'select version()'
 
 This project has a few example extensions. We will install and test the `char_count_zig` extension next:
 
-```
+```sh
 $ cd examples/char_count_zig
 $ zig build -freference-trace -p $PG_HOME
 $ psql  -U postgres -c 'CREATE EXTENSION char_count_zig;'
