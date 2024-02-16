@@ -224,24 +224,11 @@ pub const AsyncConn = struct {
     // Flush the send queue. Returns true if the all data has been sent or if the queue is empty.
     // Return false is the send queue is not send completely.
     pub fn flush(self: *Self) !bool {
-        const rc = c.PQflush(self.conn);
-        if (rc < 0) {
-            pqError(@src(), self.conn) catch |e| return e;
-            return error.OperationFailed;
-        }
-        return rc == 0;
+        return try self.connFlush();
     }
 
     pub fn consumeInput(self: *Self) !void {
-        const rc = c.PQconsumeInput(self.conn);
-        if (rc == 0) {
-            pqError(@src(), self.conn) catch |e| return e;
-            return error.OperationFailed;
-        }
-    }
-
-    pub fn isBusy(self: *Self) bool {
-        return c.PQisBusy(self.conn) != 0;
+        try self.connConsumeInput();
     }
 };
 
@@ -301,10 +288,10 @@ pub const Conn = struct {
     pub fn exec(self: *Self, query: [:0]const u8) !Result {
         const rc = c.PQsendQuery(self.conn, query);
         if (rc == 0) {
-            pqError(@src()) catch |e| return e;
+            pqError(@src(), self.conn) catch |e| return e;
             return Error.SendFailed;
         }
-        const res = self.getResultLast();
+        const res = try self.getResultLast();
         return try Self.initExecResult(self.conn, res);
     }
 
@@ -416,7 +403,6 @@ inline fn ConnMixin(comptime Self: type) type {
                 return Self{ .conn = nc, .allocator = allocator };
             }
 
-            pqError(@src()) catch |e| return e;
             return error.ConnectionFailure;
         }
 
@@ -477,6 +463,10 @@ inline fn ConnMixin(comptime Self: type) type {
             return std.mem.span(c.PQdb(self.conn));
         }
 
+        pub fn isBusy(self: *Self) bool {
+            return c.PQisBusy(self.conn) != 0;
+        }
+
         pub fn connWaitReady(self: *Self) !void {
             try intr.CheckForInterrupts();
             while (true) {
@@ -485,12 +475,12 @@ inline fn ConnMixin(comptime Self: type) type {
                 // In case the send queue is not empty we want to be woken up when
                 // the socket is writable. This ensures that the loop can continue
                 // sending pending messages that are still enqueued in memory only.
-                const send_queue_empty = try self.flush();
+                const send_queue_empty = try self.connFlush();
                 if (!send_queue_empty) {
                     wait_flag = c.WL_SOCKET_WRITEABLE;
                 }
 
-                try self.consumeInput();
+                try self.connConsumeInput();
                 if (self.isBusy()) {
                     wait_flag |= c.WL_SOCKET_READABLE;
                 }
@@ -507,6 +497,23 @@ inline fn ConnMixin(comptime Self: type) type {
                     c.ResetLatch(c.MyLatch);
                     try intr.CheckForInterrupts();
                 }
+            }
+        }
+
+        fn connFlush(self: *Self) !bool {
+            const rc = c.PQflush(self.conn);
+            if (rc < 0) {
+                pqError(@src(), self.conn) catch |e| return e;
+                return error.OperationFailed;
+            }
+            return rc == 0;
+        }
+
+        fn connConsumeInput(self: *Self) !void {
+            const rc = c.PQconsumeInput(self.conn);
+            if (rc == 0) {
+                pqError(@src(), self.conn) catch |e| return e;
+                return error.OperationFailed;
             }
         }
     };
