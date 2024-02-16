@@ -60,17 +60,19 @@ const pqsrv = struct {
     }
 
     inline fn get_wait_event_connect() Error!u32 {
-        if (wait_event_connect == 0) {
-            wait_event_connect = try err.wrap(c.WaitEventExtensionNew, .{"pq_connect"});
-        }
-        return wait_event_connect;
+        return c.PG_WAIT_EXTENSION;
+        // if (wait_event_connect == 0) {
+        //     wait_event_connect = try err.wrap(c.WaitEventExtensionNew, .{"pq_connect"});
+        // }
+        // return wait_event_connect;
     }
 
     inline fn get_wait_event_command() Error!u32 {
-        if (wait_event_command == 0) {
-            wait_event_command = try err.wrap(c.WaitEventExtensionNew, .{"pq_command"});
-        }
-        return wait_event_command;
+        return c.PG_WAIT_EXTENSION;
+        // if (wait_event_command == 0) {
+        //     wait_event_command = try err.wrap(c.WaitEventExtensionNew, .{"pq_command"});
+        // }
+        // return wait_event_command;
     }
 
     fn connOrErr(maybe_conn: ?*c.PGconn) Error!*c.PGconn {
