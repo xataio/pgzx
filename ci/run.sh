@@ -3,7 +3,6 @@
 set -e
 set -o pipefail
 
-echo "Test test"
 echo "Build and install extension"
 
 cd $PRJ_ROOT/examples/char_count_zig
