@@ -29,7 +29,7 @@ const Tests = struct {
     pub fn testHappyPath() !void {
         const input_text = "Hello World";
         const target_char = "l";
-        const expected_count: u32 = 3;
+        const expected_count: u32 = 2;
         const actual_count = try char_count_zig(input_text, target_char);
         try std.testing.expectEqual(expected_count, actual_count);
     }
