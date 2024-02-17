@@ -17,6 +17,9 @@ pub fn build(b: *std.Build) void {
     const pgzx = dep_pgzx.module("pgzx");
     var pgbuild = PGBuild.create(b, .{ .target = target, .optimize = optimize });
 
+    const build_options = b.addOptions();
+    build_options.addOption(bool, "testfn", b.option(bool, "testfn", "Register test function") orelse false);
+
     // Register the dependency with the build system
     // and add pgzx as module dependency.
     const ext = pgbuild.addInstallExtension(.{
@@ -28,6 +31,8 @@ pub fn build(b: *std.Build) void {
         .root_dir = ".",
     });
     ext.lib.root_module.addImport("pgzx", pgzx);
+    ext.lib.root_module.addOptions("build_options", build_options);
+
     b.getInstallStep().dependOn(&ext.step);
 
     // Configure pg_regress based testing for the current extension.

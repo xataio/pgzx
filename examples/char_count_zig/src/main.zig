@@ -24,3 +24,28 @@ fn char_count_zig(input_text: []const u8, target_char: []const u8) !u32 {
     }
     return count;
 }
+
+const Tests = struct {
+    pub fn testHappyPath() !void {
+        const input_text = "Hello World";
+        const target_char = "l";
+        const expected_count: u32 = 3;
+        const actual_count = try char_count_zig(input_text, target_char);
+        try std.testing.expectEqual(expected_count, actual_count);
+    }
+
+    pub fn testMoreThanOneByteError() !void {
+        const input_text = "Hello World";
+        const target_char = "lo";
+        _ = char_count_zig(input_text, target_char) catch |err| {
+            try std.testing.expectEqual(error.PGErrorStack, err);
+            // TODO: how do we check the error message?
+            return;
+        };
+        try std.testing.expect(false);
+    }
+};
+
+comptime {
+    pgzx.testing.registerTests(Tests, @import("build_options").testfn);
+}
