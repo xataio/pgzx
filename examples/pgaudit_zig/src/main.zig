@@ -348,10 +348,7 @@ const Tests = struct {
         const expected =
             \\{"operation": "CMD_SELECT", "commandText": "select test()"}
         ;
-        std.testing.expect(std.mem.eql(u8, string.items, expected)) catch |err| {
-            std.log.debug("got: {s} expected: {s}", .{ string.items, expected });
-            return err;
-        };
+        try std.testing.expectEqualSlices(u8, expected, string.items);
     }
 };
 
