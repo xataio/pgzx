@@ -33,4 +33,7 @@ echo "Run unit Zig tests"
 cd $PRJ_ROOT/examples/char_count_zig
 zig build -freference-trace -p $PG_HOME unit
 
+cd $PRJ_ROOT/examples/pgaudit_zig
+zig build -freference-trace -p $PG_HOME unit
+
 echo "Done"
