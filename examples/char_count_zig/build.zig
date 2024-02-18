@@ -48,4 +48,29 @@ pub fn build(b: *std.Build) void {
     // Make regression tests available to `zig build`
     var regress = b.step("pg_regress", "Run regression tests");
     regress.dependOn(&extest.step);
+
+    // Extension build for unit tests. Same as above, but with testfn for sure true.
+    const test_options = b.addOptions();
+    test_options.addOption(bool, "testfn", true);
+    const test_ext = pgbuild.addInstallExtension(.{
+        .name = name,
+        .version = version,
+        .root_source_file = .{
+            .path = "src/main.zig",
+        },
+        .root_dir = ".",
+    });
+    test_ext.lib.root_module.addImport("pgzx", pgzx);
+    test_ext.lib.root_module.addOptions("build_options", test_options);
+
+    // Step for running the unit tests.
+    const psql_run_tests = pgbuild.addRunTests(.{
+        .name = name,
+        .db_user = "postgres",
+        .db_port = 5432,
+    });
+    psql_run_tests.step.dependOn(&test_ext.step);
+
+    var unit = b.step("unit", "Run unit tests");
+    unit.dependOn(&psql_run_tests.step);
 }

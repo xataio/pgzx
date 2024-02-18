@@ -29,9 +29,8 @@ echo "Run regression tests"
 cd $PRJ_ROOT/examples/char_count_zig
 zig build pg_regress --verbose
 
-echo "Run unit tests"
+echo "Run unit Zig tests"
 cd $PRJ_ROOT/examples/char_count_zig
-zig build -freference-trace -p $PG_HOME -Dtestfn=true
-psql -U postgres -c 'DROP FUNCTION IF EXISTS run_tests; CREATE FUNCTION run_tests() RETURNS INTEGER AS '\''$libdir/char_count_zig'\'' LANGUAGE C IMMUTABLE; SELECT run_tests();'
+zig build -freference-trace -p $PG_HOME unit
 
 echo "Done"

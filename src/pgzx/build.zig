@@ -178,7 +178,7 @@ const Run = struct {
             else => @panic("process failed"),
         };
         if (exit_code != 0) {
-            return step.fail("pg_regress failed. Exit code: {d}\n", .{exit_code});
+            return step.fail("{s} failed. Exit code: {d}\n", .{ self.step.name, exit_code });
         }
     }
 };
@@ -242,6 +242,56 @@ pub const RunRegress = struct {
     }
 };
 
+/// This runs the following SQL commands:
+///
+///  DROP FUNCTION IF EXISTS run_tests;
+///  CREATE FUNCTION run_tests() RETURNS INTEGER AS '\''$libdir/{name}'\'' LANGUAGE C IMMUTABLE;
+///  SELECT run_tests();
+pub const RunTests = struct {
+    pub const Options = struct {
+        name: []const u8,
+
+        db_user: ?[]const u8 = null,
+        db_host: ?[]const u8 = null,
+        db_port: ?u16 = null,
+        db_name: ?[]const u8 = null,
+    };
+
+    pub fn create(b: *Build, options: Options) *Run {
+        const sql = std.fmt.allocPrint(
+            b.std_build.allocator,
+            \\ DROP FUNCTION IF EXISTS run_tests;
+            \\ CREATE FUNCTION run_tests() RETURNS INTEGER AS '$libdir/{s}' LANGUAGE C IMMUTABLE;
+            \\ SELECT run_tests();
+        ,
+            .{options.name},
+        ) catch @panic("OOM");
+        const psql_exe = b.getPsqlPath();
+        var runner = Run.create(b, "run_tests_psql", &[_][]const u8{
+            psql_exe,
+            "-c",
+            sql,
+        });
+
+        if (options.db_host) |db_host| {
+            runner.addArgs(&[_][]const u8{ "--host", db_host });
+        }
+        if (options.db_port) |db_port| {
+            runner.addArgs(&[_][]const u8{
+                "--port",
+                std.fmt.allocPrint(b.std_build.allocator, "{d}", .{db_port}) catch @panic("OOM"),
+            });
+        }
+        if (options.db_user) |db_user| {
+            runner.addArgs(&[_][]const u8{ "--user", db_user });
+        }
+        if (options.db_name) |db_name| {
+            runner.addArgs(&[_][]const u8{ "--dbname", db_name });
+        }
+        return runner;
+    }
+};
+
 pub const SharedLibraryExtension = struct {};
 
 pub const InitOptions = struct {
@@ -300,6 +350,11 @@ pub fn getPGRegressPath(self: *Build) []const u8 {
     return self.paths.pg_regress_path.?;
 }
 
+pub fn getPsqlPath(self: *Build) []const u8 {
+    const bin_dir = self.getPath(&self.paths.bin_dir, "--bindir", false);
+    return self.std_build.pathJoin(&[_][]const u8{ bin_dir, "psql" });
+}
+
 pub fn installSharedLibExtension(self: *Build, artifact: *Step.Compile, ext_path: []const u8) void {
     self.std_build.getInstallStep().dependOn(&self.std_build.addInstallArtifact(artifact, .{
         .dest_dir = .{
@@ -355,6 +410,10 @@ pub fn installExtensionDir(self: *Build, source_dir: []const u8) void {
 
 pub fn addRegress(self: *Build, options: RunRegress.Options) *Run {
     return RunRegress.create(self, options);
+}
+
+pub fn addRunTests(self: *Build, options: RunTests.Options) *Run {
+    return RunTests.create(self, options);
 }
 
 fn getPath(self: *Build, path: *?[]const u8, question: []const u8, relative: bool) []const u8 {
