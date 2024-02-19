@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -e
+set -x
+set -o pipefail
+
+cluster_name=${1:-"postgres"}
+
+rootdir=${PRJ_ROOT:-$(git rev-parse --show-toplevel)}
+outdir=${1:-$rootdir/out}
+
+PG_HOME=${PG_HOME:-$outdir/default}
+PG_BIN=$PG_HOME/bin
+PATH=$PG_BIN:$PATH
+
+cluster_dir=$PG_HOME/var/$cluster_name
+data_dir=$cluster_dir/data
+
+pg_ctl -D $data_dir status
