@@ -4,18 +4,17 @@ set -e
 set -x
 set -o pipefail
 
+USAGE="
+Usage: $0 <options> [cluster] [database] [user]
+  cluster: name of the cluster database to create. defaults to 'pgdc'
+  user: name of the cluster user to create. defaults to 'pgdc'
 
-usage() {
-  echo "Usage: $0 <options> [cluster] [database] [user]"
-  echo "  cluster: name of the cluster database to create. defaults to 'pgdc'"
-  echo "  user: name of the cluster user to create. defaults to 'pgdc'"
-  echo ""
-  echo "  -p port: port to configure for the cluster database. detaults to 5432"
-  echo "  -s lib_name: shared_preload_libraries to configure for the cluster database. detaults to ''"
-  echo "  -i path: path to folder with init scripts to run. defaults to ''"
-  echo "  -c postgresql.conf: path to custom postgresql.conf file. defaults to ''"
-  echo "  -h: print this help message"
-}
+  -p port: port to configure for the cluster database. detaults to 5432
+  -s lib_name: shared_preload_libraries to configure for the cluster database. detaults to ''
+  -i path: path to folder with init scripts to run. defaults to ''
+  -c postgresql.conf: path to custom postgresql.conf file. defaults to ''
+  -h: print this help message
+"
 
 port=
 shared_preload_libraries=
@@ -27,7 +26,7 @@ POSITIONAL_ARGS=()
 while [[ $# -gt 0 ]]; do
   case $1 in
     -h)
-      usage
+      echo "$USAGE"
       exit 0
       ;;
     -p)
@@ -52,7 +51,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     -*|--*)
       echo "Unknown option $1"
-      usage
+      echo "$USAGE"
       exit 1
       ;;
     *)

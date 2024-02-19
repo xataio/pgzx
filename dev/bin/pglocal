@@ -1,8 +1,45 @@
 #!/usr/bin/env bash
 
 set -e
-set -x
 set -o pipefail
+
+# store multiline usage string
+USAGE="
+PostgreSQL script to relocate a local installation to another folder.
+
+WARNING: This script copies the bin, include, and lib folders. If you relocate
+         a PostgreSQL installation from a system folder this script might copy
+         all other binaries, headers, and libraries from the system folder.
+
+         Ideally pglocal should be used to relocate a local installation only.
+         A postgres installation in the Nix store is isolated and can safely be
+         relocated for local testing.
+
+Usage: $0 [outdir]
+  outdir: output directory for the local installation
+          default: out
+"
+
+POSITIONAL_ARGS=()
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h)
+      echo "$USAGE"
+      exit 0
+      ;;
+    -*|--*)
+      echo "Unknown option $1"
+      echo "$USAGE"
+      exit 1
+      ;;
+    *)
+      POSITIONAL_ARGS+=("$1") # save positional arg
+      shift # past argument
+      ;;
+  esac
+done
+set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
+
 
 # Ignore nix specific env var so we can ask pg_config for the correct paths
 unset NIX_PGLIBDIR
