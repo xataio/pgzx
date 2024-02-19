@@ -4,6 +4,65 @@ set -e
 set -x
 set -o pipefail
 
+
+usage() {
+  echo "Usage: $0 <options> [cluster] [database] [user]"
+  echo "  cluster: name of the cluster database to create. defaults to 'pgdc'"
+  echo "  user: name of the cluster user to create. defaults to 'pgdc'"
+  echo ""
+  echo "  -p port: port to configure for the cluster database. detaults to 5432"
+  echo "  -s lib_name: shared_preload_libraries to configure for the cluster database. detaults to ''"
+  echo "  -i path: path to folder with init scripts to run. defaults to ''"
+  echo "  -c postgresql.conf: path to custom postgresql.conf file. defaults to ''"
+  echo "  -h: print this help message"
+}
+
+port=
+shared_preload_libraries=
+init_path=
+postgres_conf=
+
+POSITIONAL_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h)
+      usage
+      exit 0
+      ;;
+    -p)
+      port="$2"
+      shift 2
+      ;;
+    -s)
+      if [ -n "$shared_preload_libraries" ]; then
+        shared_preload_libraries="$shared_preload_libraries,$2"
+      else
+        shared_preload_libraries="$2"
+      fi
+      shift 2
+      ;;
+    -i)
+      init_path="$2"
+      shift 2
+      ;;
+    -c)
+      postgres_conf="$2"
+      shift 2
+      ;;
+    -*|--*)
+      echo "Unknown option $1"
+      usage
+      exit 1
+      ;;
+    *)
+      POSITIONAL_ARGS+=("$1") # save positional arg
+      shift # past argument
+      ;;
+  esac
+done
+set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
+
 cluster_name=${1:-"postgres"}
 database=${2:-"postgres"}
 user=${3:-"postgres"}
@@ -39,6 +98,22 @@ pg_ctl -t 60 -D $data_dir -l $log_file start || {
   exit 1
 }
 
-# createdb $database
+createdb $database
 createuser -d -e -i -l -r -s $user
+if [ -n "$init_path" ]; then
+  psql -U $user -d $database < $init_path/*.sql
+fi
+
 pg_ctl -D $data_dir stop
+
+# update postgresql.conf
+if [ -n "$postgres_conf" ]; then
+  cp $postgres_conf/* $data_dir
+fi
+if [ -n "$port" ]; then
+  echo "port=$port" >> $data_dir/postgresql.conf
+fi
+if [ -n "$shared_preload_libraries" ]; then
+  echo "shared_preload_libraries='$shared_preload_libraries'" >> $data_dir/postgresql.conf
+fi
+# echo "max_prepared_transactions=100" >> ${datadir}/postgresql.conf

@@ -107,6 +107,10 @@ The parameters are received from Postgres serialized, but pgzx automatically des
 pgzx is currently under heavy development by the [Xata](https://xata.io) team. If you want to try Zig for writing PostgreSQL extensions, it is easier with pgzx than without, but expect breaking changes and potential instability. If you need help, join us on the [Xata discord](https://xata.io/discord).
 
 * Utilities
+  * [ ] Postgres versions (compile and test)
+    * [ ] Postgres 14
+    * [ ] Postgres 15
+    * [ ] Postgres 16
   * [x] Logging
   * [x] Error handling
   * [x] Memory context allocators
@@ -127,10 +131,10 @@ pgzx is currently under heavy development by the [Xata](https://xata.io) team. I
     * [ ] Double list
     * [ ] Hash tables
 * Development environment
-  * [x] Download and vendor Postgres source code
+  * [ ] Download and vendor Postgres source code
   * [x] Compile example extensions against the Postgres source code
   * [x] Build target to run Postgres regression tests
-  * [ ] Run Zig unit tests in the Postgres environment
+  * [ ] Run unit tests in the Postgres environment
   * [ ] Provide a standard way to test extensions from separate repos
 * Packaging
   * [x] Add support for Zig packaging
