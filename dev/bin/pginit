@@ -97,7 +97,7 @@ pg_ctl -t 60 -D $data_dir -l $log_file start || {
   exit 1
 }
 
-createdb $database
+# createdb $database
 createuser -d -e -i -l -r -s $user
 if [ -n "$init_path" ]; then
   psql -U $user -d $database < $init_path/*.sql

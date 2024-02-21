@@ -18,6 +18,7 @@ data_dir=$cluster_dir/data
 log_dir=$cluster_dir/log
 log_file=$log_dir/server.log
 
+echo "Starting PostgreSQL cluster $cluster_name"
 pg_ctl -D $data_dir -l $log_file start || {
   echo "Failed to start PostgreSQL"
   cat $log_file

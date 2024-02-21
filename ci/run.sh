@@ -1,32 +1,69 @@
 #!/usr/bin/env bash
 
-set -e
 set -o pipefail
 
-echo "Build and install extension"
+test_char_count_zig() {
+  echo "Create extension"
+  extension_create char_count_zig
+  trap "extension_drop char_count_zig" INT TERM
 
-cd $PRJ_ROOT/examples/char_count_zig
-zig build -freference-trace -p $PG_HOME
+  echo "Run regression tests"
+  run_regression_tests ./examples/char_count_zig
 
-cd $PRJ_ROOT/examples/pgaudit_zig
-zig build -freference-trace -p $PG_HOME
+  extension_drop char_count_zig
+}
 
-cluster_dir=$PG_HOME/var/postgres
-PGDATA=$cluster_dir/data
+extension_build() {
+  cwd=$(pwd)
+  cd $1
+  zig build -freference-trace -p $PG_HOME
+  cd $cwd
+}
 
-echo "Start PostgreSQL"
-pgstart
-trap pgstop TERM INT EXIT
+extension_create() {
+  psql -U postgres -c "CREATE EXTENSION IF NOT EXISTS $1"
+}
 
-echo "Print server log"
-cat $cluster_dir/log/server.log
+extension_drop() {
+  psql -U postgres -c "DROP EXTENSION IF EXISTS $1"
+}
 
-echo "Create extension"
-psql -U postgres -c "CREATE EXTENSION char_count_zig"
-# psql -U postgres -c "CREATE EXTENSION pgaudit_zig"
+run_regression_tests() {
+  cwd=$(pwd)
+  cd $1
+  zig build pg_regress --verbose
+  cd $cw# d
+}
 
-echo "Run regression tests"
-cd $PRJ_ROOT/examples/char_count_zig
-zig build pg_regress --verbose
+fail () {
+  echo "$1" >&2
+  exit 1
+}
 
-echo "Done"
+main() {
+  echo "Build and install extension"
+
+  extension_build ./examples/char_count_zig || fail "Failed to build char_count_zig"
+  extension_build ./examples/pgaudit_zig || fail "Failed to build pgaudit_zig"
+
+  echo "Start PostgreSQL"
+  pgstart || fail "Failed to start PostgreSQL"
+  trap pgstop TERM INT EXIT
+
+  ok=1
+  test_char_count_zig || ok=0
+
+  if [ $ok -eq 0 ]; then
+    echo "\n\nServer log:"
+
+    cluster_dir=$PG_HOME/var/postgres
+    PGDATA=$cluster_dir/data
+    cat $cluster_dir/log/server.log
+
+    fail "Regression tests failed"
+  fi
+
+  echo "Success!"
+}
+
+main

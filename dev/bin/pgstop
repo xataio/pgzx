@@ -16,4 +16,5 @@ PATH=$PG_BIN:$PATH
 cluster_dir=$PG_HOME/var/$cluster_name
 data_dir=$cluster_dir/data
 
+echo "Stopping PostgreSQL cluster $cluster_name"
 pg_ctl -D $data_dir stop

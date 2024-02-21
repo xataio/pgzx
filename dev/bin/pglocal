@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
+set -x
 set -o pipefail
 
 # store multiline usage string
@@ -56,9 +57,18 @@ cp_direct_files() {
   local dest_dir=$1
   local src_dir=$2
   mkdir -p $dest_dir
+
+  # prepare sub directories in the destination directory to ensure write permissions.
+  for dir in $(find $src_dir -type d); do
+    mkdir -p $dest_dir/$(basename $dir)
+  done
+
+  # copy the actual files only
   for file in $(find $src_dir -maxdepth 1 -type f); do
     cp $file $dest_dir
   done
+
+  # create symlinks
   for link in $(find $src_dir -maxdepth 1 -type l); do
     ln -s $(realpath $link) $dest_dir/$(basename $link)
   done
@@ -68,7 +78,14 @@ cp_recursive() {
   local dest_dir=$1
   local src_dir=$2
   mkdir -p $dest_dir
-  for file in $(ls $src_dir); do
+
+  # prepare sub directories in the destination directory to ensure write permissions.
+  for dir in $(find $src_dir -type d -printf '%P\n'); do
+    mkdir -p $dest_dir/$dir
+  done
+
+  # copy the actual files only
+  for file in $(find $src_dir -type f -printf '%P\n'); do
     cp -r $src_dir/$file $dest_dir/$file
   done
 }
