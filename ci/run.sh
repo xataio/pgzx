@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+set -x
 set -o pipefail
 
 test_char_count_zig() {
@@ -32,7 +33,7 @@ run_regression_tests() {
   cwd=$(pwd)
   cd $1
   zig build pg_regress --verbose
-  cd $cw# d
+  cd $cwd
 }
 
 fail () {
@@ -56,10 +57,8 @@ main() {
   if [ $ok -eq 0 ]; then
     echo "\n\nServer log:"
 
-    cluster_dir=$PG_HOME/var/postgres
-    PGDATA=$cluster_dir/data
-    cat $cluster_dir/log/server.log
-
+    eval $(pgenv)
+    cat $PG_CLUSTER_LOG_FILE
     fail "Regression tests failed"
   fi
 

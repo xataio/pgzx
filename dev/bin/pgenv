@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+PG_CLUSTER_NAME=${1:-"postgres"}
+
+rootdir=${PRJ_ROOT:-$(git rev-parse --show-toplevel)}
+outdir=${2:-$rootdir/out}
+
+PG_HOME=${PG_HOME:-$outdir/default}
+PG_BIN=$PG_HOME/bin
+PATH=$PG_BIN:$PATH
+echo "PG_HOME='$PG_HOME'"
+echo "PG_BIN='$PG_BIN'"
+echo "PATH='$PATH'"
+
+PG_CLUSTER_DIR=$PG_HOME/var/$PG_CLUSTER_NAME
+PG_CLUSTER_DATA_DIR=$PG_CLUSTER_DIR/data
+PG_CLUSTER_LOG_DIR=$PG_CLUSTER_DIR/log
+PG_CLUSTER_LOG_FILE=$PG_CLUSTER_LOG_DIR/server.log
+echo "PG_CLUSTER_DIR='$PG_CLUSTER_DIR'"
+echo "PG_CLUSTER_DATA_DIR='$PG_CLUSTER_DATA_DIR'"
+echo "PG_CLUSTER_LOG_DIR='$PG_CLUSTER_LOG_DIR'"
+echo "PG_CLUSTER_LOG_FILE='$PG_CLUSTER_LOG_FILE'"
