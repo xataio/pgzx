@@ -21,6 +21,7 @@ const Paths = struct {
     shared_dir: ?[]const u8 = null,
     extension_dir: ?[]const u8 = null,
     pg_regress_path: ?[]const u8 = null,
+    psql_path: ?[]const u8 = null,
 };
 
 pub const ExtensionVersion = struct {
@@ -330,7 +331,7 @@ pub fn getSharedDir(self: *Build) []const u8 {
 }
 
 pub fn getBinDir(self: *Build) []const u8 {
-    return self.getPath(&self.paths.shared_dir, "--bindir", true);
+    return self.getPath(&self.paths.bin_dir, "--bindir", false);
 }
 
 pub fn getExtensionDir(self: *Build) []const u8 {
@@ -351,8 +352,11 @@ pub fn getPGRegressPath(self: *Build) []const u8 {
 }
 
 pub fn getPsqlPath(self: *Build) []const u8 {
-    const bin_dir = self.getPath(&self.paths.bin_dir, "--bindir", false);
-    return self.std_build.pathJoin(&[_][]const u8{ bin_dir, "psql" });
+    self.paths.psql_path = self.paths.psql_path orelse blk: {
+        const bin_dir = self.getBinDir();
+        break :blk self.std_build.pathJoin(&[_][]const u8{ bin_dir, "psql" });
+    };
+    return self.paths.psql_path.?;
 }
 
 pub fn installSharedLibExtension(self: *Build, artifact: *Step.Compile, ext_path: []const u8) void {
