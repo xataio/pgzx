@@ -48,13 +48,13 @@ fn runTests(comptime testsuites: anytype) type {
     };
 }
 
-pub inline fn registerTests(comptime testsuites: anytype, comptime testfn: bool) void {
+pub inline fn registerTests(comptime testsuites: anytype) void {
     const T = @TypeOf(testsuites);
     if (@typeInfo(T) != .Struct) {
         @compileError("registerTests: testsuites must be an array of test suites. Found '" ++ @typeName(T) ++ "'");
     }
 
-    if (testfn) {
+    if (@import("build_options").testfn) {
         fmgr.PG_FUNCTION_V1("run_tests", runTests(testsuites).run_tests);
     }
 }

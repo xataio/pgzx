@@ -49,5 +49,5 @@ const Testsuite2 = struct {
 };
 
 comptime {
-    pgzx.testing.registerTests(.{ Testsuite1, Testsuite2 }, @import("build_options").testfn);
+    pgzx.testing.registerTests(.{ Testsuite1, Testsuite2 });
 }
