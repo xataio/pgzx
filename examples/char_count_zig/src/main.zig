@@ -25,7 +25,7 @@ fn char_count_zig(input_text: []const u8, target_char: []const u8) !u32 {
     return count;
 }
 
-const Tests = struct {
+const Testsuite1 = struct {
     pub fn testHappyPath() !void {
         const input_text = "Hello World";
         const target_char = "l";
@@ -33,7 +33,9 @@ const Tests = struct {
         const actual_count = try char_count_zig(input_text, target_char);
         try std.testing.expectEqual(expected_count, actual_count);
     }
+};
 
+const Testsuite2 = struct {
     pub fn testMoreThanOneByteError() !void {
         const input_text = "Hello World";
         const target_char = "lo";
@@ -47,5 +49,5 @@ const Tests = struct {
 };
 
 comptime {
-    pgzx.testing.registerTests(Tests, @import("build_options").testfn);
+    pgzx.testing.registerTests(.{ Testsuite1, Testsuite2 }, @import("build_options").testfn);
 }
