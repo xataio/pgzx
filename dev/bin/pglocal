@@ -4,6 +4,44 @@ set -e
 set -x
 set -o pipefail
 
+# store multiline usage string
+USAGE="
+PostgreSQL script to relocate a local installation to another folder.
+
+WARNING: This script copies the bin, include, and lib folders. If you relocate
+         a PostgreSQL installation from a system folder this script might copy
+         all other binaries, headers, and libraries from the system folder.
+
+         Ideally pglocal should be used to relocate a local installation only.
+         A postgres installation in the Nix store is isolated and can safely be
+         relocated for local testing.
+
+Usage: $0 [outdir]
+  outdir: output directory for the local installation
+          default: out
+"
+
+POSITIONAL_ARGS=()
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h)
+      echo "$USAGE"
+      exit 0
+      ;;
+    -*|--*)
+      echo "Unknown option $1"
+      echo "$USAGE"
+      exit 1
+      ;;
+    *)
+      POSITIONAL_ARGS+=("$1") # save positional arg
+      shift # past argument
+      ;;
+  esac
+done
+set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
+
+
 # Ignore nix specific env var so we can ask pg_config for the correct paths
 unset NIX_PGLIBDIR
 
@@ -19,8 +57,20 @@ cp_direct_files() {
   local dest_dir=$1
   local src_dir=$2
   mkdir -p $dest_dir
+
+  # prepare sub directories in the destination directory to ensure write permissions.
+  for dir in $(find $src_dir -type d); do
+    mkdir -p $dest_dir/$(basename $dir)
+  done
+
+  # copy the actual files only
   for file in $(find $src_dir -maxdepth 1 -type f); do
     cp $file $dest_dir
+  done
+
+  # create symlinks
+  for link in $(find $src_dir -maxdepth 1 -type l); do
+    ln -s $(realpath $link) $dest_dir/$(basename $link)
   done
 }
 
@@ -28,7 +78,14 @@ cp_recursive() {
   local dest_dir=$1
   local src_dir=$2
   mkdir -p $dest_dir
-  for file in $(ls $src_dir); do
+
+  # prepare sub directories in the destination directory to ensure write permissions.
+  for dir in $(find $src_dir -type d -printf '%P\n'); do
+    mkdir -p $dest_dir/$dir
+  done
+
+  # copy the actual files only
+  for file in $(find $src_dir -type f -printf '%P\n'); do
     cp -r $src_dir/$file $dest_dir/$file
   done
 }

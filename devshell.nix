@@ -49,6 +49,8 @@ in {
       pkgs.gss
       pkgs.krb5
 
+      pkgs.pkg-config
+
       pkgs.zigpkgs.master
       pkgs.zls
     ];

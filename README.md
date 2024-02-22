@@ -107,6 +107,10 @@ The parameters are received from Postgres serialized, but pgzx automatically des
 pgzx is currently under heavy development by the [Xata](https://xata.io) team. If you want to try Zig for writing PostgreSQL extensions, it is easier with pgzx than without, but expect breaking changes and potential instability. If you need help, join us on the [Xata discord](https://xata.io/discord).
 
 * Utilities
+  * [ ] Postgres versions (compile and test)
+    * [ ] Postgres 14
+    * [ ] Postgres 15
+    * [ ] Postgres 16
   * [x] Logging
   * [x] Error handling
   * [x] Memory context allocators
@@ -127,10 +131,10 @@ pgzx is currently under heavy development by the [Xata](https://xata.io) team. I
     * [ ] Double list
     * [ ] Hash tables
 * Development environment
-  * [x] Download and vendor Postgres source code
+  * [ ] Download and vendor Postgres source code
   * [x] Compile example extensions against the Postgres source code
   * [x] Build target to run Postgres regression tests
-  * [ ] Run Zig unit tests in the Postgres environment
+  * [ ] Run unit tests in the Postgres environment
   * [ ] Provide a standard way to test extensions from separate repos
 * Packaging
   * [x] Add support for Zig packaging
@@ -141,22 +145,24 @@ pgzx is currently under heavy development by the [Xata](https://xata.io) team. I
 
 ### Develpment shell and local installation
 
-We use Nix to provide a local development shell. But you should be able to run
-the following scripts without the development shell.
+We use Nix to provide a local development shell.
+This ensures that we have a stable environment with all dependencies available
+in the expected versions. This is especially important with Zig, which is still
+in development.
+
+For this purpose it is possible do use this project as input in downstream
+flake files as well.
+
+The tools we use also require some environment variables set, which are already
+pre-configured in the develpment shell.
 
 We would recommend the [nix-installer from DeterminateSystems](https://github.com/DeterminateSystems/nix-installer). The
 installer enables Nix Flakes (used by this project) out of the box and also
 provides an uninstaller.
 
-TODO: test the scripts without development shell
-
-TODO: support to create develpment shell in docker container
-
-Still, we would recommend to use the development shell as we already provide
-all compatible dependencies that you will need for developing within this
-repository.
-The tools we use also require some environment variables set, which are already
-pre-configured in the develpment shell.
+If you want to try out the project without having to install Nix on your
+system, you can do so using Docker. You can build the docker image by running
+the `dev/docker/build.sh` script. The docker image is names `pgzx:latest`.
 
 To enter the develpment shell run:
 
@@ -164,9 +170,16 @@ To enter the develpment shell run:
 $ nix develop
 ```
 
+If you want to use the docker instead, run:
+
+```
+$ ./dev/docker/run.sh
+```
+
+
 NOTE:
 We also provide an `.envrc` file to automatically enter the development shell when entering
-the projects folder.
+the projects folder. If you use direnv you can enable the environment via `direnv allow`.
 
 The nix configuration already installs PostgresSQL, but for testing we want to
 have a local postgres installation where we can install our test extensions in.
@@ -183,14 +196,14 @@ $ ls out
 
 The `out/default` folder is a symlink to the postgres installation currently in use.
 
-Having a local installation we want to create a local database and user that we can run:
+Having a local installation we want to create a local database and user:
 
 ```
 $ pginit
 ...
 ```
 
-This did create a local database names and `postgres` user. The script allows us to configure an alternative name for the cluster, database or user. This allows us to create multiple clusters within our current installation.
+This did create a local database named `postgres`. The script allows us to configure an alternative name for the cluster, database or user. This allows us to create multiple clusters within our current installation.
 
 We can start and stop the database using `pgstart` and `pgstop`. Let's test our current setup:
 

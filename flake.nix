@@ -26,7 +26,11 @@
     };
   };
 
-  outputs = inputs:
+  outputs = inputs @ {
+    self,
+    nixpkgs,
+    ...
+  }:
     inputs.parts.lib.mkFlake {inherit inputs;} {
       debug = true;
 
@@ -35,24 +39,40 @@
         ./nix/modules/nixpkgs.nix
       ];
 
-      nixpkgs = {
-        config.allowBroken = true;
-        overlays = [
-          inputs.zig-overlay.overlays.default
-          (_final: prev: {
-            zls = inputs.zls.packages.${prev.system}.zls;
-          })
+      flake.overlays = rec {
+        default = nixpkgs.lib.composeManyExtensions [
+          zigpkgs
+          zls
+          pgzx_scripts
         ];
+        zigpkgs = inputs.zig-overlay.overlays.default;
+        zls = _final: prev: {
+          zls = inputs.zls.packages.${prev.system}.zls;
+        };
+        pgzx_scripts = _final: prev: {
+          pgzx_scripts = self.packages.${prev.system}.pgzx_scripts;
+        };
       };
 
       systems = ["x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin"];
 
       perSystem = {
+        system,
         config,
         lib,
         pkgs,
         ...
       }: {
+        nixpkgs = {
+          config.allowBroken = true;
+          overlays = [
+            inputs.zig-overlay.overlays.default
+            (_final: _prev: {
+              zls = inputs.zls.packages.${system}.zls;
+            })
+          ];
+        };
+
         pre-commit.pkgs = pkgs;
         pre-commit.settings = {
           hooks = {
@@ -62,6 +82,15 @@
             deadnix.enable = true;
             yamllint.enable = true;
           };
+        };
+
+        packages.pgzx_scripts = pkgs.stdenvNoCC.mkDerivation {
+          name = "pgzx_scripts";
+          src = ./dev/bin;
+          installPhase = ''
+            mkdir -p $out/bin
+            cp -r $src/* $out/bin
+          '';
         };
 
         devShells.default = let

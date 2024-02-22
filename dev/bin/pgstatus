@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -e
+#set -x
+set -o pipefail
+
+eval $(pgenv $@)
+
+pg_ctl -D $PG_CLUSTER_DATA_DIR status
