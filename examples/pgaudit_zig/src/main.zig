@@ -285,10 +285,7 @@ fn eventToJSON(event: *AuditEvent, writer: std.ArrayList(u8).Writer) !void {
 fn logAuditEvent(event: *AuditEvent) !void {
     std.log.debug("pgaudit_zig: logAuditEvent\n", .{});
 
-    var log_memctx = try pgzx.mem.createAllocSetContext("pgaudit_zig_context_log", .{ .parent = pg.CurrentMemoryContext });
-    defer log_memctx.deinit();
-
-    var string = std.ArrayList(u8).init(log_memctx.allocator());
+    var string = std.ArrayList(u8).init(pgzx.mem.PGCurrentContextAllocator);
     defer string.deinit();
     const writer = string.writer();
 
