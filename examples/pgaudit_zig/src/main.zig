@@ -250,16 +250,7 @@ fn pgaudit_zig_MemoryContextCallback(arg: ?*anyopaque) callconv(.C) void {
     freeEvent(event);
 }
 
-fn logAuditEvent(event: *AuditEvent) !void {
-    std.log.debug("pgaudit_zig: logAuditEvent\n", .{});
-
-    var log_memctx = try pgzx.mem.createAllocSetContext("pgaudit_zig_context_log", .{ .parent = pg.CurrentMemoryContext });
-    defer log_memctx.deinit();
-
-    var string = std.ArrayList(u8).init(log_memctx.allocator());
-    defer string.deinit();
-    var writer = string.writer();
-
+fn eventToJSON(event: *AuditEvent, writer: std.ArrayList(u8).Writer) !void {
     _ = try writer.write("{\"operation\": ");
     try std.json.encodeJsonString(@tagName(event.command), .{}, writer);
 
@@ -289,6 +280,75 @@ fn logAuditEvent(event: *AuditEvent) !void {
         try std.json.encodeJsonString(event.commandText, .{}, writer);
     }
     _ = try writer.write("}");
+}
+
+fn logAuditEvent(event: *AuditEvent) !void {
+    std.log.debug("pgaudit_zig: logAuditEvent\n", .{});
+
+    var string = std.ArrayList(u8).init(pgzx.mem.PGCurrentContextAllocator);
+    defer string.deinit();
+    const writer = string.writer();
+
+    try eventToJSON(event, writer);
 
     std.log.debug("pgaudit_zig: logAuditEvent: {s}\n", .{string.items});
+}
+
+const Tests = struct {
+
+    // Test that exercises adding, searching, and removing an event from the global list.
+    pub fn testAddAndRemoveEvent() !void {
+        var memctx = try pgzx.mem.createAllocSetContext("pgaudit_zig_tests_context", .{ .parent = pg.CurrentMemoryContext });
+        defer memctx.deinit();
+        const allocator = memctx.allocator();
+
+        const query_ctx = memctx.context();
+
+        const event = try allocator.create(AuditEvent);
+        event.* = .{
+            .command = Commands.CMD_SELECT,
+            .commandText = "select test()",
+            .memctx = memctx,
+            .queryContext = query_ctx,
+        };
+
+        const list = try getAuditList();
+        try list.append(event);
+
+        const last = list.getLast();
+        try std.testing.expectEqual(event, last);
+
+        const popped = try popEvent(list, query_ctx);
+        try std.testing.expectEqual(event, popped);
+
+        try std.testing.expectEqual(0, list.items.len);
+    }
+
+    // Test for eventToJSON function.
+    pub fn testEventToJSON() !void {
+        var memctx = try pgzx.mem.createAllocSetContext("pgaudit_zig_tests_context", .{ .parent = pg.CurrentMemoryContext });
+        defer memctx.deinit();
+        const allocator = memctx.allocator();
+
+        var event = AuditEvent{
+            .command = Commands.CMD_SELECT,
+            .commandText = "select test()",
+            .memctx = memctx,
+        };
+
+        var string = std.ArrayList(u8).init(allocator);
+        defer string.deinit();
+        const writer = string.writer();
+
+        try eventToJSON(&event, writer);
+
+        const expected =
+            \\{"operation": "CMD_SELECT", "commandText": "select test()"}
+        ;
+        try std.testing.expectEqualSlices(u8, expected, string.items);
+    }
+};
+
+comptime {
+    pgzx.testing.registerTests(@import("build_options").testfn, .{Tests});
 }

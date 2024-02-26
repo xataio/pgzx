@@ -11,7 +11,15 @@ test_char_count_zig() {
   echo "Run regression tests"
   run_regression_tests ./examples/char_count_zig
 
+  echo "Run unit tests"
+  run_unit_tests ./examples/char_count_zig
+
   extension_drop char_count_zig
+}
+
+test_pgaudit_zig() {
+  echo "Run unit tests"
+  run_unit_tests ./examples/pgaudit_zig
 }
 
 extension_build() {
@@ -33,6 +41,13 @@ run_regression_tests() {
   cwd=$(pwd)
   cd $1
   zig build pg_regress --verbose
+  cd $cwd
+}
+
+run_unit_tests() {
+  cwd=$(pwd)
+  cd $1
+  zig build -freference-trace -p $PG_HOME unit
   cd $cwd
 }
 

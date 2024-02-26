@@ -24,6 +24,7 @@ pub const str = @import("pgzx/str.zig");
 pub const utils = @import("pgzx/utils.zig");
 pub const intr = @import("pgzx/interrupts.zig");
 pub const list = @import("pgzx/list.zig");
+pub const testing = @import("pgzx/testing.zig");
 
 pub const guc = utils.guc;
 
