@@ -350,5 +350,5 @@ const Tests = struct {
 };
 
 comptime {
-    pgzx.testing.registerTests(.{Tests});
+    pgzx.testing.registerTests(Tests, @import("build_options").testfn);
 }

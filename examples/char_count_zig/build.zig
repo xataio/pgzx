@@ -31,7 +31,7 @@ pub fn build(b: *std.Build) void {
         .root_dir = ".",
     });
     ext.lib.root_module.addImport("pgzx", pgzx);
-    pgzx.addOptions("build_options", build_options);
+    ext.lib.root_module.addOptions("build_options", build_options);
 
     b.getInstallStep().dependOn(&ext.step);
 
@@ -52,7 +52,6 @@ pub fn build(b: *std.Build) void {
     // Extension build for unit tests. Same as above, but with testfn for sure true.
     const test_options = b.addOptions();
     test_options.addOption(bool, "testfn", true);
-    pgzx.addOptions("build_options", test_options);
     const test_ext = pgbuild.addInstallExtension(.{
         .name = name,
         .version = version,
@@ -62,6 +61,7 @@ pub fn build(b: *std.Build) void {
         .root_dir = ".",
     });
     test_ext.lib.root_module.addImport("pgzx", pgzx);
+    test_ext.lib.root_module.addOptions("build_options", test_options);
 
     // Step for running the unit tests.
     const psql_run_tests = pgbuild.addRunTests(.{
