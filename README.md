@@ -32,9 +32,6 @@ This project uses [Nix flakes]() to manage build dependencies and provide a deve
 
 Before getting started we would recommend you to familiarize yourself with the projects setup first. To do so, please start with the [Contributing][#contributing] section.   
 
-
-WARNING: we're assuming the repository is public here. This is currently not the case and you need a local checkout of pgzx. Create a new folder for your project and run the documented commands as given. Your project folder should be a sibling folder next to the local checkout of pgzx. Initialize the project by changing the path to 'path:../pgzx'
-
 We will create a new project folder for our new extension and initialize the folder using the projects template:
 
 ```
@@ -45,7 +42,7 @@ $ nix flake init -t github:xataio/pgzx
 
 This step will create a working extension named 'my_extension'. The extension exports a hello world function named 'hello()'.
 
-The templates README.md file already contains instructions on how to enter the development shell, build, and test the extension. You can follow the instructions and verify that your setup is functioning. Do not forget to use `pgstop` before quitting the development shell.
+The templates [README.md](./nix/templates/init/README.md) file already contains instructions on how to enter the development shell, build, and test the extension. You can follow the instructions and verify that your setup is functioning. Do not forget to use `pgstop` before quitting the development shell.
 
 Next we want to rename the project to match our extension name. To do so update the file names in the `extension` folder, and replace `my_extension` with you project name in the `README.md`, `build.zig`, `build.zig.zon` and extensions SQL file.
 

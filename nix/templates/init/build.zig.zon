@@ -7,12 +7,8 @@
     },
     .dependencies = .{
         .pgzx = .{
-            .path = "./../pgzx",
-
-            // TODO: Use downlaod URL with hash:
-            // .url = "..."
+            .url = "https://github.com/xataio/pgzx/archive/main.tar.gz",
             // .hash = "..."
-
         },
     },
 }
