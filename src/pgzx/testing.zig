@@ -48,6 +48,35 @@ fn runTests(comptime testsuites: anytype) type {
     };
 }
 
+/// This function registers a set of test suites to be run inside the Postgres server. A `run_tests` function is
+/// registered as a Postgres function that will run all the tests registered. This function is available over
+/// SQL (`SELECT run_tests();`).
+///
+/// You would typically call this function like this:
+///
+/// ```
+/// comptime {
+///    pgzx.testing.registerTests(.{Tests}, @import("build_options").testfn);
+///}
+/// ```
+///
+/// The `build_options.testfn` options should be defined via `build.zig`. It is used to exclude the test function
+/// from the production build.
+///
+/// If your extension has multiple modules, you can call `registerTests` like this to register the test suites
+/// from all of them:
+///
+/// ```
+/// comptime {
+///    pgzx.testing.registerTests(.{
+///         @import("module1.zig").Tests,
+///         @import("module2.zig").Tests,
+///         @import("module2.zig").Tests },
+///     @import("build_options").testfn);
+/// }
+/// ```
+///
+/// Note that you can only call this function once in the extension.
 pub inline fn registerTests(comptime testsuites: anytype, comptime testfn: bool) void {
     const T = @TypeOf(testsuites);
     if (@typeInfo(T) != .Struct) {

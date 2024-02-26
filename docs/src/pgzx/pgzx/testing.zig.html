@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>pgzx/testing.zig - source view</title>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg==">
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNTMgMTQwIj48ZyBmaWxsPSIjRjdBNDFEIj48Zz48cG9seWdvbiBwb2ludHM9IjQ2LDIyIDI4LDQ0IDE5LDMwIi8+PHBvbHlnb24gcG9pbnRzPSI0NiwyMiAzMywzMyAyOCw0NCAyMiw0NCAyMiw5NSAzMSw5NSAyMCwxMDAgMTIsMTE3IDAsMTE3IDAsMjIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMzEsOTUgMTIsMTE3IDQsMTA2Ii8+PC9nPjxnPjxwb2x5Z29uIHBvaW50cz0iNTYsMjIgNjIsMzYgMzcsNDQiLz48cG9seWdvbiBwb2ludHM9IjU2LDIyIDExMSwyMiAxMTEsNDQgMzcsNDQgNTYsMzIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTE2LDk1IDk3LDExNyA5MCwxMDQiLz48cG9seWdvbiBwb2ludHM9IjExNiw5NSAxMDAsMTA0IDk3LDExNyA0MiwxMTcgNDIsOTUiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTUwLDAgNTIsMTE3IDMsMTQwIDEwMSwyMiIvPjwvZz48Zz48cG9seWdvbiBwb2ludHM9IjE0MSwyMiAxNDAsNDAgMTIyLDQ1Ii8+PHBvbHlnb24gcG9pbnRzPSIxNTMsMjIgMTUzLDExNyAxMDYsMTE3IDEyMCwxMDUgMTI1LDk1IDEzMSw5NSAxMzEsNDUgMTIyLDQ1IDEzMiwzNiAxNDEsMjIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTI1LDk1IDEzMCwxMTAgMTA2LDExNyIvPjwvZz48L2c+PC9zdmc+">
+    <style>
+      body{
+        font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      pre > code {
+        display: block;
+        overflow: auto;
+        line-height: normal;
+        margin: 0em;
+      }
+      .tok-kw {
+          color: #333;
+          font-weight: bold;
+      }
+      .tok-str {
+          color: #d14;
+      }
+      .tok-builtin {
+          color: #005C7A;
+      }
+      .tok-comment {
+          color: #545454;
+          font-style: italic;
+      }
+      .tok-fn {
+          color: #900;
+          font-weight: bold;
+      }
+      .tok-null {
+          color: #005C5C;
+      }
+      .tok-number {
+          color: #005C5C;
+      }
+      .tok-type {
+          color: #458;
+          font-weight: bold;
+      }
+      pre {
+        counter-reset: line;
+      }
+      pre .line:before {
+        counter-increment: line;
+        content: counter(line);
+        display: inline-block;
+        padding-right: 1em;
+        width: 2em;
+        text-align: right;
+        color: #999;
+      }
+      
+      .line {
+        width: 100%;
+        display: inline-block;
+      }
+      .line:target {
+        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        background: #fafafa;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body{
+            background:#222;
+            color: #ccc;
+        }
+        pre > code {
+            color: #ccc;
+            background: #222;
+            border: unset;
+        }
+        .line:target {
+            border-top: 1px solid #444;
+            border-bottom: 1px solid #444;
+            background: #333;
+        }
+        .tok-kw {
+            color: #eee;
+        }
+        .tok-str {
+            color: #2e5;
+        }
+        .tok-builtin {
+            color: #ff894c;
+        }
+        .tok-comment {
+            color: #aa7;
+        }
+        .tok-fn {
+            color: #B1A0F8;
+        }
+        .tok-null {
+            color: #ff8080;
+        }
+        .tok-number {
+            color: #ff8080;
+        }
+        .tok-type {
+            color: #68f;
+        }
+      }
+    </style>
+</head>
+<body>
+<pre><code><span class="line" id="L1"><span class="tok-kw">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>);</span>
+<span class="line" id="L2"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> elog = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;elog.zig&quot;</span>);</span>
+<span class="line" id="L3"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> fmgr = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;fmgr.zig&quot;</span>);</span>
+<span class="line" id="L4"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> mem = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;mem.zig&quot;</span>);</span>
+<span class="line" id="L5"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> pg = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;c.zig&quot;</span>);</span>
+<span class="line" id="L6"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> pgzx_err = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;err.zig&quot;</span>);</span>
+<span class="line" id="L7"></span>
+<span class="line" id="L8"><span class="tok-kw">fn</span> <span class="tok-fn">runTests</span>(<span class="tok-kw">comptime</span> testsuites: <span class="tok-kw">anytype</span>) <span class="tok-type">type</span> {</span>
+<span class="line" id="L9">    <span class="tok-kw">return</span> <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L10">        <span class="tok-kw">fn</span> <span class="tok-fn">run_tests</span>() !<span class="tok-type">u32</span> {</span>
+<span class="line" id="L11">            <span class="tok-kw">var</span> success_count: <span class="tok-type">u32</span> = <span class="tok-number">0</span>;</span>
+<span class="line" id="L12"></span>
+<span class="line" id="L13">            <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (testsuites) |T| {</span>
+<span class="line" id="L14">                <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (<span class="tok-builtin">@typeInfo</span>(T).Struct.decls) |f| {</span>
+<span class="line" id="L15">                    <span class="tok-kw">if</span> (std.mem.startsWith(<span class="tok-type">u8</span>, f.name, <span class="tok-str">&quot;test&quot;</span>)) {</span>
+<span class="line" id="L16">                        elog.Info(<span class="tok-builtin">@src</span>(), <span class="tok-str">&quot;Running test: {s}\n&quot;</span>, .{f.name});</span>
+<span class="line" id="L17">                        <span class="tok-kw">const</span> fun = <span class="tok-builtin">@field</span>(T, f.name);</span>
+<span class="line" id="L18"></span>
+<span class="line" id="L19">                        <span class="tok-comment">// create a memory context for the test</span>
+</span>
+<span class="line" id="L20">                        <span class="tok-kw">var</span> test_memctx = <span class="tok-kw">try</span> mem.createTempAllocSet(<span class="tok-str">&quot;test_memory_context&quot;</span>, .{ .parent = pg.CurrentMemoryContext });</span>
+<span class="line" id="L21">                        <span class="tok-kw">defer</span> test_memctx.deinit();</span>
+<span class="line" id="L22"></span>
+<span class="line" id="L23">                        <span class="tok-comment">// capture PG errors in case some test does throw a PG error that we don't want to leak:</span>
+</span>
+<span class="line" id="L24">                        <span class="tok-kw">var</span> errctx = pgzx_err.Context.init();</span>
+<span class="line" id="L25">                        <span class="tok-kw">defer</span> errctx.deinit();</span>
+<span class="line" id="L26"></span>
+<span class="line" id="L27">                        <span class="tok-kw">if</span> (errctx.pg_try()) {</span>
+<span class="line" id="L28">                            fun() <span class="tok-kw">catch</span> |err| {</span>
+<span class="line" id="L29">                                <span class="tok-kw">return</span> elog.Error(<span class="tok-builtin">@src</span>(), <span class="tok-str">&quot;Test failed: {}\n&quot;</span>, .{err});</span>
+<span class="line" id="L30">                            };</span>
+<span class="line" id="L31">                        } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L32">                            <span class="tok-kw">return</span> elog.Error(<span class="tok-builtin">@src</span>(), <span class="tok-str">&quot;Test failed with Postgres error report: {}\n&quot;</span>, .{errctx.errorValue()});</span>
+<span class="line" id="L33">                        }</span>
+<span class="line" id="L34"></span>
+<span class="line" id="L35">                        success_count += <span class="tok-number">1</span>;</span>
+<span class="line" id="L36">                    }</span>
+<span class="line" id="L37">                }</span>
+<span class="line" id="L38">            }</span>
+<span class="line" id="L39"></span>
+<span class="line" id="L40">            <span class="tok-kw">if</span> (success_count &gt; <span class="tok-number">0</span>) {</span>
+<span class="line" id="L41">                elog.Info(<span class="tok-builtin">@src</span>(), <span class="tok-str">&quot;All tests passed\n&quot;</span>, .{});</span>
+<span class="line" id="L42">            } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L43">                elog.Info(<span class="tok-builtin">@src</span>(), <span class="tok-str">&quot;No tests found\n&quot;</span>, .{});</span>
+<span class="line" id="L44">            }</span>
+<span class="line" id="L45"></span>
+<span class="line" id="L46">            <span class="tok-kw">return</span> success_count;</span>
+<span class="line" id="L47">        }</span>
+<span class="line" id="L48">    };</span>
+<span class="line" id="L49">}</span>
+<span class="line" id="L50"></span>
+<span class="line" id="L51"><span class="tok-comment">/// This function registers a set of test suites to be run inside the Postgres server. A `run_tests` function is</span></span>
+<span class="line" id="L52"><span class="tok-comment">/// registered as a Postgres function that will run all the tests registered. This function is available over</span></span>
+<span class="line" id="L53"><span class="tok-comment">/// SQL (`SELECT run_tests();`).</span></span>
+<span class="line" id="L54"><span class="tok-comment">///</span></span>
+<span class="line" id="L55"><span class="tok-comment">/// You would typically call this function like this:</span></span>
+<span class="line" id="L56"><span class="tok-comment">///</span></span>
+<span class="line" id="L57"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L58"><span class="tok-comment">/// comptime {</span></span>
+<span class="line" id="L59"><span class="tok-comment">///    pgzx.testing.registerTests(.{Tests}, @import(&quot;build_options&quot;).testfn);</span></span>
+<span class="line" id="L60"><span class="tok-comment">///}</span></span>
+<span class="line" id="L61"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L62"><span class="tok-comment">///</span></span>
+<span class="line" id="L63"><span class="tok-comment">/// The `build_options.testfn` options should be defined via `build.zig`. It is used to exclude the test function</span></span>
+<span class="line" id="L64"><span class="tok-comment">/// from the production build.</span></span>
+<span class="line" id="L65"><span class="tok-comment">///</span></span>
+<span class="line" id="L66"><span class="tok-comment">/// If your extension has multiple modules, you can call `registerTests` like this to register the test suites</span></span>
+<span class="line" id="L67"><span class="tok-comment">/// from all of them:</span></span>
+<span class="line" id="L68"><span class="tok-comment">///</span></span>
+<span class="line" id="L69"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L70"><span class="tok-comment">/// comptime {</span></span>
+<span class="line" id="L71"><span class="tok-comment">///    pgzx.testing.registerTests(.{</span></span>
+<span class="line" id="L72"><span class="tok-comment">///         @import(&quot;module1.zig&quot;).Tests,</span></span>
+<span class="line" id="L73"><span class="tok-comment">///         @import(&quot;module2.zig&quot;).Tests,</span></span>
+<span class="line" id="L74"><span class="tok-comment">///         @import(&quot;module2.zig&quot;).Tests },</span></span>
+<span class="line" id="L75"><span class="tok-comment">///     @import(&quot;build_options&quot;).testfn);</span></span>
+<span class="line" id="L76"><span class="tok-comment">/// }</span></span>
+<span class="line" id="L77"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L78"><span class="tok-comment">///</span></span>
+<span class="line" id="L79"><span class="tok-comment">/// Note that you can only call this function once in the extension.</span></span>
+<span class="line" id="L80"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">registerTests</span>(<span class="tok-kw">comptime</span> testsuites: <span class="tok-kw">anytype</span>, <span class="tok-kw">comptime</span> testfn: <span class="tok-type">bool</span>) <span class="tok-type">void</span> {</span>
+<span class="line" id="L81">    <span class="tok-kw">const</span> T = <span class="tok-builtin">@TypeOf</span>(testsuites);</span>
+<span class="line" id="L82">    <span class="tok-kw">if</span> (<span class="tok-builtin">@typeInfo</span>(T) != .Struct) {</span>
+<span class="line" id="L83">        <span class="tok-builtin">@compileError</span>(<span class="tok-str">&quot;registerTests: testsuites must be an array of test suites. Found '&quot;</span> ++ <span class="tok-builtin">@typeName</span>(T) ++ <span class="tok-str">&quot;'&quot;</span>);</span>
+<span class="line" id="L84">    }</span>
+<span class="line" id="L85"></span>
+<span class="line" id="L86">    <span class="tok-kw">if</span> (testfn) {</span>
+<span class="line" id="L87">        fmgr.PG_FUNCTION_V1(<span class="tok-str">&quot;run_tests&quot;</span>, runTests(testsuites).run_tests);</span>
+<span class="line" id="L88">    }</span>
+<span class="line" id="L89">}</span>
+<span class="line" id="L90"></span>
+</code></pre></body>
+</html>

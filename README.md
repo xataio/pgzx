@@ -101,6 +101,47 @@ comptime {
 
 The parameters are received from Postgres serialized, but pgzx automatically deserializes them into Zig types.
 
+### Testing your extension
+
+pgzx provides two types of automatic tests: pg_regress tests and unit tests. The [pg_regress tests](https://www.postgresql.org/docs/current/regress.html) work similar with the way they work for C extensions. You provide inputs in a `sql` folder and expected outputs in the `expected` folder, and then you can run them like this:
+
+```sh
+zig build pg_regress
+```
+
+Under the hood, this calls the `pg_regress` tool from the Postgres build.
+
+For unit tests, we would like to run tests in a Postgres instance, so that the unit tests compile in the same environment as the tested code, and so that the tests can call Postgres APIs. In order to do this, pgzx registers a custom `run_tests` function via the Function manager. This function can be called from SQL (`SELECT run_tests();`) and it will run the unit tests.
+
+A test suite is a Zig struct for which each function whose name starts with `test` is a unit test. To register a test suite, you would typically do something like this:
+
+```zig
+comptime {
+    pgzx.testing.registerTests(.{Tests}, @import("build_options").testfn);
+}
+``` 
+
+The `build_options.testfn` options should be defined via `build.zig`. For an example on how to do that, check out the `char_count_zig` or the `pgaudit_zig` sample extensions.
+
+Note that you can only call the `pgzx.testing.registerTests` function once per extension. If you extension has multiple modules/files, you should call it like this:
+
+```zig
+ comptime {
+    pgzx.testing.registerTests(.{
+         @import("module1.zig").Tests,
+         @import("module2.zig").Tests,
+         @import("module2.zig").Tests },
+     @import("build_options").testfn);
+}
+```
+
+To run the unit tests, provided that you are using our sample `build.zig`, you can run:
+
+```sh
+zig build unit -p $PG_HOME
+```
+
+Behind the scenes, this builds the extension with the `testfn` build option set to `true`, deploys it in the Postgres instance, and then calls `SELECT run_tests();` to run the tests.
 
 ## Status/Roadmap
 
@@ -134,7 +175,7 @@ pgzx is currently under heavy development by the [Xata](https://xata.io) team. I
   * [ ] Download and vendor Postgres source code
   * [x] Compile example extensions against the Postgres source code
   * [x] Build target to run Postgres regression tests
-  * [ ] Run unit tests in the Postgres environment
+  * [x] Run unit tests in the Postgres environment
   * [ ] Provide a standard way to test extensions from separate repos
 * Packaging
   * [x] Add support for Zig packaging
