@@ -56,7 +56,7 @@ fn runTests(comptime testsuites: anytype) type {
 ///
 /// ```
 /// comptime {
-///    pgzx.testing.registerTests(.{Tests}, @import("build_options").testfn);
+///    pgzx.testing.registerTests(@import("build_options").testfn, .{Tests});
 ///}
 /// ```
 ///
@@ -68,16 +68,16 @@ fn runTests(comptime testsuites: anytype) type {
 ///
 /// ```
 /// comptime {
-///    pgzx.testing.registerTests(.{
+///    pgzx.testing.registerTests(@import("build_options").testfn), .{
 ///         @import("module1.zig").Tests,
 ///         @import("module2.zig").Tests,
-///         @import("module2.zig").Tests },
-///     @import("build_options").testfn);
+///         @import("module2.zig").Tests,
+///    });
 /// }
 /// ```
 ///
 /// Note that you can only call this function once in the extension.
-pub inline fn registerTests(comptime testsuites: anytype, comptime testfn: bool) void {
+pub inline fn registerTests(comptime testfn: bool, comptime testsuites: anytype) void {
     const T = @TypeOf(testsuites);
     if (@typeInfo(T) != .Struct) {
         @compileError("registerTests: testsuites must be an array of test suites. Found '" ++ @typeName(T) ++ "'");

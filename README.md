@@ -117,7 +117,7 @@ A test suite is a Zig struct for which each function whose name starts with `tes
 
 ```zig
 comptime {
-    pgzx.testing.registerTests(.{Tests}, @import("build_options").testfn);
+    pgzx.testing.registerTests(@import("build_options").testfn, .{Tests});
 }
 ``` 
 
@@ -127,11 +127,11 @@ Note that you can only call the `pgzx.testing.registerTests` function once per e
 
 ```zig
  comptime {
-    pgzx.testing.registerTests(.{
+    pgzx.testing.registerTests(@import("build_options").testfn, .{
          @import("module1.zig").Tests,
          @import("module2.zig").Tests,
-         @import("module2.zig").Tests },
-     @import("build_options").testfn);
+         @import("module2.zig").Tests,
+    });
 }
 ```
 
