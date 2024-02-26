@@ -372,7 +372,7 @@ pub const Conn = struct {
         }
 
         while (true) {
-            const res = try self.getResult();
+            const res = try self.getRawResult();
             if (res == null) break;
 
             if (last) |r| c.PQclear(r);
