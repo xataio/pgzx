@@ -18,6 +18,9 @@ pqsrv_connect_params(const char *const *keywords,
 						uint32_t wait_event_info);
 
 void
+pgsrv_wait_connected(void *conn, uint32 wait_event_info);
+
+void
 pqsrv_disconnect(void *conn);
 
 #endif

@@ -25,3 +25,8 @@ void
 pqsrv_disconnect(void *conn)  {
     libpqsrv_disconnect(conn);
 }
+
+void
+pgsrv_wait_connected(void *conn, uint32 wait_event_info) {
+    libpqsrv_connect_internal(conn, wait_event_info);
+}
