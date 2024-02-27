@@ -28,7 +28,7 @@ We recommend checking the examples in the section above to understand how to use
 
 ### Getting Started
 
-This project uses [Nix flakes]() to manage build dependencies and provide a development shell. We provide a template for you initialize a new Zig based postgres extension project, which allows you to reuse some of the utilities we're using.
+This project uses [Nix flakes](https://nixos.wiki/wiki/Flakes) to manage build dependencies and provide a development shell. We provide a template for you initialize a new Zig based Postgres extension project, which allows you to reuse some of the utilities we're using.
 
 Before getting started we would recommend you to familiarize yourself with the projects setup first. To do so, please start with the [Contributing][#contributing] section.   
 
