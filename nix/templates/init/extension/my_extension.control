@@ -1,0 +1,5 @@
+# my_extension extension
+comment = 'My extension short doc'
+default_version = '0.1'
+module_pathname = '$libdir/my_extension'
+relocatable = true
