@@ -382,7 +382,6 @@ pub const Conn = struct {
                 c.PGRES_COPY_IN,
                 c.PGRES_COPY_OUT,
                 c.PGRES_COPY_BOTH,
-                c.CONNECTION_BAD,
                 => true,
                 else => false,
             };
