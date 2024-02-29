@@ -1,4 +1,4 @@
-const c = @import("c.zig");
+const c = @import("../c.zig");
 
 // Wrapper for postgres lists.
 //
@@ -16,23 +16,48 @@ pub fn PointerListOf(comptime T: type) type {
         const Self = @This();
 
         pub fn create1(v: *T) Self {
-            return Self.init(c.list_make1(v));
+            return Self.init(c.list_make1_impl(
+                c.T_List,
+                .{ .ptr_value = v },
+            ));
         }
 
         pub fn create2(v1: *T, v2: *T) Self {
-            return Self.init(c.list_make2(v1, v2));
+            return Self.init(c.list_make2_impl(
+                c.T_List,
+                .{ .ptr_value = v1 },
+                .{ .ptr_value = v2 },
+            ));
         }
 
         pub fn create3(v1: *T, v2: *T, v3: *T) Self {
-            return Self.init(c.list_make3(v1, v2, v3));
+            return Self.init(c.list_make3_impl(
+                c.T_List,
+                .{ .ptr_value = v1 },
+                .{ .ptr_value = v2 },
+                .{ .ptr_value = v3 },
+            ));
         }
 
         pub fn create4(v1: *T, v2: *T, v3: *T, v4: *T) Self {
-            return Self.init(c.list_make4(v1, v2, v3, v4));
+            return Self.init(c.list_make4_impl(
+                c.T_List,
+                .{ .ptr_value = v1 },
+                .{ .ptr_value = v2 },
+                .{ .ptr_value = v3 },
+                .{ .ptr_value = v4 },
+            ));
         }
 
         pub fn create5(v1: *T, v2: *T, v3: *T, v4: *T, v5: *T) Self {
-            return Self.init(c.list_make5(v1, v2, v3, v4, v5));
+            return Self.init(c.list_make5_impl(
+                c.T_List,
+                .{ .ptr_value = v1 },
+                .{ .ptr_value = v2 },
+                .{ .ptr_value = v3 },
+                .{ .ptr_value = v4 },
+                .{ .ptr_value = v5 },
+            ));
         }
 
         pub fn init(l: *c.List) Self {
@@ -124,12 +149,8 @@ pub fn PointerListOf(comptime T: type) type {
             return Self.init(c.list_difference_ptr(self.list, other.list));
         }
 
-        pub fn appendUnique(self: Self, other: Self) Self {
-            return Self.init(c.list_concat(self.list, other.list));
-        }
-
-        pub fn appendUniquePtr(self: Self, other: Self) Self {
-            return Self.init(c.list_concat_ptr(self.list, other.list));
+        pub fn append(self: Self, value: *T) Self {
+            return Self.init(c.lappend(self.list, value));
         }
 
         pub fn concatUnique(self: Self, other: Self) Self {
@@ -185,3 +206,51 @@ fn IteratorOfWith(comptime T: type, comptime fn_init: anytype, comptime fn_next:
         }
     };
 }
+
+pub const PointerListTestSuite = struct {
+    const std = @import("std");
+
+    pub fn testIterator() !void {
+        var elems = &[_]i32{ 1, 2, 3, 4, 5, 6 };
+        var list = PointerListOf(i32).create5(
+            @constCast(&elems[0]),
+            @constCast(&elems[1]),
+            @constCast(&elems[2]),
+            @constCast(&elems[3]),
+            @constCast(&elems[4]),
+        );
+        list = list.append(@constCast(&elems[5]));
+        defer list.deinit();
+
+        var it = list.iter();
+        var i: i32 = 1;
+        while (it.next()) |elem| {
+            try std.testing.expect(i <= 6);
+            try std.testing.expect(elem != null);
+            try std.testing.expect(elem.?.* == i);
+            i += 1;
+        }
+    }
+
+    pub fn testIteratorRev() !void {
+        var elems = &[_]i32{ 1, 2, 3, 4, 5, 6 };
+        var list = PointerListOf(i32).create5(
+            @constCast(&elems[0]),
+            @constCast(&elems[1]),
+            @constCast(&elems[2]),
+            @constCast(&elems[3]),
+            @constCast(&elems[4]),
+        );
+        list = list.append(@constCast(&elems[5]));
+        defer list.deinit();
+
+        var it = list.iterRev();
+        var i: i32 = 6;
+        while (it.next()) |elem| {
+            try std.testing.expect(i > 0);
+            try std.testing.expect(elem != null);
+            try std.testing.expect(elem.?.* == i);
+            i -= 1;
+        }
+    }
+};

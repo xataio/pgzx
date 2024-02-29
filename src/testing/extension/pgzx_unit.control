@@ -1,0 +1,5 @@
+# pgzx_unit testing extension
+comment = 'PGZX unit tests'
+default_version = '0.1'
+module_pathname = '$libdir/pgzx_unit'
+relocatable = false

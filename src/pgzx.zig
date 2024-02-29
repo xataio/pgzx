@@ -23,8 +23,10 @@ pub const spi = @import("pgzx/spi.zig");
 pub const str = @import("pgzx/str.zig");
 pub const utils = @import("pgzx/utils.zig");
 pub const intr = @import("pgzx/interrupts.zig");
-pub const list = @import("pgzx/list.zig");
 pub const testing = @import("pgzx/testing.zig");
+
+// data structures
+pub const collections = @import("pgzx/collections.zig");
 
 pub const guc = utils.guc;
 
@@ -35,4 +37,5 @@ pub const PG_MODULE_MAGIC = fmgr.PG_MODULE_MAGIC;
 pub const PG_FUNCTION_V1 = fmgr.PG_FUNCTION_V1;
 pub const PG_FUNCTION_INFO_V1 = fmgr.PG_FUNCTION_INFO_V1;
 
+pub const list = collections.list;
 pub const PointerListOf = list.PointerListOf;
