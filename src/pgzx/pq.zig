@@ -453,46 +453,46 @@ pub const Conn = struct {
         c.pqsrv_disconnect(self.conn);
     }
 
-    pub fn status(self: *Self) ConnStatus {
+    pub fn status(self: *const Self) ConnStatus {
         return c.PQstatus(self.conn);
     }
 
-    pub fn transactionStatus(self: *Self) TransactionStatus {
+    pub fn transactionStatus(self: *const Self) TransactionStatus {
         return c.PQtransactionStatus(self.conn);
     }
 
-    pub fn serverVersion(self: *Self) c_int {
+    pub fn serverVersion(self: *const Self) c_int {
         return c.PQserverVersion(self.conn);
     }
 
-    pub fn errorMessage(self: *Self) ?[:0]const u8 {
+    pub fn errorMessage(self: *const Self) ?[:0]const u8 {
         if (c.PQerrorMessage(self.conn)) |msg| {
             return std.mem.span(msg);
         }
         return null;
     }
 
-    pub fn socket(self: *Self) c_int {
+    pub fn socket(self: *const Self) c_int {
         return c.PQsocket(self.conn);
     }
 
-    pub fn backendPID(self: *Self) c_int {
+    pub fn backendPID(self: *const Self) c_int {
         return c.PQbackendPID(self.conn);
     }
 
-    pub fn host(self: *Self) [:0]const u8 {
+    pub fn host(self: *const Self) [:0]const u8 {
         return std.mem.span(c.PQhost(self.conn));
     }
 
-    pub fn port(self: *Self) [:0]const u8 {
+    pub fn port(self: *const Self) [:0]const u8 {
         return std.mem.span(c.PQport(self.conn));
     }
 
-    pub fn dbname(self: *Self) [:0]const u8 {
+    pub fn dbname(self: *const Self) [:0]const u8 {
         return std.mem.span(c.PQdb(self.conn));
     }
 
-    pub fn isBusy(self: *Self) bool {
+    pub fn isBusy(self: *const Self) bool {
         return c.PQisBusy(self.conn) != 0;
     }
 };
