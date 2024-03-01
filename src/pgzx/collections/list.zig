@@ -8,30 +8,42 @@ const c = @import("../c.zig");
 // All allocations are done one the current postgres memory context.
 pub fn PointerListOf(comptime T: type) type {
     return struct {
-        list: *c.List,
-
+        const Self = @This();
         const Iterator = IteratorOf(T);
         const ReverseIterator = ReverseIteratorOf(T);
 
-        const Self = @This();
+        list: ?*c.List,
 
-        pub fn create1(v: *T) Self {
-            return Self.init(c.list_make1_impl(
+        pub fn init() Self {
+            return Self.initFrom(null);
+        }
+
+        pub fn initFrom(from: ?*c.List) Self {
+            if (from) |l| {
+                if (l.type != c.T_List) {
+                    @panic("Expected a pointer list");
+                }
+            }
+            return Self{ .list = from };
+        }
+
+        pub fn init1(v: *T) Self {
+            return Self.initFrom(c.list_make1_impl(
                 c.T_List,
                 .{ .ptr_value = v },
             ));
         }
 
-        pub fn create2(v1: *T, v2: *T) Self {
-            return Self.init(c.list_make2_impl(
+        pub fn init2(v1: *T, v2: *T) Self {
+            return Self.initFrom(c.list_make2_impl(
                 c.T_List,
                 .{ .ptr_value = v1 },
                 .{ .ptr_value = v2 },
             ));
         }
 
-        pub fn create3(v1: *T, v2: *T, v3: *T) Self {
-            return Self.init(c.list_make3_impl(
+        pub fn init3(v1: *T, v2: *T, v3: *T) Self {
+            return Self.initFrom(c.list_make3_impl(
                 c.T_List,
                 .{ .ptr_value = v1 },
                 .{ .ptr_value = v2 },
@@ -39,8 +51,8 @@ pub fn PointerListOf(comptime T: type) type {
             ));
         }
 
-        pub fn create4(v1: *T, v2: *T, v3: *T, v4: *T) Self {
-            return Self.init(c.list_make4_impl(
+        pub fn init4(v1: *T, v2: *T, v3: *T, v4: *T) Self {
+            return Self.initFrom(c.list_make4_impl(
                 c.T_List,
                 .{ .ptr_value = v1 },
                 .{ .ptr_value = v2 },
@@ -49,8 +61,8 @@ pub fn PointerListOf(comptime T: type) type {
             ));
         }
 
-        pub fn create5(v1: *T, v2: *T, v3: *T, v4: *T, v5: *T) Self {
-            return Self.init(c.list_make5_impl(
+        pub fn init5(v1: *T, v2: *T, v3: *T, v4: *T, v5: *T) Self {
+            return Self.initFrom(c.list_make5_impl(
                 c.T_List,
                 .{ .ptr_value = v1 },
                 .{ .ptr_value = v2 },
@@ -58,13 +70,6 @@ pub fn PointerListOf(comptime T: type) type {
                 .{ .ptr_value = v4 },
                 .{ .ptr_value = v5 },
             ));
-        }
-
-        pub fn init(l: *c.List) Self {
-            if (l.type != c.T_List) {
-                @panic("Expected a pointer list");
-            }
-            return Self{ .list = l };
         }
 
         pub fn deinit(self: Self) void {
@@ -75,16 +80,16 @@ pub fn PointerListOf(comptime T: type) type {
             c.list_free_deep(self.list);
         }
 
-        pub fn rawList(self: Self) *c.List {
+        pub fn rawList(self: Self) ?*c.List {
             return self.list;
         }
 
         pub fn copy(self: Self) Self {
-            return Self.init(c.list_copy(self.list));
+            return Self.initFrom(c.list_copy(self.list));
         }
 
         pub fn copyDeep(self: Self) Self {
-            return Self.init(c.list_copy_deep(self.list));
+            return Self.initFrom(c.list_copy_deep(self.list));
         }
 
         pub fn sort(self: Self, cmp: fn (?*T, ?*T) c_int) void {
@@ -105,6 +110,20 @@ pub fn PointerListOf(comptime T: type) type {
             return Iterator.init(self.list);
         }
 
+        pub fn append(self: *Self, value: *T) void {
+            var list: ?*c.List = self.list;
+            list = c.lappend(list, value);
+            self.list = list;
+        }
+
+        pub fn concatUnique(self: *Self, other: Self) void {
+            self.list = c.list_concat_unique(self.list, other.list);
+        }
+
+        pub fn concatUniquePtr(self: *Self, other: Self) void {
+            self.list = c.list_concat_unique_ptr(self.list, other.list);
+        }
+
         pub fn iterRev(self: Self) ReverseIterator {
             return ReverseIterator.init(self.list);
         }
@@ -117,48 +136,55 @@ pub fn PointerListOf(comptime T: type) type {
             return c.list_member_ptr(self.list, value);
         }
 
-        pub fn del(self: Self, value: *T) Self {
-            return Self.init(c.list_delete(self.list, value));
+        pub fn deleteNth(self: *Self, n: usize) void {
+            if (n >= self.len()) {
+                @panic("Index out of bounds");
+            }
+            self.list = c.list_delete_nth(self.list, @intCast(n));
         }
 
-        pub fn delPtr(self: Self, value: *T) Self {
-            return Self.init(c.list_delete_ptr(self.list, value));
+        pub fn deleteFirst(self: *Self) void {
+            self.list = c.list_delete_first(self.list);
+        }
+
+        pub fn deleteFirstN(self: *Self, n: usize) void {
+            self.list = c.list_delete_first_n(self.list, @intCast(n));
+        }
+
+        pub fn deleteLast(self: *Self) void {
+            self.list = c.list_delete_last(self.list);
+        }
+
+        pub fn delete(self: *Self, value: *T) void {
+            self.list = c.list_delete(self.list, value);
+        }
+
+        pub fn deletePointer(self: *Self, value: *T) void {
+            self.list = c.list_delete_ptr(self.list, value);
         }
 
         pub fn createUnion(self: Self, other: *Self) Self {
-            return Self.init(c.list_union(self.list, other.list));
+            return Self.initFrom(c.list_union(self.list, other.list));
         }
 
         pub fn createUnionPtr(self: Self, other: Self) Self {
-            return Self.init(c.list_union_ptr(self.list, other.list));
+            return Self.initFrom(c.list_union_ptr(self.list, other.list));
         }
 
         pub fn createIntersection(self: Self, other: Self) Self {
-            return Self.init(c.list_intersection(self.list, other.list));
+            return Self.initFrom(c.list_intersection(self.list, other.list));
         }
 
         pub fn createIntersectionPtr(self: Self, other: Self) Self {
-            return Self.init(c.list_intersection_ptr(self.list, other.list));
+            return Self.initFrom(c.list_intersection_ptr(self.list, other.list));
         }
 
         pub fn createDifference(self: Self, other: Self) Self {
-            return Self.init(c.list_difference(self.list, other.list));
+            return Self.initFrom(c.list_difference(self.list, other.list));
         }
 
         pub fn createDifferencePtr(self: Self, other: Self) Self {
-            return Self.init(c.list_difference_ptr(self.list, other.list));
-        }
-
-        pub fn append(self: Self, value: *T) Self {
-            return Self.init(c.lappend(self.list, value));
-        }
-
-        pub fn concatUnique(self: Self, other: Self) Self {
-            return Self.init(c.list_concat_unique(self.list, other.list));
-        }
-
-        pub fn concatUniquePtr(self: Self, other: Self) Self {
-            return Self.init(c.list_concat_unique_ptr(self.list, other.list));
+            return Self.initFrom(c.list_difference_ptr(self.list, other.list));
         }
     };
 }
@@ -186,14 +212,16 @@ fn IteratorOfWith(comptime T: type, comptime fn_init: anytype, comptime fn_next:
 
         const Self = @This();
 
-        pub fn init(l: *c.List) Self {
-            if (l.type != c.T_List) {
-                @panic("Expected a pointer list");
+        pub fn init(list: ?*c.List) Self {
+            if (list) |l| {
+                if (l.type != c.T_List) {
+                    @panic("Expected a pointer list");
+                }
+                return Self{ .list = l, .cell = fn_init(l) };
+            } else {
+                // Safety: The `list` element is not used when cell is null.
+                return Self{ .list = undefined, .cell = null };
             }
-            return Self{
-                .list = l,
-                .cell = fn_init(l),
-            };
         }
 
         pub fn next(self: *Self) ??*T {
@@ -210,16 +238,24 @@ fn IteratorOfWith(comptime T: type, comptime fn_init: anytype, comptime fn_next:
 pub const PointerListTestSuite = struct {
     const std = @import("std");
 
-    pub fn testIterator() !void {
+    pub fn testIterator_emptyList() !void {
+        var list = PointerListOf(i32).init();
+        defer list.deinit();
+
+        var it = list.iter();
+        try std.testing.expect(it.next() == null);
+    }
+
+    pub fn testIterator_forward() !void {
         var elems = &[_]i32{ 1, 2, 3, 4, 5, 6 };
-        var list = PointerListOf(i32).create5(
+        var list = PointerListOf(i32).init5(
             @constCast(&elems[0]),
             @constCast(&elems[1]),
             @constCast(&elems[2]),
             @constCast(&elems[3]),
             @constCast(&elems[4]),
         );
-        list = list.append(@constCast(&elems[5]));
+        list.append(@constCast(&elems[5]));
         defer list.deinit();
 
         var it = list.iter();
@@ -232,16 +268,16 @@ pub const PointerListTestSuite = struct {
         }
     }
 
-    pub fn testIteratorRev() !void {
+    pub fn testIterator_reverse() !void {
         var elems = &[_]i32{ 1, 2, 3, 4, 5, 6 };
-        var list = PointerListOf(i32).create5(
+        var list = PointerListOf(i32).init5(
             @constCast(&elems[0]),
             @constCast(&elems[1]),
             @constCast(&elems[2]),
             @constCast(&elems[3]),
             @constCast(&elems[4]),
         );
-        list = list.append(@constCast(&elems[5]));
+        list.append(@constCast(&elems[5]));
         defer list.deinit();
 
         var it = list.iterRev();
