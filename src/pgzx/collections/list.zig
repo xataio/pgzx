@@ -235,7 +235,7 @@ fn IteratorOfWith(comptime T: type, comptime fn_init: anytype, comptime fn_next:
     };
 }
 
-pub const PointerListTestSuite = struct {
+pub const TestSuite_PointerList = struct {
     const std = @import("std");
 
     pub fn testIterator_emptyList() !void {

@@ -6,7 +6,8 @@ comptime {
     pgzx.testing.registerTests(
         @import("build_options").testfn,
         .{
-            pgzx.collections.list.PointerListTestSuite,
+            pgzx.collections.list.TestSuite_PointerList,
+            pgzx.collections.slist.TestSuite_SList,
         },
     );
 }

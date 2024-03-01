@@ -10,72 +10,74 @@ fn initNode() c.slist_node {
 
 pub fn SList(comptime T: type, comptime node_field: std.meta.FieldEnum(T)) type {
     return struct {
-        head: c.slist_head,
-
         const Self = @This();
-        usingnamespace SListMeta(T, node_field);
-
         const Iterator = SListIter(T, node_field);
 
-        pub fn init() Self {
-            var h = Self{};
+        usingnamespace SListMeta(T, node_field);
+
+        head: c.slist_head,
+
+        pub inline fn init() Self {
+            var h = Self{ .head = undefined };
             c.slist_init(&h.head);
             return h;
         }
 
-        pub fn initWith(init_head: c.slist_head) Self {
+        pub inline fn initWith(init_head: c.slist_head) Self {
             return Self{ .head = init_head };
         }
 
-        pub fn initFrom(init_node: *T) Self {
+        pub inline fn initFrom(init_node: *T) Self {
             var l = Self.init();
             l.head.head.next = Self.nodePtr(init_node);
             return l;
         }
 
-        pub fn isEmpty(self: *const Self) bool {
-            return c.slist_empty(&self.head);
+        pub inline fn isEmpty(self: Self) bool {
+            return c.slist_is_empty(&self.head);
         }
 
-        pub fn prepend(self: *Self, v: *T) void {
+        pub inline fn pushHead(self: *Self, v: *T) void {
             c.slist_push_head(&self.head, Self.nodePtr(v));
         }
 
-        pub fn popFront(self: *Self) ?*T {
-            const node_ptr = c.slist_pop_head(&self.head);
+        pub inline fn popHead(self: *Self) ?*T {
+            const node_ptr = c.slist_pop_head_node(&self.head);
             return Self.optNodeParentPtr(node_ptr);
         }
 
-        pub fn head(self: *Self) ?*T {
-            const node_ptr = c.slist_head_node(&self.head);
+        pub inline fn headNode(self: Self) ?*T {
+            const node_ptr = c.slist_head_node(@constCast(&self.head));
             return Self.optNodeParentPtr(node_ptr);
         }
 
-        pub fn tail(self: *Self) ?*T {
-            const node_ptr = c.slist_tail_node(&self.head);
-            if (node_ptr == null) return null;
+        pub fn tail(self: Self) ?Self {
+            if (self.isEmpty()) return null;
 
-            var new_head: c.slit_head = undefined;
-            new_head.head.next = node_ptr;
+            const next_ptr = self.head.head.next.*.next;
+            if (next_ptr == null) return null;
+
+            var new_head: c.slist_head = undefined;
+            new_head.head.next = next_ptr;
             return Self.initWith(new_head);
         }
 
-        pub fn insertAfter(prev: *T, v: *T) void {
+        pub inline fn insertAfter(prev: *T, v: *T) void {
             c.slist_insert_after(Self.nodePtr(prev), Self.nodePtr(v));
         }
 
-        pub fn hasNext(v: *T) bool {
+        pub inline fn hasNext(v: *T) bool {
             return Self.nodePtr(v).*.next != null;
         }
 
-        pub fn next(v: *T) ?*T {
+        pub inline fn next(v: *T) ?*T {
             const node_ptr = c.slist_next(Self.nodePtr(v));
             return Self.optNodeParentPtr(node_ptr);
         }
 
-        pub fn iter(self: *Self) Iterator {
+        pub inline fn iter(self: *Self) Iterator {
             var i: c.slist_iter = undefined;
-            i.cur = Self.nodePtr(self.head.head.next);
+            i.cur = self.head.head.next;
             return .{ .iter = i };
         }
     };
@@ -88,8 +90,10 @@ pub fn SListIter(comptime T: type, comptime node_field: std.meta.FieldEnum(T)) t
 
         iter: c.slist_iter,
 
-        pub fn next(self: *Self) ?*T {
-            const node_ptr = c.slist_next(&self.node);
+        pub fn next(self: *Self) ??*T {
+            if (self.iter.cur == null) return null;
+            const node_ptr = self.iter.cur;
+            self.iter.cur = node_ptr.*.next;
             return if (node_ptr) |p| Self.nodeParentPtr(p) else null;
         }
     };
@@ -97,20 +101,104 @@ pub fn SListIter(comptime T: type, comptime node_field: std.meta.FieldEnum(T)) t
 
 fn SListMeta(comptime T: type, comptime node_field: std.meta.FieldEnum(T)) type {
     return struct {
-        const node = @TypeOf(T).fieldInfo(node_field).name;
+        const node = std.meta.fieldInfo(T, node_field).name;
 
-        fn nodePtr(v: *T) *c.slist_node {
+        inline fn nodePtr(v: *T) *c.slist_node {
             return &@field(v, node);
         }
 
-        fn nodeParentPtr(n: *c.slist_node) ?*T {
+        inline fn nodeParentPtr(n: *c.slist_node) ?*T {
             return @fieldParentPtr(T, node, n);
         }
 
-        fn optNodeParentPtr(n: ?*c.slist_node) ?*T {
+        inline fn optNodeParentPtr(n: ?*c.slist_node) ?*T {
             return if (n) |p| nodeParentPtr(p) else null;
         }
     };
 }
 
-pub const TestSuite = struct {};
+pub const TestSuite_SList = struct {
+    pub fn testEmpty() !void {
+        const T = struct {
+            value: u32,
+            node: c.slist_node,
+        };
+        const MyList = SList(T, .node);
+
+        var list = MyList.init();
+        try std.testing.expect(list.isEmpty());
+
+        var it = list.iter();
+        try std.testing.expect(it.next() == null);
+
+        try std.testing.expect(list.headNode() == null);
+        try std.testing.expect(list.tail() == null);
+    }
+
+    pub fn testPush() !void {
+        const T = struct {
+            value: u32,
+            node: c.slist_node = .{ .next = null },
+        };
+        const MyListT = SList(T, .node);
+
+        var values = [_]T{ .{ .value = 1 }, .{ .value = 2 }, .{ .value = 3 } };
+
+        var list = MyListT.init();
+        list.pushHead(&values[2]);
+        list.pushHead(&values[1]);
+        list.pushHead(&values[0]);
+
+        var i: u32 = 1;
+        var it = list.iter();
+        while (it.next()) |node| {
+            try std.testing.expect(i <= 3);
+            try std.testing.expect(node != null);
+            try std.testing.expect(node.?.*.value == i);
+            i += 1;
+        }
+        try std.testing.expect(i == 4);
+
+        try std.testing.expect(list.headNode().?.*.value == 1);
+        try std.testing.expect(list.tail().?.headNode().?.*.value == 2);
+    }
+
+    pub fn testPop() !void {
+        const T = struct {
+            value: u32,
+            node: c.slist_node = .{ .next = null },
+        };
+        const MyListT = SList(T, .node);
+
+        var values = [_]T{ .{ .value = 1 }, .{ .value = 2 }, .{ .value = 3 } };
+
+        var list = MyListT.init();
+        list.pushHead(&values[2]);
+        list.pushHead(&values[1]);
+        list.pushHead(&values[0]);
+
+        _ = list.popHead();
+
+        var i: u32 = 2;
+        var it = list.iter();
+        while (it.next()) |node| {
+            try std.testing.expect(i <= 3);
+            try std.testing.expect(node != null);
+            try std.testing.expect(node.?.*.value == i);
+            i += 1;
+        }
+        try std.testing.expect(i == 4);
+        try std.testing.expect(list.headNode().?.*.value == 2);
+        try std.testing.expect(list.tail().?.headNode().?.*.value == 3);
+
+        _ = list.popHead();
+        _ = list.popHead();
+        try std.testing.expect(list.isEmpty());
+
+        it = list.iter();
+        try std.testing.expect(it.next() == null);
+
+        try std.testing.expect(list.headNode() == null);
+        try std.testing.expect(list.tail() == null);
+    }
+};
