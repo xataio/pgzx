@@ -8,6 +8,7 @@ comptime {
         .{
             pgzx.collections.list.TestSuite_PointerList,
             pgzx.collections.slist.TestSuite_SList,
+            pgzx.collections.dlist.TestSuite_DList,
         },
     );
 }

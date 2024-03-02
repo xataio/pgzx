@@ -90,7 +90,7 @@ pub fn SListIter(comptime T: type, comptime node_field: std.meta.FieldEnum(T)) t
 
         iter: c.slist_iter,
 
-        pub fn next(self: *Self) ??*T {
+        pub inline fn next(self: *Self) ?*T {
             if (self.iter.cur == null) return null;
             const node_ptr = self.iter.cur;
             self.iter.cur = node_ptr.*.next;
@@ -153,8 +153,7 @@ pub const TestSuite_SList = struct {
         var it = list.iter();
         while (it.next()) |node| {
             try std.testing.expect(i <= 3);
-            try std.testing.expect(node != null);
-            try std.testing.expect(node.?.*.value == i);
+            try std.testing.expect(node.*.value == i);
             i += 1;
         }
         try std.testing.expect(i == 4);
@@ -183,8 +182,7 @@ pub const TestSuite_SList = struct {
         var it = list.iter();
         while (it.next()) |node| {
             try std.testing.expect(i <= 3);
-            try std.testing.expect(node != null);
-            try std.testing.expect(node.?.*.value == i);
+            try std.testing.expect(node.*.value == i);
             i += 1;
         }
         try std.testing.expect(i == 4);
