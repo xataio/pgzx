@@ -19,6 +19,8 @@ const includes = @cImport({
 
     @cInclude("commands/extension.h");
 
+    @cInclude("lib/ilist.h");
+
     @cInclude("storage/ipc.h");
     @cInclude("storage/proc.h");
     @cInclude("storage/latch.h");
