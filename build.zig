@@ -26,7 +26,7 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
         });
         module.addIncludePath(.{
-            .path = b.pathFromRoot("./src/pgzx/c/include/"),
+            .path = "./src/pgzx/c/include/",
         });
         module.addIncludePath(.{
             .cwd_relative = pgbuild.getIncludeServerDir(),
@@ -34,7 +34,7 @@ pub fn build(b: *std.Build) void {
         // libpq support
         module.addCSourceFiles(.{
             .files = &[_][]const u8{
-                b.pathFromRoot("./src/pgzx/c/libpqsrv.c"),
+                "./src/pgzx/c/libpqsrv.c",
             },
             .flags = &[_][]const u8{
                 "-I", pgbuild.getIncludeDir(),
