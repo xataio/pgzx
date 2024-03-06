@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="brand-kit/banner/pgx-banner-github@2x.png" alt="pgzx logo" />
+</div>
+
 <p align="center">
   <a href="https://github.com/xataio/pgzx/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-green" alt="License - Apache 2.0"></a>&nbsp;
   <a href="https://github.com/xataio/pgzx/actions?query=branch%3Amain"><img src="https://github.com/xataio/pgzx/actions/workflows/check.yaml/badge.svg" alt="CI Build"></a> &nbsp;
