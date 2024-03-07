@@ -4,9 +4,8 @@ Our logo consists of a symbol. For dark backgrounds, use the inverted (white) lo
 
 | Logo |
 |------|
-| ![SymbolWhite](logo/pgzx-white.svg) |
 | ![SymbolBlack](logo/pgzx-black.svg) |
-
+| ![SymbolWhite](logo/pgzx-white.svg) |
 
 ## Banner
 
