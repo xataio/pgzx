@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="brand-kit/banner/pgx-banner-github@2x.png" alt="pgzx logo" />
+  <img src="brand-kit/banner/pgzx-banner-github@2x.png" alt="pgzx logo" />
 </div>
 
 <p align="center">
