@@ -93,19 +93,66 @@
           '';
         };
 
-        devShells.default = let
-          user_shell = (import ./devshell.nix) {
+        devShells = let
+          devshell_nix = (import ./devshell.nix) {
             inherit pkgs;
             inherit lib;
           };
-        in
-          pkgs.mkShell (user_shell
+
+          user_shell =
+            devshell_nix
             // {
               shellHook = ''
-                ${user_shell.shellHook or ""}
+                ${devshell_nix.shellHook or ""}
                 ${config.pre-commit.devShell.shellHook or ""}
               '';
+            };
+
+          mkShell = pkgs.mkShell;
+
+          # On darwin we expect command line tools to be installed.
+          # It is possible to install clang/gcc as nix package, but linking
+          # can be quite a pain.
+          # On non-darwin systems we will use the nix toolchain for now.
+          useSystemCC = pkgs.stdenv.isDarwin;
+        in {
+          default = mkShell user_shell;
+
+          # Create development shell with C tools and dependencies to build Postgres locally.
+          debug = mkShell (user_shell
+            // {
+              hardeningDisable = ["all"];
+
+              packages =
+                user_shell.packages
+                ++ [
+                  pkgs.flex
+                  pkgs.bison
+                  pkgs.meson
+                  pkgs.ninja
+                  pkgs.ccache
+                  pkgs.pkg-config
+                  pkgs.cmake
+
+                  pkgs.icu
+                  pkgs.zip
+                  pkgs.readline
+                  pkgs.openssl
+                  pkgs.libxml2
+                  pkgs.llvmPackages_17.llvm
+                  pkgs.llvmPackages_17.lld
+                  pkgs.llvmPackages_17.clang
+                  pkgs.llvmPackages_17.clang-unwrapped
+                  pkgs.lz4
+                  pkgs.zstd
+                  pkgs.libxslt
+                  pkgs.python3
+                ]
+                ++ (lib.optionals (!useSystemCC) [
+                  pkgs.clang
+                ]);
             });
+        };
       };
     };
 }
