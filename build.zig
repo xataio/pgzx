@@ -64,7 +64,7 @@ pub fn build(b: *std.Build) void {
                 .path = "src/testing.zig",
             },
             .root_dir = "src/testing",
-            .link_libc = false,
+            .link_libc = true,
             .link_allow_shlib_undefined = true,
         });
         tests.lib.root_module.addIncludePath(.{
