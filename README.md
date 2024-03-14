@@ -320,6 +320,141 @@ ok 1         - char_count_test                            10 ms
 # All 1 tests passed.
 ```
 
+### Debugging the unit tests
+
+Because Postgres manages the actual processes and starts a new process for each client we must attach our debugger to an existing session.
+
+To debug an extension that exposes a function, like the unit tests, first start a SQL session:
+
+```
+$ psql -U postgres
+```
+
+In order to attach our debugger to the session we need the PID for your current process:
+
+```
+postgres=# select pg_backend_pid();
+ pg_backend_pid
+----------------
+          14985
+(1 row)
+```
+
+If we want to set breakpoints we must also ensure that our extensions library has been loaded. You might have to drop and re-create an the test function in case you can't set a breakpoint (this will force Postgres to load the library):
+
+```
+postgres=# DROP FUNCTION run_tests;
+CREATE FUNCTION run_tests() RETURNS INTEGER AS '$libdir/pgzx_unit' LANGUAGE C IMMUTABLE;
+```
+
+Now we can attach our debugger and set a breakpoint (See your debuggers documentation on how to attach):
+
+```
+$ lldb -p 14985
+(lldb) b hsearch.zig:117
+...
+(lldb) c
+```
+
+You can set breakpoints in your Zig based extension in C sources given you have all debug symbols available.
+
+With our breakpoints set we want to start the testsuite:
+
+```
+postgres=# SELECT run_tests();
+```
+
+
+### Postgres debug build
+
+The default development shell and scripts relocated the Nix postgres installation into the `out` folder only. When debugging extension in isolation this is normally all you need. But in case you need to debug and step into the Postgres sources as well it is helpful to have a debug build available.
+
+This project provides a second development shell type that provides tooling to fetch and build Postgres in debug mode.
+
+Select the `debug` shell to start a shell with required development tools:
+
+```
+nix develop '.#debug'
+```
+
+The `pgbuild` script will fetch the Postgres sources and build a local debug build that you can use for development, testing, and debugging:
+
+```
+$ pgbuild
+```
+
+This will checkout Postgres into the `out/postgresql_src` directory. The build files will be stored in `out/postgresql_src/build`. We use [meson](https://mesonbuild.com/) and [Ninja](https://ninja-build.org/) to build Postgres. Ninja speeds up the compilation by parallelizing compilation tasks as much as possible. Compilation via Ninja also emits a `compile_commands.json` file that you can use with your editors LSP to improve navigating the Postgres source code if you wish to do so.
+
+Optionally symlink the `compile_commands.json` file:
+
+```
+$ ln -s ./out/postgresql_src/build/compile_commands.json ./out/postgresql_src/compile_commands.json
+```
+
+The local build will be installed in `out/local`. To switch to the local Postgres build and ensure that your extension is build against it use:
+
+```
+$ pguse local
+
+```
+
+Note: Delete the `zig-cache` folder when switching to another Postgres installation to ensure that you extension is rebuild properly against the new versions.
+
+
+### Debugging Zig standard library and build script support
+
+To debug Zig build scripts or the standard library all you need is the original sources. No additional build step is required. Anyways, it is recommended to use the same library version as is the zig compiler ships with. You can query the current version or Git commit of a nightly build using the `zig` tool:
+
+```
+$ zig version
+0.12.0-dev.3154+0b744da84
+```
+
+The version shown here for example indicates that we use a nightly build. The commit ID of that build is `0b744da84`.
+
+You can clone and checkout the repository by yourself. We also have a small script `ziglocal` to checkout and even build the compiler. You can use the script to just checkout the correct version into your development environment:
+
+```
+$ ziglocal clone --commit 0b744da84
+```
+
+This command clones the master branch only into the `./out/zig` directory.
+
+Now when building the test extensions you can use the `--zig-lib-dir` CLI flag to tell the compiler to use an alternative library:
+
+```
+$ zig build unit -p $PG_HOME --zig-lib-dir $PRJ_ROOT/out/zig/lib
+```
+
+The zig compiler will now use the local checkout to build the `build.zig` file and your project.
+
+### Debugging Zig compiler/linker
+
+As Zig is still in development, you might have the need to build the Zig toolchain yourself, maybe in debug mode.
+
+The `debug` shell installs the additional dependencies that you need to build Postgres or the Zig compiler yourself.
+
+```
+nix develop '.#debug'
+```
+
+Optionally we might want to debug the actual version that we normally use:
+
+```
+$ zig version
+0.12.0-dev.3154+0b744da84
+```
+
+Next we checkout and compile the toolchain (Note: the `--commit` option is optional):
+
+```
+$ ziglocal --commit 0b744da84
+```
+
+This step will take a while. You will find the compiler and library of your local debug build in the `out/zig/build/stage3` directory.
+
+
+
 [docs_Log]: https://xataio.github.io/pgzx/#A;pgzx:elog.Log
 [docs_Info]: https://xataio.github.io/pgzx/#A;pgzx:elog.Info
 [docs_Notice]: https://xataio.github.io/pgzx/#A;pgzx:elog.Notice

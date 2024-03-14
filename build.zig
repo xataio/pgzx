@@ -26,7 +26,7 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
         });
         module.addIncludePath(.{
-            .path = b.pathFromRoot("./src/pgzx/c/include/"),
+            .path = "./src/pgzx/c/include/",
         });
         module.addIncludePath(.{
             .cwd_relative = pgbuild.getIncludeServerDir(),
@@ -34,7 +34,7 @@ pub fn build(b: *std.Build) void {
         // libpq support
         module.addCSourceFiles(.{
             .files = &[_][]const u8{
-                b.pathFromRoot("./src/pgzx/c/libpqsrv.c"),
+                "./src/pgzx/c/libpqsrv.c",
             },
             .flags = &[_][]const u8{
                 "-I", pgbuild.getIncludeDir(),
@@ -53,29 +53,43 @@ pub fn build(b: *std.Build) void {
     };
 
     // Unit test extension
-    {
-        const psql_run_tests = pgbuild.addRunTests(.{
-            .name = "pgzx_unit",
-            .db_user = "postgres",
-            .db_port = 5432,
-        });
-
+    const test_ext = blk: {
         const test_options = b.addOptions();
         test_options.addOption(bool, "testfn", true);
 
-        const test_ext = pgbuild.addInstallExtension(.{
+        const tests = pgbuild.addInstallExtension(.{
             .name = "pgzx_unit",
             .version = .{ .major = 0, .minor = 1 },
             .root_source_file = .{
                 .path = "src/testing.zig",
             },
             .root_dir = "src/testing",
+            .link_libc = true,
+            .link_allow_shlib_undefined = true,
         });
-        test_ext.lib.root_module.addIncludePath(.{
+        tests.lib.root_module.addIncludePath(.{
             .path = b.pathFromRoot("./src/pgzx/c/include/"),
         });
-        test_ext.lib.root_module.addImport("pgzx", pgzx);
-        test_ext.lib.root_module.addOptions("build_options", test_options);
+        tests.lib.root_module.addImport("pgzx", pgzx);
+        tests.lib.root_module.addOptions("build_options", test_options);
+
+        break :blk tests;
+    };
+
+    // Unit tests installer target
+    // Optionally build and install the extension, so we can hook up with t a debugger and run tests manually.
+    {
+        var install_unit = b.step("install-unit", "Install unit tests extension (for manual testing)");
+        install_unit.dependOn(&test_ext.step);
+    }
+
+    // Unit test runner
+    {
+        const psql_run_tests = pgbuild.addRunTests(.{
+            .name = "pgzx_unit",
+            .db_user = "postgres",
+            .db_port = 5432,
+        });
 
         psql_run_tests.step.dependOn(&test_ext.step);
 

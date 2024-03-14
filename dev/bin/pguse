@@ -3,9 +3,9 @@
 set -e
 set -x
 
-rootdir=${PRJ_ROOT:-$(git rev-parse --show-toplevel)}
-outdir=${1:-$rootdir/out}
+ROOTDIR=${PRJ_ROOT:-$(git rev-parse --show-toplevel)}
+WORKDIR=${WORKDIR:-"$ROOTDIR/out"}
 version=${1:-"16"}
 
-rm -f $outdir/default
-ln -s $outdir/$version $outdir/default
+rm -f $WORKDIR/default
+ln -s $WORKDIR/$version $WORKDIR/default
