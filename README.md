@@ -12,7 +12,7 @@
 
 # pgzx - Create Postgres Extensions with Zig!
 
-`pgzx` is a library for developing PostgreSQL extensions written in Zig. It provides a set of utilities (e.g. error handling, memory allocators, wrappers) that simplify integrating with the Postgres code base.
+`pgzx` is a library for developing PostgreSQL extensions written in Zig. It provides a set of utilities (e.g. error handling, memory allocators, wrappers) as well as a development environment that simplify integrating with the Postgres code base.
 
 ## Why Zig?
 
@@ -42,7 +42,7 @@ We recommend checking the examples in the section above to understand how to use
 
 This project uses [Nix flakes](https://nixos.wiki/wiki/Flakes) to manage build dependencies and provide a development shell. We provide a template for you initialize a new Zig based Postgres extension project, which allows you to reuse some of the utilities we're using.
 
-Before getting started we would recommend you to familiarize yourself with the projects setup first. To do so, please start with the [Contributing][#contributing] section.   
+Before getting started we would recommend you to familiarize yourself with the projects setup first. To do so, please start with the [Contributing](#contributing) section.   
 
 We will create a new project folder for our new extension and initialize the folder using the projects template:
 
@@ -52,7 +52,7 @@ $ cd my_extension
 $ nix flake init -t github:xataio/pgzx
 ```
 
-This step will create a working extension named 'my_extension'. The extension exports a hello world function named 'hello()'.
+This step will create a working extension named 'my_extension'. The extension exports a hello world function named `hello()`.
 
 The templates [README.md](./nix/templates/init/README.md) file already contains instructions on how to enter the development shell, build, and test the extension. You can follow the instructions and verify that your setup is functioning. Do not forget to use `pgstop` before quitting the development shell.
 
