@@ -1,4 +1,6 @@
 const std = @import("std");
+
+pub const err = @import("err.zig");
 pub const elog = @import("elog.zig");
 pub const fmgr = @import("fmgr.zig");
 pub const mem = @import("mem.zig");
@@ -92,11 +94,8 @@ fn runTestSuiteTest(fun: anytype) !void {
     // capture PG errors in case some test does throw a PG error that we don't want to leak:
     var errctx = pgzx_err.Context.init();
     defer errctx.deinit();
-
     if (errctx.pg_try()) {
-        fun() catch |err| {
-            return elog.Error(@src(), "Test failed: {}\n", .{err});
-        };
+        try fun();
     } else {
         return elog.Error(@src(), "Test failed with Postgres error report: {}\n", .{errctx.errorValue()});
     }

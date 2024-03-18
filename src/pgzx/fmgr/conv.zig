@@ -3,6 +3,7 @@ const std = @import("std");
 const c = @import("../c.zig");
 const err = @import("../err.zig");
 const mem = @import("../mem.zig");
+const meta = @import("../meta.zig");
 const varatt = @import("../varatt.zig");
 
 pub fn Conv(comptime T: type, comptime from: anytype, comptime to: anytype) type {
@@ -125,15 +126,12 @@ pub fn find(comptime T: type) type {
         },
         .Optional => |opt| OptConv(find(opt.child)),
         .Array => @compileLog("fixed size arrays not supported"),
-        .Pointer => |ptrInfo| blk: {
-            if (ptrInfo.size != .Slice or ptrInfo.child != u8) {
+        .Pointer => blk: {
+            if (!meta.isStringLike(T)) {
+                @compileLog("type:", T);
                 @compileError("unsupported ptr type");
             }
-            if (ptrInfo.sentinel) |_| {
-                break :blk SliceU8Z;
-            } else {
-                break :blk SliceU8;
-            }
+            break :blk if (meta.hasSentinal(T)) SliceU8Z else SliceU8;
         },
         else => {
             @compileLog("type:", T);

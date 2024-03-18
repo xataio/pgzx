@@ -1,5 +1,7 @@
 const std = @import("std");
+
 const c = @import("../c.zig");
+const meta = @import("../meta.zig");
 
 pub const Error = error{
     InvalidBool,
@@ -43,16 +45,12 @@ pub fn find(comptime T: type) type {
         },
         .Optional => |opt| optconv(find(opt.child)),
         .Array => @compileLog("fixed size arrays not supported"),
-        .Pointer => |ptrInfo| blk: {
-            if (ptrInfo.size != .Slice or ptrInfo.child != u8) {
+        .Pointer => blk: {
+            if (!meta.isStringLike(T)) {
                 @compileLog("type:", T);
                 @compileError("unsupported ptr type");
             }
-            if (ptrInfo.sentinel) |_| {
-                break :blk textzconv;
-            } else {
-                break :blk textconv;
-            }
+            break :blk if (meta.isSentinel(T)) textzconv else textconv;
         },
         else => {
             @compileLog("type:", T);
