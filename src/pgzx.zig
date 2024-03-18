@@ -41,4 +41,8 @@ pub const utils = @import("pgzx/utils.zig");
 pub const intr = @import("pgzx/interrupts.zig");
 pub const testing = @import("pgzx/testing.zig");
 
+// reexport the meta module. Although quite generic, it is useful to have these
+// helpers around at times.
+pub const meta = @import("pgzx/meta.zig");
+
 pub const guc = utils.guc;
