@@ -196,7 +196,7 @@ pub fn HTab(comptime Context: type) type {
 
         /// Initialize an iterator for the hash table.
         /// If the iterator was not full exhausted, it should be terminated with `term`.
-        pub fn iter(self: Self) Iterator {
+        pub fn iterator(self: Self) Iterator {
             return Iterator.init(self.htab);
         }
 
@@ -564,7 +564,7 @@ pub const TestSuite_HTab = struct {
         try table.put(&k2, 25);
 
         var count: u32 = 0;
-        var iter = table.iter();
+        var iter = table.iterator();
         while (iter.next()) |_| {
             count += 1;
         }
