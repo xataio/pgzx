@@ -32,3 +32,10 @@ pub inline fn isPrimitive(comptime T: type) bool {
         else => false,
     };
 }
+
+pub inline fn fnReturnType(comptime T: type, comptime fnName: []const u8) type {
+    return switch (@typeInfo(@field(T, fnName))) {
+        .Fn => |f| f.return_type.?,
+        else => @compileError("Expected a function type"),
+    };
+}
