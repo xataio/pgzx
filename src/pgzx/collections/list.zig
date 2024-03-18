@@ -106,7 +106,7 @@ pub fn PointerListOf(comptime T: type) type {
             return c.list_length(self.list);
         }
 
-        pub fn iter(self: Self) Iterator {
+        pub fn iterator(self: Self) Iterator {
             return Iterator.init(self.list);
         }
 
@@ -242,7 +242,7 @@ pub const TestSuite_PointerList = struct {
         var list = PointerListOf(i32).init();
         defer list.deinit();
 
-        var it = list.iter();
+        var it = list.iterator();
         try std.testing.expect(it.next() == null);
     }
 
@@ -258,7 +258,7 @@ pub const TestSuite_PointerList = struct {
         list.append(@constCast(&elems[5]));
         defer list.deinit();
 
-        var it = list.iter();
+        var it = list.iterator();
         var i: i32 = 1;
         while (it.next()) |elem| {
             try std.testing.expect(i <= 6);

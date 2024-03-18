@@ -153,7 +153,7 @@ fn executorCheckPermsHook(rangeTables: [*c]pg.List, rtePermInfos: [*c]pg.List, v
     var errctx = pgzx.err.Context.init();
     defer errctx.deinit();
     if (errctx.pg_try()) {
-        var it = pgzx.PointerListOf(pg.RangeTblEntry).initFrom(rangeTables).iter();
+        var it = pgzx.PointerListOf(pg.RangeTblEntry).initFrom(rangeTables).iterator();
         while (it.next()) |rte| {
             const relOid = rte.?.relid;
             const relNamespaceOid = pg.get_rel_namespace(relOid);

@@ -75,7 +75,7 @@ pub fn DList(comptime T: type, comptime node_field: std.meta.FieldEnum(T)) type 
 
         pub inline fn count(self: *const Self) usize {
             var n: usize = 0;
-            var it = self.iter();
+            var it = self.iterator();
             while (it.next() != null) : (n += 1) {}
             return n;
         }
@@ -140,7 +140,7 @@ pub fn DList(comptime T: type, comptime node_field: std.meta.FieldEnum(T)) type 
             return descr.nodeParentPtr(c.dlist_prev_node(&self.list, descr.nodePtr(node)));
         }
 
-        pub inline fn iter(self: *const Self) Iterator {
+        pub inline fn iterator(self: *const Self) Iterator {
             return Iterator.init(&self.list);
         }
 
@@ -242,7 +242,7 @@ pub const TestSuite_DList = struct {
         var list = TList.init();
         try std.testing.expectEqual(true, list.isEmpty());
 
-        var it = list.iter();
+        var it = list.iterator();
         while (it.next()) |n| {
             _ = n;
             std.log.info("iterating over empty list", .{});
@@ -279,7 +279,7 @@ pub const TestSuite_DList = struct {
         try std.testing.expectEqual(3, list.count());
 
         var i: u32 = 0;
-        var it = list.iter();
+        var it = list.iterator();
         while (it.next()) |n| {
             i += 1;
             try std.testing.expect(i <= 3);
@@ -301,7 +301,7 @@ pub const TestSuite_DList = struct {
         try std.testing.expectEqual(3, list.count());
 
         var i: u32 = 3;
-        var it = list.iter();
+        var it = list.iterator();
         while (it.next()) |n| {
             try std.testing.expect(i >= 1);
             try std.testing.expectEqual(i, n.value);

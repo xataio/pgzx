@@ -258,7 +258,7 @@ The `executorCheckPermsHook` function receives the list of tables (`rangeTable`)
 
 
 ```zig
-    var it = pgzx.PointerListOf(pg.RangeTblEntry).init(rangeTables).iter();
+    var it = pgzx.PointerListOf(pg.RangeTblEntry).init(rangeTables).iterator();
     while (it.next()) |rte| {
         ...
     }

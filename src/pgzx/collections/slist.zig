@@ -75,7 +75,7 @@ pub fn SList(comptime T: type, comptime node_field: std.meta.FieldEnum(T)) type 
             return Self.optNodeParentPtr(node_ptr);
         }
 
-        pub inline fn iter(self: *Self) Iterator {
+        pub inline fn iterator(self: *Self) Iterator {
             var i: c.slist_iter = undefined;
             i.cur = self.head.head.next;
             return .{ .iter = i };
@@ -128,7 +128,7 @@ pub const TestSuite_SList = struct {
         var list = MyList.init();
         try std.testing.expect(list.isEmpty());
 
-        var it = list.iter();
+        var it = list.iterator();
         try std.testing.expect(it.next() == null);
 
         try std.testing.expect(list.headNode() == null);
@@ -150,7 +150,7 @@ pub const TestSuite_SList = struct {
         list.pushHead(&values[0]);
 
         var i: u32 = 1;
-        var it = list.iter();
+        var it = list.iterator();
         while (it.next()) |node| {
             try std.testing.expect(i <= 3);
             try std.testing.expect(node.*.value == i);
@@ -179,7 +179,7 @@ pub const TestSuite_SList = struct {
         _ = list.popHead();
 
         var i: u32 = 2;
-        var it = list.iter();
+        var it = list.iterator();
         while (it.next()) |node| {
             try std.testing.expect(i <= 3);
             try std.testing.expect(node.*.value == i);
@@ -193,7 +193,7 @@ pub const TestSuite_SList = struct {
         _ = list.popHead();
         try std.testing.expect(list.isEmpty());
 
-        it = list.iter();
+        it = list.iterator();
         try std.testing.expect(it.next() == null);
 
         try std.testing.expect(list.headNode() == null);
