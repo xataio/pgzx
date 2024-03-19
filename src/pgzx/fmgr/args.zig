@@ -1,6 +1,6 @@
 const std = @import("std");
 const c = @import("../c.zig");
-const conv = @import("conv.zig");
+const datum = @import("../datum.zig");
 
 /// Index function argument type.
 pub fn Arg(comptime T: type, comptime argNum: u32) type {
@@ -49,7 +49,7 @@ inline fn readArgType(comptime T: type) type {
     if (T == c.FunctionCallInfo) {
         return T;
     }
-    return conv.find(T).Type;
+    return datum.findConv(T).Type;
 }
 
 /// Reads a postgres function call argument as a given type.
@@ -57,7 +57,7 @@ fn readArg(comptime T: type, fcinfo: c.FunctionCallInfo, argNum: u32) !readArgTy
     if (T == c.FunctionCallInfo) {
         return fcinfo;
     }
-    const converter = comptime conv.find(T);
+    const converter = comptime datum.findConv(T);
     return converter.fromNullableDatum(try mustGetArgNullable(fcinfo, argNum));
 }
 

@@ -1,10 +1,10 @@
 const std = @import("std");
 
-const c = @import("../c.zig");
-const err = @import("../err.zig");
-const mem = @import("../mem.zig");
-const meta = @import("../meta.zig");
-const varatt = @import("../varatt.zig");
+const c = @import("c.zig");
+const err = @import("err.zig");
+const mem = @import("mem.zig");
+const meta = @import("meta.zig");
+const varatt = @import("varatt.zig");
 
 pub fn Conv(comptime T: type, comptime from: anytype, comptime to: anytype) type {
     return struct {
@@ -74,18 +74,18 @@ var directMappings = .{
 };
 
 pub fn fromNullableDatum(comptime T: type, d: c.NullableDatum) !T {
-    return find(T).fromNullableDatum(d);
+    return findConv(T).fromNullableDatum(d);
 }
 
 pub fn fromDatum(comptime T: type, d: c.Datum, is_null: bool) !T {
-    return find(T).fromNullableDatum(.{ .value = d, .isnull = is_null });
+    return findConv(T).fromNullableDatum(.{ .value = d, .isnull = is_null });
 }
 
 pub fn toNullableDatum(v: anytype) !c.NullableDatum {
-    return find(@TypeOf(v)).toNullableDatum(v);
+    return findConv(@TypeOf(v)).toNullableDatum(v);
 }
 
-pub fn find(comptime T: type) type {
+pub fn findConv(comptime T: type) type {
     if (isConv(T)) { // is T already a converter?
         return T;
     }
@@ -124,7 +124,7 @@ pub fn find(comptime T: type) type {
             64 => Float64,
             else => @compileError("unsupported float type"),
         },
-        .Optional => |opt| OptConv(find(opt.child)),
+        .Optional => |opt| OptConv(findConv(opt.child)),
         .Array => @compileLog("fixed size arrays not supported"),
         .Pointer => blk: {
             if (!meta.isStringLike(T)) {

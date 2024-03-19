@@ -1,9 +1,10 @@
 const std = @import("std");
 
 const c = @import("c.zig");
-pub const elog = @import("elog.zig");
+const elog = @import("elog.zig");
+const datum = @import("datum.zig");
+
 pub const args = @import("fmgr/args.zig");
-pub const conv = @import("fmgr/conv.zig");
 pub const varatt = c.varatt;
 
 pub const Pg_magic_struct = c.Pg_magic_struct;
@@ -93,7 +94,7 @@ pub inline fn pgCall(
     }
 
     const value = @call(.no_async, impl, callArgs) catch |e| elog.throwAsPostgresError(src, e);
-    const resultConv = conv.find(@TypeOf(value));
+    const resultConv = datum.findConv(@TypeOf(value));
     const nullableDatum = resultConv.toNullableDatum(value) catch |e| elog.throwAsPostgresError(src, e);
     if (nullableDatum.isnull) {
         fcinfo.*.isnull = true;
