@@ -185,6 +185,7 @@ pgzx is currently under heavy development by the [Xata](https://xata.io) team. I
     * [ ] Postgres 14
     * [ ] Postgres 15
     * [ ] Postgres 16
+    * [x] Postgres 17
   * [x] Logging
   * [x] Error handling
   * [x] Memory context allocators
@@ -203,7 +204,7 @@ pgzx is currently under heavy development by the [Xata](https://xata.io) team. I
         * ...
     * [ ] Single list
     * [ ] Double list
-    * [ ] Hash tables
+    * [x] Hash tables
 * Development environment
   * [ ] Download and vendor Postgres source code
   * [x] Compile example extensions against the Postgres source code
