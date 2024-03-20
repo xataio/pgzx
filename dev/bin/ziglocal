@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
 
 USAGE="
-Usage: $0 <options>
+Usage: $0 <options> [command]
   -h: print this help message
   -r|--repo <repo>: git repository to clone postgres from.
   -b|--branch <branch>: branch to clone from the repository.
+
+If no command is given, the default is to clone, configure and build the project.
+
+Commands:
+  clone: clone the repository.
+  configure: configure the build.
+  build: build the project.
 
 Environment variables:
   WORKDIR: directory to store the files and installation.
@@ -12,7 +19,7 @@ Environment variables:
   ZIG_SRC_DIR: directory to store the zig source code.
 "
 
-set -x
+#set -x
 
 ROOTDIR=${PRJ_ROOT:-$(git rev-parse --show-toplevel)}
 WORKDIR=${WORKDIR:-"${ROOTDIR}/out"}
@@ -53,16 +60,16 @@ set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
 clone() {
   echo "Checkout $ZIG_REPO"
 
-  if [ -d "$ZIG_SRC_DIR" ] && [ -n "$(ls -A $ZIG_SRC_DIR)" ]; then
-    echo "The directory $ZIG_SRC_DIR already exists and is not empty. Aborting."
+  if [ -d "$ZIG_SRC_DIR" ] && [ -n "$(ls -A "$ZIG_SRC_DIR")" ]; then
+    echo "The directory '$ZIG_SRC_DIR' already exists and is not empty. Aborting."
     return 0
   fi
 
-  mkdir -p $(dirname $ZIG_SRC_DIR)
-  git clone --single-branch -b ${ZIG_BRANCH} ${ZIG_REPO} $ZIG_SRC_DIR
+  mkdir -p "$(dirname "$ZIG_SRC_DIR")"
+  git clone --single-branch -b "$ZIG_BRANCH" "$ZIG_REPO" "$ZIG_SRC_DIR"
 
   if [ -n "$ZIG_COMMIT" ]; then
-    git -C $ZIG_SRC_DIR checkout $ZIG_COMMIT
+    git -C "$ZIG_SRC_DIR" checkout "$ZIG_COMMIT"
   fi
 }
 

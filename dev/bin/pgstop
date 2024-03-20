@@ -4,7 +4,7 @@ set -e
 #set -x
 set -o pipefail
 
-eval $(pgenv $@)
+eval "$(pgenv "$@")"
 
-echo "Stopping PostgreSQL cluster $cluster_name"
-pg_ctl -D $PG_CLUSTER_DATA_DIR stop
+echo "Stopping PostgreSQL cluster '$PG_CLUSTER_NAME'"
+pg_ctl -D "$PG_CLUSTER_DATA_DIR" stop

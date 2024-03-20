@@ -4,11 +4,11 @@ set -e
 #set -x
 set -o pipefail
 
-eval $(pgenv $@)
+eval "$(pgenv "$@")"
 
 echo "Starting PostgreSQL cluster $PG_CLUSTER_NAME"
-pg_ctl -D $PG_CLUSTER_DATA_DIR -l $PG_CLUSTER_LOG_FILE start || {
+pg_ctl -D "$PG_CLUSTER_DATA_DIR" -l "$PG_CLUSTER_LOG_FILE" start || {
   echo "Failed to start PostgreSQL"
-  cat $PG_CLUSTER_LOG_FILE
+  cat "$PG_CLUSTER_LOG_FILE"
   exit 1
 }

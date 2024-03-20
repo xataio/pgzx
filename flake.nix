@@ -89,6 +89,7 @@
             alejandra.enable = true;
             deadnix.enable = true;
             yamllint.enable = true;
+            shellcheck.enable = true;
           };
         };
 

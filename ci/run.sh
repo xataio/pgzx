@@ -29,9 +29,9 @@ test_pgaudit_zig() {
 
 extension_build() {
   cwd=$(pwd)
-  cd $1
-  zig build -freference-trace -p $PG_HOME
-  cd $cwd
+  cd "$1" || return 1
+  zig build -freference-trace -p "$PG_HOME" || return 1
+  cd "$cwd" || return 1
 }
 
 extension_create() {
@@ -46,26 +46,20 @@ extension_drop() {
 
 run_regression_tests() {
   echo "Run regression tests"
-  rc=0
 
   cwd=$(pwd)
-  cd $1
-  zig build pg_regress --verbose || rc=1
-  cd $cwd
-
-  return $rc
+  cd "$1" || return 1
+  zig build pg_regress --verbose || return 1
+  cd "$cwd" || return 1
 }
 
 run_unit_tests() {
   echo "Run unit tests"
-  rc=0
 
   cwd=$(pwd)
-  cd $1
-  zig build -freference-trace -p $PG_HOME unit || rc=1
-  cd $cwd
-
-  return $rc
+  cd "$1" || return 1
+  zig build -freference-trace -p "$PG_HOME" unit || return 1
+  cd "$cwd" || return 1
 }
 
 run_test_suites() {
@@ -84,11 +78,11 @@ fail () {
 
 main() {
   echo "Build and install extension"
-  eval $(pgenv)
+  eval "$(pgenv)"
 
   log_init_size=0;
-  if [ -f $PG_CLUSTER_LOG_FILE ]; then
-    log_init_size=$(stat -c %s $PG_CLUSTER_LOG_FILE)
+  if [ -f "$PG_CLUSTER_LOG_FILE" ]; then
+    log_init_size=$(stat -c %s "$PG_CLUSTER_LOG_FILE")
   fi
   echo "Server log size: $log_init_size"
 
@@ -101,13 +95,13 @@ main() {
 
 
   ok=true
-  run_test_suites test_pgzx test_char_count_zig || ok=false
+  run_test_suites test_pgzx test_char_count_zig test_pgaudit_zig || ok=false
 
   if ! $ok; then
-    echo "\n\nServer log:"
+    printf "\n\nServer log:"
 
-    log_size=$(stat -c %s $PG_CLUSTER_LOG_FILE)
-    tail -c $((log_size - log_init_size)) $PG_CLUSTER_LOG_FILE
+    log_size=$(stat -c %s "$PG_CLUSTER_LOG_FILE")
+    tail -c $((log_size - log_init_size)) "$PG_CLUSTER_LOG_FILE"
     fail "Regression tests failed"
   fi
 

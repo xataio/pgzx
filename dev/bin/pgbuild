@@ -60,13 +60,13 @@ set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
 clone() {
   echo "Downloading postgres source from $POSTGRES_REPO"
 
-  if [ -d "$PG_SRC_DIR" ] && [ -n "$(ls -A $PG_SRC_DIR)" ]; then
+  if [ -d "$PG_SRC_DIR" ] && [ -n "$(ls -A "$PG_SRC_DIR")" ]; then
     echo "The directory $PG_SRC_DIR already exists and is not empty. Aborting."
     return 0
   fi
 
-  mkdir -p $(dirname $PG_SRC_DIR)
-  git clone --single-branch -b ${POSTGRES_BRANCH} ${POSTGRES_REPO} $PG_SRC_DIR
+  mkdir -p "$(dirname "$PG_SRC_DIR")"
+  git clone --single-branch -b "$POSTGRES_BRANCH" "$POSTGRES_REPO" "$PG_SRC_DIR"
 }
 
 patch() {
@@ -97,12 +97,12 @@ configure() {
 
   meson setup "$PG_BUILD_DIR" "$PG_SRC_DIR" \
     --debug \
-		-Dprefix=${PG_INSTALL_DIR} \
-		-Dbindir=${PG_INSTALL_DIR}/bin \
-		-Ddatadir=${PG_INSTALL_DIR}/share \
-		-Dincludedir=${PG_INSTALL_DIR}/include \
-		-Dlibdir=${PG_INSTALL_DIR}/lib \
-		-Dsysconfdir=${PG_INSTALL_DIR}/etc \
+		-Dprefix="${PG_INSTALL_DIR}" \
+		-Dbindir="${PG_INSTALL_DIR}/bin" \
+		-Ddatadir="${PG_INSTALL_DIR}/share" \
+		-Dincludedir="${PG_INSTALL_DIR}/include" \
+		-Dlibdir="${PG_INSTALL_DIR}/lib" \
+		-Dsysconfdir="${PG_INSTALL_DIR}/etc" \
 		-Dplperl=auto \
 		-Dplpython=auto \
 		-Dssl=openssl \
@@ -129,8 +129,8 @@ build() {
 install() {
   echo "Installing postgres to $PG_INSTALL_DIR"
 
-	mkdir -p ${PG_INSTALL_DIR}
-	ninja -C ${PG_BUILD_DIR} install
+	mkdir -p "${PG_INSTALL_DIR}"
+	ninja -C "${PG_BUILD_DIR}" install
 }
 
 # The first argument determines the function to run. If no argument is given we run all commands in order:

@@ -7,5 +7,5 @@ ROOTDIR=${PRJ_ROOT:-$(git rev-parse --show-toplevel)}
 WORKDIR=${WORKDIR:-"$ROOTDIR/out"}
 version=${1:-"16"}
 
-rm -f $WORKDIR/default
-ln -s $WORKDIR/$version $WORKDIR/default
+rm -f "$WORKDIR/default"
+ln -s "$WORKDIR/$version" "$WORKDIR/default"

@@ -4,6 +4,6 @@ set -e
 #set -x
 set -o pipefail
 
-eval $(pgenv $@)
+eval "$(pgenv "$@")"
 
-pg_ctl -D $PG_CLUSTER_DATA_DIR status
+pg_ctl -D "$PG_CLUSTER_DATA_DIR" status
