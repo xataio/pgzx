@@ -21,7 +21,7 @@ $ pglocal && pginit
 $ pgstart
 ```
 
-4. Before we can the extension we must update the `build.zig.zon` file and enter the maybe update the URL and hash value. To do so we run `zig build` and copy the hash value from the error message into our `build.zig.zon` file:
+4. Before you can build the extension you must edit the `build.zig.zon` file and update the hash value. To do so we run `zig build` and copy the hash value from the error message into the `build.zig.zon` file:
 
 ```
 $ zig build
