@@ -32,73 +32,73 @@ ZIG_COMMIT=${ZIG_COMMIT:-""}
 
 POSITIONAL_ARGS=()
 while [[ $# -gt 0 ]]; do
-  case $1 in
-    -h)
-      echo "$USAGE"
-      exit 0
-      ;;
-    --repo | -r)
-      ZIG_REPO="$2"
-      shift 2
-      ;;
-    -b | --branch)
-      ZIG_BRANCH="$2"
-      shift 2
-      ;;
-    --commit)
-      ZIG_COMMIT="$2"
-      shift 2
-      ;;
-    *)
-      POSITIONAL_ARGS+=("$1") # save positional arg
-      shift # past argument
-      ;;
-  esac
+	case $1 in
+		-h)
+			echo "$USAGE"
+			exit 0
+			;;
+		--repo | -r)
+			ZIG_REPO="$2"
+			shift 2
+			;;
+		-b | --branch)
+			ZIG_BRANCH="$2"
+			shift 2
+			;;
+		--commit)
+			ZIG_COMMIT="$2"
+			shift 2
+			;;
+		*)
+			POSITIONAL_ARGS+=("$1") # save positional arg
+			shift                   # past argument
+			;;
+	esac
 done
 set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
 
 clone() {
-  echo "Checkout $ZIG_REPO"
+	echo "Checkout $ZIG_REPO"
 
-  if [ -d "$ZIG_SRC_DIR" ] && [ -n "$(ls -A "$ZIG_SRC_DIR")" ]; then
-    echo "The directory '$ZIG_SRC_DIR' already exists and is not empty. Aborting."
-    return 0
-  fi
+	if [ -d "$ZIG_SRC_DIR" ] && [ -n "$(ls -A "$ZIG_SRC_DIR")" ]; then
+		echo "The directory '$ZIG_SRC_DIR' already exists and is not empty. Aborting."
+		return 0
+	fi
 
-  mkdir -p "$(dirname "$ZIG_SRC_DIR")"
-  git clone --single-branch -b "$ZIG_BRANCH" "$ZIG_REPO" "$ZIG_SRC_DIR"
+	mkdir -p "$(dirname "$ZIG_SRC_DIR")"
+	git clone --single-branch -b "$ZIG_BRANCH" "$ZIG_REPO" "$ZIG_SRC_DIR"
 
-  if [ -n "$ZIG_COMMIT" ]; then
-    git -C "$ZIG_SRC_DIR" checkout "$ZIG_COMMIT"
-  fi
+	if [ -n "$ZIG_COMMIT" ]; then
+		git -C "$ZIG_SRC_DIR" checkout "$ZIG_COMMIT"
+	fi
 }
 
 configure() {
-  mkdir -p "$ZIG_SRC_DIR/build"
-  cmake -B "$ZIG_SRC_DIR/build" -S "$ZIG_SRC_DIR" -G Ninja -DCMAKE_BUILD_TYPE=Debug
+	mkdir -p "$ZIG_SRC_DIR/build"
+	cmake -B "$ZIG_SRC_DIR/build" -S "$ZIG_SRC_DIR" -G Ninja -DCMAKE_BUILD_TYPE=Debug
 }
 
 build() {
-  ninja -C "$ZIG_SRC_DIR/build"
+	ninja -C "$ZIG_SRC_DIR/build"
 }
 
 if [ -z "$1" ]; then
-  clone && configure && build
-  exit 0
+	clone && configure && build
+	exit 0
 fi
 
 case $1 in
-  clone)
-    clone
-    ;;
-  configure)
-    configure
-    ;;
-  build)
-    build
-    ;;
-  *)
-    echo "Usage: $0 {clone|configure|build|install}"
-    exit 1
-    ;;
+	clone)
+		clone
+		;;
+	configure)
+		configure
+		;;
+	build)
+		build
+		;;
+	*)
+		echo "Usage: $0 {clone|configure|build|install}"
+		exit 1
+		;;
 esac

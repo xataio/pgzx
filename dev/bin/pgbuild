@@ -36,44 +36,44 @@ POSTGRES_BRANCH=${POSTGRES_BRANCH:-"REL_16_STABLE"}
 
 POSITIONAL_ARGS=()
 while [[ $# -gt 0 ]]; do
-  case $1 in
-    -h)
-      echo "$USAGE"
-      exit 0
-      ;;
-    --repo | -r)
-      POSTGRES_REPO="$2"
-      shift 2
-      ;;
-    -b | --branch)
-      POSTGRES_BRANCH="$2"
-      shift 2
-      ;;
-    *)
-      POSITIONAL_ARGS+=("$1") # save positional arg
-      shift # past argument
-      ;;
-  esac
+	case $1 in
+		-h)
+			echo "$USAGE"
+			exit 0
+			;;
+		--repo | -r)
+			POSTGRES_REPO="$2"
+			shift 2
+			;;
+		-b | --branch)
+			POSTGRES_BRANCH="$2"
+			shift 2
+			;;
+		*)
+			POSITIONAL_ARGS+=("$1") # save positional arg
+			shift                   # past argument
+			;;
+	esac
 done
 set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
 
 clone() {
-  echo "Downloading postgres source from $POSTGRES_REPO"
+	echo "Downloading postgres source from $POSTGRES_REPO"
 
-  if [ -d "$PG_SRC_DIR" ] && [ -n "$(ls -A "$PG_SRC_DIR")" ]; then
-    echo "The directory $PG_SRC_DIR already exists and is not empty. Aborting."
-    return 0
-  fi
+	if [ -d "$PG_SRC_DIR" ] && [ -n "$(ls -A "$PG_SRC_DIR")" ]; then
+		echo "The directory $PG_SRC_DIR already exists and is not empty. Aborting."
+		return 0
+	fi
 
-  mkdir -p "$(dirname "$PG_SRC_DIR")"
-  git clone --single-branch -b "$POSTGRES_BRANCH" "$POSTGRES_REPO" "$PG_SRC_DIR"
+	mkdir -p "$(dirname "$PG_SRC_DIR")"
+	git clone --single-branch -b "$POSTGRES_BRANCH" "$POSTGRES_REPO" "$PG_SRC_DIR"
 }
 
 patch() {
-  # The meson scripts assume that clang is part of the LLVM suite, which is used when
-  # enabling the jit build (which we do). 
-  # Unfortunately the is not always the case. We work around this by patching the build scripts:
-  git -C "$PG_SRC_DIR" apply - <<EOF
+	# The meson scripts assume that clang is part of the LLVM suite, which is used when
+	# enabling the jit build (which we do).
+	# Unfortunately the is not always the case. We work around this by patching the build scripts:
+	git -C "$PG_SRC_DIR" apply - <<EOF
 diff --git a/meson.build b/meson.build
 index 6804f941be..d62142c8f7 100644
 --- a/meson.build
@@ -91,12 +91,12 @@ EOF
 }
 
 configure() {
-  echo "Configuring postgres build"
+	echo "Configuring postgres build"
 
-  patch
+	patch
 
-  meson setup "$PG_BUILD_DIR" "$PG_SRC_DIR" \
-    --debug \
+	meson setup "$PG_BUILD_DIR" "$PG_SRC_DIR" \
+		--debug \
 		-Dprefix="${PG_INSTALL_DIR}" \
 		-Dbindir="${PG_INSTALL_DIR}/bin" \
 		-Ddatadir="${PG_INSTALL_DIR}/share" \
@@ -121,13 +121,13 @@ configure() {
 }
 
 build() {
-  echo "Building postgres"
+	echo "Building postgres"
 
 	ninja -C "$PG_BUILD_DIR"
 }
 
 install() {
-  echo "Installing postgres to $PG_INSTALL_DIR"
+	echo "Installing postgres to $PG_INSTALL_DIR"
 
 	mkdir -p "${PG_INSTALL_DIR}"
 	ninja -C "${PG_BUILD_DIR}" install
@@ -136,28 +136,28 @@ install() {
 # The first argument determines the function to run. If no argument is given we run all commands in order:
 
 if [ -z "$1" ]; then
-  clone && configure && build && install
-  exit 0
+	clone && configure && build && install
+	exit 0
 fi
 
 case $1 in
-  clone)
-    clone
-    ;;
-  patch)
-    patch
-    ;;
-  configure)
-    configure
-    ;;
-  build)
-    build
-    ;;
-  install)
-    install
-    ;;
-  *)
-    echo "Usage: $0 {clone|configure|build|install}"
-    exit 1
-    ;;
+	clone)
+		clone
+		;;
+	patch)
+		patch
+		;;
+	configure)
+		configure
+		;;
+	build)
+		build
+		;;
+	install)
+		install
+		;;
+	*)
+		echo "Usage: $0 {clone|configure|build|install}"
+		exit 1
+		;;
 esac

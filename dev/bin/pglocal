@@ -23,24 +23,23 @@ Usage: $0 [outdir]
 
 POSITIONAL_ARGS=()
 while [[ $# -gt 0 ]]; do
-  case $1 in
-    -h)
-      echo "$USAGE"
-      exit 0
-      ;;
-    --*|-*)
-      echo "Unknown option $1"
-      echo "$USAGE"
-      exit 1
-      ;;
-    *)
-      POSITIONAL_ARGS+=("$1") # save positional arg
-      shift # past argument
-      ;;
-  esac
+	case $1 in
+		-h)
+			echo "$USAGE"
+			exit 0
+			;;
+		--* | -*)
+			echo "Unknown option $1"
+			echo "$USAGE"
+			exit 1
+			;;
+		*)
+			POSITIONAL_ARGS+=("$1") # save positional arg
+			shift                   # past argument
+			;;
+	esac
 done
 set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
-
 
 # Ignore nix specific env var so we can ask pg_config for the correct paths
 unset NIX_PGLIBDIR
@@ -54,46 +53,46 @@ postgres_major_version=$($PG_CONFIG --version | awk '{print $2}' | sed 's/\..*$/
 new_install_dir=$outdir/$postgres_major_version
 
 cp_direct_files() {
-  local dest_dir=$1
-  local src_dir=$2
-  mkdir -p "$dest_dir"
+	local dest_dir=$1
+	local src_dir=$2
+	mkdir -p "$dest_dir"
 
-  # prepare sub directories in the destination directory to ensure write permissions.
-  find "$src_dir" -type d -printf '%P\n' | while read -r dir; do
-    target="${dest_dir}/${dir}"
-    mkdir -p "$target" && chmod u+w "$target" || return 1
-  done
+	# prepare sub directories in the destination directory to ensure write permissions.
+	find "$src_dir" -type d -printf '%P\n' | while read -r dir; do
+		target="${dest_dir}/${dir}"
+		mkdir -p "$target" && chmod u+w "$target" || return 1
+	done
 
-  # # copy the actual files only
-  find "$src_dir" -maxdepth 1 -type f | while read -r file; do
-    cp "$file" "$dest_dir" || return 1
-  done
+	# # copy the actual files only
+	find "$src_dir" -maxdepth 1 -type f | while read -r file; do
+		cp "$file" "$dest_dir" || return 1
+	done
 
-  # create symlinks
-  find "$src_dir" -maxdepth 1 -type l | while read -r link; do
-    ln -s "$(realpath "$link")" "$dest_dir/$(basename "$link")" || return 1
-  done
+	# create symlinks
+	find "$src_dir" -maxdepth 1 -type l | while read -r link; do
+		ln -s "$(realpath "$link")" "$dest_dir/$(basename "$link")" || return 1
+	done
 }
 
 cp_recursive() {
-  local dest_dir=$1
-  local src_dir=$2
-  mkdir -p "$dest_dir"
+	local dest_dir=$1
+	local src_dir=$2
+	mkdir -p "$dest_dir"
 
-  if [ ! -d "$src_dir" ]; then
-    return 0
-  fi
+	if [ ! -d "$src_dir" ]; then
+		return 0
+	fi
 
-  # prepare sub directories in the destination directory to ensure write permissions.
-  find "$src_dir" -type d -printf '%P\n' | while read -r dir; do
-    target="${dest_dir}/${dir}"
-    mkdir -p "$target" && chmod u+w "$target" || return 1
-  done
+	# prepare sub directories in the destination directory to ensure write permissions.
+	find "$src_dir" -type d -printf '%P\n' | while read -r dir; do
+		target="${dest_dir}/${dir}"
+		mkdir -p "$target" && chmod u+w "$target" || return 1
+	done
 
-  # copy the actual files only
-  find "$src_dir" -type f -printf '%P\n' | while read -r file; do
-    cp -r "$src_dir/$file" "$dest_dir/$file" || return 1
-  done
+	# copy the actual files only
+	find "$src_dir" -type f -printf '%P\n' | while read -r file; do
+		cp -r "$src_dir/$file" "$dest_dir/$file" || return 1
+	done
 }
 
 mkdir -p "$new_install_dir"
@@ -105,8 +104,11 @@ cp_direct_files "$new_install_dir/bin" "$("$PG_CONFIG" --bindir)"
 # copy headers from include dir
 mkdir -p "$new_install_dir/include"
 mkdir -p "$new_install_dir/include/server"
-("$PG_CONFIG" --includedir; "$PG_CONFIG" --pkgincludedir) | sort -u | while read -r dir; do
-  cp_direct_files "$new_install_dir/include" "$dir"
+(
+	"$PG_CONFIG" --includedir
+	"$PG_CONFIG" --pkgincludedir
+) | sort -u | while read -r dir; do
+	cp_direct_files "$new_install_dir/include" "$dir"
 done
 cp_recursive "$new_install_dir/include/server" "$("$PG_CONFIG" --includedir-server)"
 
@@ -116,18 +118,20 @@ cp_recursive "$new_install_dir/include/server" "$("$PG_CONFIG" --includedir-serv
 # to ensure we have a complete local installation including pgxs based tooling.
 pg_derived_libdir=$(realpath "$("$PG_CONFIG" --bindir)/../lib")
 if [ -d "$pg_derived_libdir" ]; then
-  if [ "$(realpath "$("$PG_CONFIG" --libdir)")" != "$pg_derived_libdir" ]; then
-    cp_recursive "$new_install_dir/lib" "$pg_derived_libdir"
-  fi
+	if [ "$(realpath "$("$PG_CONFIG" --libdir)")" != "$pg_derived_libdir" ]; then
+		cp_recursive "$new_install_dir/lib" "$pg_derived_libdir"
+	fi
 fi
 
 # copy from libdirs reporter by pg_config
-("$PG_CONFIG" --libdir; "$PG_CONFIG" --pkglibdir) | sort -u | while read -r dir; do
-  cp_direct_files "$new_install_dir/lib" "$dir"
+(
+	"$PG_CONFIG" --libdir
+	"$PG_CONFIG" --pkglibdir
+) | sort -u | while read -r dir; do
+	cp_direct_files "$new_install_dir/lib" "$dir"
 done
 cp_recursive "$new_install_dir/lib/pkgconfig" "$($PG_CONFIG --pkglibdir)/pkgconfig"
 cp_recursive "$new_install_dir/lib/postgresql" "$($PG_CONFIG --pkglibdir)/postgresql"
-
 
 # copy locale
 cp_recursive "$new_install_dir/share/locale" "$($PG_CONFIG --localedir)"
@@ -139,5 +143,5 @@ chmod -R +w "$new_install_dir"
 
 # link outdir/default if not exists
 if [ ! -e "$outdir/default" ]; then
-  ln -s "$new_install_dir" "$outdir/default"
+	ln -s "$new_install_dir" "$outdir/default"
 fi

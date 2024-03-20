@@ -41,8 +41,12 @@ in {
   packages =
     scripts
     ++ [
+      # make linters and formatters available in dev shell
       pkgs.pre-commit
       pkgs.alejandra
+      pkgs.deadnix
+      pkgs.shellcheck
+      pkgs.shfmt
 
       pkgs.postgresql_16_jit
       pkgs.openssl

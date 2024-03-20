@@ -3,7 +3,10 @@
 set -e
 set -x
 
-SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
+SCRIPT_DIR=$(
+	cd "$(dirname "$0")"
+	pwd
+)
 PRJ_ROOT=${PRJ_ROOT:-$(realpath "$SCRIPT_DIR/../..")}
 DOCKERFILE=${DOCKERFILE:-"$PRJ_ROOT/dev/docker/Dockerfile"}
 
