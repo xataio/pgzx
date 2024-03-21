@@ -20,6 +20,8 @@ pub const HTabIter = collections.htab.HTabIter;
 pub const StringHashTable = collections.htab.StringHashTable;
 pub const KVHashTable = collections.htab.KVHashTable;
 
+pub const datum = @import("pgzx/datum.zig");
+
 pub const elog = @import("pgzx/elog.zig");
 
 pub const err = @import("pgzx/err.zig");
