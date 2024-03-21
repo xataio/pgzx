@@ -16,7 +16,7 @@
 
 ## Why Zig?
 
-[Zig](https://ziglang.org/) is a small and simple language that aims to be a "modern C" and make system-level code bases easier to maintain. It provides safe memory management, compilation time code execution (comptime), and a standard library.
+[Zig](https://ziglang.org/) is a small and simple language that aims to be a "modern C" and make system-level code bases easier to maintain. It provides safe memory management, compilation time code execution (comptime), and a rich standard library.
 
 Zig can interact with C code quite naturally: it supports the C ABI, can work with C pointers and types directly, it can import header files and even translate C code to Zig code. Thanks to this interoperability, a Postgres extension written in Zig can, theoretically, accomplish anything that a C extension can. This means you get full power AND a modern language and standard library to write your extension.
 
@@ -185,6 +185,7 @@ pgzx is currently under heavy development by the [Xata](https://xata.io) team. I
     * [ ] Postgres 14
     * [ ] Postgres 15
     * [ ] Postgres 16
+    * [x] Postgres 17
   * [x] Logging
   * [x] Error handling
   * [x] Memory context allocators
@@ -203,7 +204,7 @@ pgzx is currently under heavy development by the [Xata](https://xata.io) team. I
         * ...
     * [ ] Single list
     * [ ] Double list
-    * [ ] Hash tables
+    * [x] Hash tables
 * Development environment
   * [ ] Download and vendor Postgres source code
   * [x] Compile example extensions against the Postgres source code
@@ -456,6 +457,7 @@ This step will take a while. You will find the compiler and library of your loca
 ## See also
 
 * [pgrx](https://github.com/pgcentralfoundation/pgrx) - Similar project but for Rust, it served as an inspiration for this project. 
+* [pg_tle](https://github.com/aws/pg_tle) - Trusted Language Extensions for PostgreSQL.
 
 ## License
 

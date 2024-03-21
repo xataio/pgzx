@@ -140,19 +140,23 @@
 <span class="line" id="L23"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> str = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;pgzx/str.zig&quot;</span>);</span>
 <span class="line" id="L24"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> utils = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;pgzx/utils.zig&quot;</span>);</span>
 <span class="line" id="L25"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> intr = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;pgzx/interrupts.zig&quot;</span>);</span>
-<span class="line" id="L26"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> list = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;pgzx/list.zig&quot;</span>);</span>
-<span class="line" id="L27"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> testing = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;pgzx/testing.zig&quot;</span>);</span>
-<span class="line" id="L28"></span>
-<span class="line" id="L29"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> guc = utils.guc;</span>
+<span class="line" id="L26"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> testing = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;pgzx/testing.zig&quot;</span>);</span>
+<span class="line" id="L27"></span>
+<span class="line" id="L28"><span class="tok-comment">// data structures</span>
+</span>
+<span class="line" id="L29"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> collections = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;pgzx/collections.zig&quot;</span>);</span>
 <span class="line" id="L30"></span>
-<span class="line" id="L31"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> PGError = err.PGError;</span>
-<span class="line" id="L32"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> pgRethrow = err.pgRethrow;</span>
-<span class="line" id="L33"></span>
-<span class="line" id="L34"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> PG_MODULE_MAGIC = fmgr.PG_MODULE_MAGIC;</span>
-<span class="line" id="L35"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> PG_FUNCTION_V1 = fmgr.PG_FUNCTION_V1;</span>
-<span class="line" id="L36"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> PG_FUNCTION_INFO_V1 = fmgr.PG_FUNCTION_INFO_V1;</span>
-<span class="line" id="L37"></span>
-<span class="line" id="L38"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> PointerListOf = list.PointerListOf;</span>
+<span class="line" id="L31"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> guc = utils.guc;</span>
+<span class="line" id="L32"></span>
+<span class="line" id="L33"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> PGError = err.PGError;</span>
+<span class="line" id="L34"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> pgRethrow = err.pgRethrow;</span>
+<span class="line" id="L35"></span>
+<span class="line" id="L36"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> PG_MODULE_MAGIC = fmgr.PG_MODULE_MAGIC;</span>
+<span class="line" id="L37"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> PG_FUNCTION_V1 = fmgr.PG_FUNCTION_V1;</span>
+<span class="line" id="L38"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> PG_FUNCTION_INFO_V1 = fmgr.PG_FUNCTION_INFO_V1;</span>
 <span class="line" id="L39"></span>
+<span class="line" id="L40"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> list = collections.list;</span>
+<span class="line" id="L41"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> PointerListOf = list.PointerListOf;</span>
+<span class="line" id="L42"></span>
 </code></pre></body>
 </html>
