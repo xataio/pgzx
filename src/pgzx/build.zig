@@ -470,7 +470,7 @@ pub fn runPGConfig(self: *Build, question: []const u8) []const u8 {
 
 pub fn getPGHome(self: *Build) []const u8 {
     self.paths.pg_home = self.paths.pg_home orelse blk: {
-        if (std.os.getenv("PG_HOME")) |path| {
+        if (std.posix.getenv("PG_HOME")) |path| {
             break :blk path;
         }
 
@@ -485,7 +485,7 @@ fn findPGConfig() []const u8 {
 }
 
 fn getenvOr(name: []const u8, default: []const u8) []const u8 {
-    return std.os.getenv(name) orelse default;
+    return std.posix.getenv(name) orelse default;
 }
 
 fn check_exec(term: anytype) bool {
