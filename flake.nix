@@ -85,10 +85,31 @@
         pre-commit.settings = {
           hooks = {
             # editorconfig-checker.enable = true;
-            taplo.enable = true;
+
+            # check github actions files
+            actionlint.enable = true;
+
+            # check nix files
             alejandra.enable = true;
             deadnix.enable = true;
-            yamllint.enable = true;
+
+            # check shell scripts
+            shellcheck.enable = true;
+            shfmt_local = {
+              enable = true;
+              name = "shfmt";
+              description = "Shell script formatter";
+              types = ["shell"];
+              entry = "${pkgs.shfmt}/bin/shfmt -d -i 0 -ci -s";
+            };
+
+            # zig linters
+            zigfmt = {
+              enable = true;
+              name = "Zig fmt";
+              entry = "${pkgs.zigpkgs.master}/bin/zig fmt --check";
+              files = "\\.zig$|\\.zon$";
+            };
           };
         };
 

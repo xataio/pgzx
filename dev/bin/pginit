@@ -24,41 +24,41 @@ postgres_conf=
 POSITIONAL_ARGS=()
 
 while [[ $# -gt 0 ]]; do
-  case $1 in
-    -h)
-      echo "$USAGE"
-      exit 0
-      ;;
-    -p)
-      port="$2"
-      shift 2
-      ;;
-    -s)
-      if [ -n "$shared_preload_libraries" ]; then
-        shared_preload_libraries="$shared_preload_libraries,$2"
-      else
-        shared_preload_libraries="$2"
-      fi
-      shift 2
-      ;;
-    -i)
-      init_path="$2"
-      shift 2
-      ;;
-    -c)
-      postgres_conf="$2"
-      shift 2
-      ;;
-    -*|--*)
-      echo "Unknown option $1"
-      echo "$USAGE"
-      exit 1
-      ;;
-    *)
-      POSITIONAL_ARGS+=("$1") # save positional arg
-      shift # past argument
-      ;;
-  esac
+	case $1 in
+		-h)
+			echo "$USAGE"
+			exit 0
+			;;
+		-p)
+			port="$2"
+			shift 2
+			;;
+		-s)
+			if [ -n "$shared_preload_libraries" ]; then
+				shared_preload_libraries="$shared_preload_libraries,$2"
+			else
+				shared_preload_libraries="$2"
+			fi
+			shift 2
+			;;
+		-i)
+			init_path="$2"
+			shift 2
+			;;
+		-c)
+			postgres_conf="$2"
+			shift 2
+			;;
+		--* | -*)
+			echo "Unknown option $1"
+			echo "$USAGE"
+			exit 1
+			;;
+		*)
+			POSITIONAL_ARGS+=("$1") # save positional arg
+			shift                   # past argument
+			;;
+	esac
 done
 set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
 
@@ -83,36 +83,36 @@ log_dir=$cluster_dir/log
 log_file=$log_dir/server.log
 
 # create the database
-mkdir -p $cluster_dir
-mkdir -p $data_dir
-mkdir -p $log_dir
-pg_ctl initdb -D $data_dir -o "--encoding=UTF8"
+mkdir -p "$cluster_dir"
+mkdir -p "$data_dir"
+mkdir -p "$log_dir"
+pg_ctl initdb -D "$data_dir" -o "--encoding=UTF8"
 
 # create database user
 date
-pg_ctl -t 60 -D $data_dir -l $log_file start || {
-  echo "Failed to start PostgreSQL"
-  date
-  cat $log_file
-  exit 1
+pg_ctl -t 60 -D "$data_dir" -l "$log_file" start || {
+	echo "Failed to start PostgreSQL"
+	date
+	cat "$log_file"
+	exit 1
 }
 
 # createdb $database
-createuser -d -e -i -l -r -s $user
+createuser -d -e -i -l -r -s "$user"
 if [ -n "$init_path" ]; then
-  psql -U $user -d $database < $init_path/*.sql
+	psql -U "$user" -d "$database" <"$init_path"/*.sql
 fi
 
-pg_ctl -D $data_dir stop
+pg_ctl -D "$data_dir" stop
 
 # update postgresql.conf
 if [ -n "$postgres_conf" ]; then
-  cp $postgres_conf/* $data_dir
+	cp "$postgres_conf"/* "$data_dir"
 fi
 if [ -n "$port" ]; then
-  echo "port=$port" >> $data_dir/postgresql.conf
+	echo "port=$port" >>"$data_dir/postgresql.conf"
 fi
 if [ -n "$shared_preload_libraries" ]; then
-  echo "shared_preload_libraries='$shared_preload_libraries'" >> $data_dir/postgresql.conf
+	echo "shared_preload_libraries='$shared_preload_libraries'" >>"$data_dir/postgresql.conf"
 fi
 # echo "max_prepared_transactions=100" >> ${datadir}/postgresql.conf
