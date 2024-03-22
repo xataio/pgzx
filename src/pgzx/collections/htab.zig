@@ -291,7 +291,7 @@ pub fn StringKeyContext(comptime V: type, comptime options: StringKeyOptions) ty
         pub const Key = [:0]const u8;
         pub const Value = V;
 
-        pub const DefaultHash = HashValueFunc.Blobs;
+        pub const DefaultHash = HashValueFunc.Strings;
 
         pub const Entry = extern struct {
             key: [options.max_str_len]u8,
