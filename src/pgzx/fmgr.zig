@@ -56,6 +56,14 @@ pub inline fn PG_FUNCTION_INFO_V1(comptime fun: []const u8) void {
     @export(FunctionV1, .{ .name = finfo_name });
 }
 
+/// Similar to PG_FUNCTION_V1, but doesn't generate the function call wrapper,
+/// meaning that `callback` needs to be in the standard V1 function format.
+pub inline fn PG_FUNCTION_V1_RAW(comptime name: []const u8, comptime callback: anytype) void {
+    PG_FUNCTION_INFO_V1(name);
+
+    @export(callback, .{ .name = name });
+}
+
 pub inline fn PG_FUNCTION_V1(comptime name: []const u8, comptime callback: anytype) void {
     PG_FUNCTION_INFO_V1(name);
 
