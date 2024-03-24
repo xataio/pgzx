@@ -41,6 +41,7 @@ const includes = @cImport({
     // libpq support
     @cInclude("libpq-fe.h");
     @cInclude("libpq/libpq-be.h");
+    @cInclude("libpq/pqformat.h");
     @cInclude("libpqsrv.h");
 });
 
