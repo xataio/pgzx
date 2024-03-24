@@ -4,6 +4,7 @@ const includes = @cImport({
     @cInclude("postgres.h");
     @cInclude("postgres_ext.h");
 
+    @cInclude("access/hash.h");
     @cInclude("fmgr.h");
     @cInclude("miscadmin.h");
     @cInclude("varatt.h");
