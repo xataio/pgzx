@@ -197,13 +197,6 @@ pub const Conn = struct {
         }
     }
 
-    pub fn asSync(self: *Self) !Conn {
-        return Conn{
-            .conn = self.conn,
-            .allocator = self.allocator,
-        };
-    }
-
     pub fn exec(self: *Self, query: [:0]const u8) !Result {
         const rc = c.PQsendQuery(self.conn, query);
         if (rc == 0) {
