@@ -168,7 +168,7 @@ pub const Float32 = ConvNoFail(f32, c.DatumGetFloat4, c.Float4GetDatum);
 pub const Float64 = ConvNoFail(f64, c.DatumGetFloat8, c.Float8GetDatum);
 
 pub const SliceU8 = Conv([]const u8, getDatumTextSlice, sliceToDatumText);
-pub const SliceU8Z = Conv([:0]const u8, getDatumTextSliceZ, sliceToDatumText);
+pub const SliceU8Z = Conv([:0]const u8, getDatumCString, sliceToDatumCString);
 
 pub const PGDatum = ConvNoFail(c.Datum, idDatum, idDatum);
 const PGNullableDatum = struct {
@@ -221,11 +221,18 @@ pub fn getDatumTextSliceZ(datum: c.Datum) ![:0]const u8 {
     return buffer[0..len :0];
 }
 
+/// Convert a cstring datum to a null-terminated slice.
+pub fn getDatumCString(datum: c.Datum) ![:0]const u8 {
+    const ptr = c.DatumGetCString(datum);
+
+    return std.mem.span(ptr);
+}
+
 pub inline fn sliceToDatumText(slice: []const u8) !c.Datum {
     const text = c.cstring_to_text_with_len(slice.ptr, @intCast(slice.len));
     return c.PointerGetDatum(text);
 }
 
-pub inline fn sliceToDatumTextZ(slice: [:0]const u8) !c.Datum {
-    return sliceToDatumText(slice);
+pub inline fn sliceToDatumCString(slice: [:0]const u8) !c.Datum {
+    return c.PointerGetDatum(slice.ptr);
 }
