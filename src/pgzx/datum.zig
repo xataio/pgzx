@@ -9,12 +9,14 @@ const varatt = @import("varatt.zig");
 pub fn Conv(comptime T: type, comptime from: anytype, comptime to: anytype) type {
     return struct {
         pub const Type = T;
+
         pub fn fromNullableDatum(d: c.NullableDatum) !Type {
             if (d.isnull) {
                 return err.PGError.UnexpectedNullValue;
             }
             return try from(d.value);
         }
+
         pub fn toNullableDatum(v: Type) !c.NullableDatum {
             return .{
                 .value = try to(v),
@@ -27,12 +29,14 @@ pub fn Conv(comptime T: type, comptime from: anytype, comptime to: anytype) type
 pub fn ConvNoFail(comptime T: type, comptime from: anytype, comptime to: anytype) type {
     return struct {
         pub const Type = T;
+
         pub fn fromNullableDatum(d: c.NullableDatum) !T {
             if (d.isnull) {
                 return err.PGError.UnexpectedNullValue;
             }
             return from(d.value);
         }
+
         pub fn toNullableDatum(v: T) !c.NullableDatum {
             return .{
                 .value = to(v),
@@ -46,12 +50,14 @@ pub fn ConvNoFail(comptime T: type, comptime from: anytype, comptime to: anytype
 pub fn OptConv(comptime C: anytype) type {
     return struct {
         pub const Type = ?C.Type;
+
         pub fn fromNullableDatum(d: c.NullableDatum) !Type {
             if (d.isnull) {
                 return null;
             }
             return try C.fromNullableDatum(d);
         }
+
         pub fn toNullableDatum(v: Type) !c.NullableDatum {
             if (v) |value| {
                 return try C.toNullableDatum(value);
@@ -70,7 +76,10 @@ pub fn OptConv(comptime C: anytype) type {
 /// reflection only.
 var directMappings = .{
     .{ c.Datum, PGDatum },
+    .{ c.FunctionCallInfo, PGFunctionCallInfo },
     .{ c.NullableDatum, PGNullableDatum },
+    .{ c.SortSupport, PGSortSupport },
+    .{ c.StringInfo, PGStringInfo },
 };
 
 pub fn fromNullableDatum(comptime T: type, d: c.NullableDatum) !T {
@@ -154,7 +163,7 @@ inline fn isConv(comptime T: type) bool {
     return @hasDecl(T, "Type") and @hasDecl(T, "fromNullableDatum") and @hasDecl(T, "toNullableDatum");
 }
 
-pub const Void = ConvNoFail(void, idDatum, toVoid);
+pub const Void = ConvNoFail(void, makeID(c.Datum), toVoid);
 pub const Bool = ConvNoFail(bool, c.DatumGetBool, c.BoolGetDatum);
 pub const Int8 = ConvNoFail(i8, datumGetInt8, c.Int8GetDatum);
 pub const Int16 = ConvNoFail(i16, c.DatumGetInt16, c.Int16GetDatum);
@@ -170,12 +179,18 @@ pub const Float64 = ConvNoFail(f64, c.DatumGetFloat8, c.Float8GetDatum);
 pub const SliceU8 = Conv([]const u8, getDatumTextSlice, sliceToDatumText);
 pub const SliceU8Z = Conv([:0]const u8, getDatumTextSliceZ, sliceToDatumText);
 
-pub const PGDatum = ConvNoFail(c.Datum, idDatum, idDatum);
+pub const PGFunctionCallInfo = ConvID(c.FunctionCallInfo);
+pub const PGSortSupport = ConvID(c.SortSupport);
+pub const PGStringInfo = Conv(c.StringInfo, datumGetStringInfo, c.PointerGetDatum);
+
+pub const PGDatum = ConvID(c.Datum);
 const PGNullableDatum = struct {
     pub const Type = c.NullableDatum;
+
     pub fn fromNullableDatum(d: c.NullableDatum) !Type {
         return d;
     }
+
     pub fn toNullableDatum(v: Type) !c.NullableDatum {
         return v;
     }
@@ -185,8 +200,26 @@ const PGNullableDatum = struct {
 
 // TODO: conversion decorator for jsonb decoding/encoding types
 
-fn idDatum(d: c.Datum) c.Datum {
-    return d;
+fn ConvID(comptime T: type) type {
+    const idFn = makeID(T);
+
+    return ConvNoFail(T, idFn, idFn);
+}
+
+fn makeID(comptime T: type) fn (T) T {
+    return struct {
+        fn id(t: T) T {
+            return t;
+        }
+    }.id;
+}
+
+fn datumGetStringInfo(datum: c.Datum) !c.StringInfo {
+    return datumGetPointer(c.StringInfo, datum);
+}
+
+inline fn datumGetPointer(comptime T: type, datum: c.Datum) T {
+    return @ptrCast(@alignCast(c.DatumGetPointer(datum)));
 }
 
 fn toVoid(d: void) c.Datum {
