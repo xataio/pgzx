@@ -36,6 +36,7 @@ pub fn HTab(comptime Context: type) type {
         const ConstKeyPtr = if (meta.isSlice(Key)) Key else *const Key;
 
         const Iterator = HTabIter(Context);
+        const ValuesIterator = HTabValuesIter(Context);
 
         const Self = @This();
 
@@ -200,6 +201,19 @@ pub fn HTab(comptime Context: type) type {
             return Iterator.init(self.htab);
         }
 
+        /// Initialize a values iterator.
+        ///
+        /// NOTE:
+        /// The iterator type is only valid for Contexts that have a readValue function.
+        /// This is not the case when using tables that
+        /// use Postgres internal structures or are passed to you from
+        /// Postgres.
+        /// The KVContext and StringKeyContext introduced by pgzx are safe to
+        /// use with this iterator.
+        pub fn valuesIterator(self: Self) ValuesIterator {
+            return ValuesIterator.init(self.htab);
+        }
+
         fn keyPtr(k: ConstKeyPtr) ?*anyopaque {
             if (meta.isSlice(Key)) {
                 return @constCast(@ptrCast(k.ptr));
@@ -274,6 +288,27 @@ pub fn HTabIter(comptime Context: type) type {
     };
 }
 
+pub fn HTabValuesIter(comptime Context: type) type {
+    return struct {
+        iter: HTabIter(Context),
+
+        pub const Self = @This();
+
+        pub fn init(htab: *c.HTAB) Self {
+            return .{ .iter = HTabIter(Context).init(htab) };
+        }
+
+        pub fn term(self: *Self) void {
+            self.iter.term();
+        }
+
+        pub fn next(self: *Self) ?Context.Value {
+            const entry = self.iter.next();
+            return if (entry) |e| Context.readValue(e) else null;
+        }
+    };
+}
+
 pub const StringKeyOptions = struct {
     max_str_len: usize = c.NAMEDATALEN,
 };
@@ -308,6 +343,10 @@ pub fn StringKeyContext(comptime V: type, comptime options: StringKeyOptions) ty
 
         pub fn writeValue(entry: *Entry, value: V) void {
             entry.*.value = value;
+        }
+
+        pub fn readValue(entry: *Entry) V {
+            return entry.*.value;
         }
     };
 }
@@ -344,6 +383,10 @@ pub fn KVContext(comptime K: type, comptime V: type) type {
 
         pub fn writeValue(entry: *Entry, value: V) void {
             entry.*.value = value;
+        }
+
+        pub fn readValue(entry: *Entry) V {
+            return entry.*.value;
         }
     };
 }
@@ -569,5 +612,46 @@ pub const TestSuite_HTab = struct {
             count += 1;
         }
         try std.testing.expectEqual(count, 2);
+    }
+
+    pub fn testIterValuesInt() !void {
+        var table = try IntTable.init("testing table", 2, .{});
+        defer table.deinit();
+
+        const k1: u32 = 42;
+        const k2: u32 = 43;
+        try table.put(&k1, 0);
+        try table.put(&k2, 1);
+
+        var seen = [_]bool{ false, false };
+        var count: usize = 0;
+        var iter = table.valuesIterator();
+        while (iter.next()) |value| {
+            count += 1;
+            try std.testing.expect(value < 2);
+            seen[value] = true;
+        }
+
+        try std.testing.expectEqual(count, 2);
+        try std.testing.expectEqual(seen, [_]bool{ true, true });
+    }
+
+    pub fn testIterValueString() !void {
+        var table = try StringTable.init("testing table", 2, .{});
+
+        try table.put("foo", 0);
+        try table.put("bar", 1);
+
+        var seen = [_]bool{ false, false };
+        var count: usize = 0;
+        var iter = table.valuesIterator();
+        while (iter.next()) |value| {
+            count += 1;
+            try std.testing.expect(value < 2);
+            seen[value] = true;
+        }
+
+        try std.testing.expectEqual(count, 2);
+        try std.testing.expectEqual(seen, [_]bool{ true, true });
     }
 };
