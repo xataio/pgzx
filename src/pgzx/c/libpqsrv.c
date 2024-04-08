@@ -8,11 +8,12 @@ void pqsrv_connect_prepare(void) {
     libpqsrv_connect_prepare();
 }
 
-void *pqsrv_connect(const char *conninfo, uint32 wait_event_info) {
+PGconn *
+pqsrv_connect(const char *conninfo, uint32 wait_event_info) {
     return libpqsrv_connect(conninfo, wait_event_info);
 }
 
-void*
+PGconn*
 pqsrv_connect_params(const char *const *keywords,
 						const char *const *values,
 						int expand_dbname,

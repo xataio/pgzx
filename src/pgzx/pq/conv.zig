@@ -50,7 +50,7 @@ pub fn find(comptime T: type) type {
                 @compileLog("type:", T);
                 @compileError("unsupported ptr type");
             }
-            break :blk if (meta.isSentinel(T)) textzconv else textconv;
+            break :blk if (meta.hasSentinal(T)) textzconv else textconv;
         },
         else => {
             @compileLog("type:", T);
@@ -172,10 +172,10 @@ const textconv = struct {
 };
 
 const textzconv = struct {
-    const OID = c.TEXTOID;
-    const Type = [:0]const u8;
+    pub const OID = c.TEXTOID;
+    pub const Type = [:0]const u8;
 
-    pub fn write(writer: std.io.Writer, value: [:0]const u8) !void {
+    pub fn write(writer: anytype, value: [:0]const u8) !void {
         _ = try writer.write(value);
     }
 

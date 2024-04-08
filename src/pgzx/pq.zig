@@ -30,13 +30,13 @@ const pqsrv = struct {
     var wait_event_connect: u32 = 0;
     var wait_event_command: u32 = 0;
 
-    pub fn connectAsync(conninfo: []const u8) Error!*c.PGconn {
+    pub fn connectAsync(conninfo: [:0]const u8) Error!*c.PGconn {
         try err.wrap(c.pqsrv_connect_prepare, .{});
-        return connOrErr(c.PQconnectStart(conninfo));
+        return connOrErr(c.PQconnectStart(conninfo.ptr));
     }
 
-    pub fn connect(conninfo: []const u8) Error!*c.PGconn {
-        const maybeConn = try err.wrap(c.pqsrv_connect, .{ conninfo, try get_wait_event_connect() });
+    pub fn connect(conninfo: [:0]const u8) Error!*c.PGconn {
+        const maybeConn: ?*c.PGconn = try err.wrap(c.pqsrv_connect, .{ conninfo.ptr, try get_wait_event_connect() });
         return connOrErr(maybeConn);
     }
 
@@ -105,7 +105,7 @@ pub const Conn = struct {
     }
 
     pub fn connectWait(allocator: std.mem.Allocator, conninfo: []const u8) !Self {
-        return try Self.connectWith(c.libpqsrv_connect, allocator, conninfo);
+        return try Self.connectWith(pqsrv.connect, allocator, conninfo);
     }
 
     pub fn connectWaitCheck(allocator: std.mem.Allocator, conninfo: []const u8) !Self {
@@ -137,11 +137,7 @@ pub const Conn = struct {
 
         const conninfoZ = try local_allocator.dupeZ(u8, conninfo);
         const conn = try connector(conninfoZ);
-        if (conn) |nc| {
-            return Self{ .conn = nc, .allocator = allocator };
-        }
-
-        return error.ConnectionFailure;
+        return Self{ .conn = conn, .allocator = allocator };
     }
 
     fn connectParamsWith(
@@ -158,11 +154,11 @@ pub const Conn = struct {
         return Self{ .conn = conn, .allocator = allocator };
     }
 
-    fn waitConnected(self: *Self) !void {
+    fn waitConnected(self: *const Self) !void {
         return pqsrv.waitConnected(self.conn);
     }
 
-    fn checkConnSuccess(self: *Self) !void {
+    fn checkConnSuccess(self: *const Self) !void {
         if (self.status() != c.CONNECTION_OK) {
             if (self.errorMessage()) |msg| {
                 std.log.err("Connection error: {s}", .{msg});
@@ -171,33 +167,33 @@ pub const Conn = struct {
         }
     }
 
-    pub fn connectPoll(self: *Self) PollingStatus {
+    pub fn connectPoll(self: *const Self) PollingStatus {
         return c.PQconnectPoll(self.conn);
     }
 
-    pub fn reset(self: *Self) bool {
+    pub fn reset(self: *const Self) bool {
         return c.PQresetStart(self.conn) != 0;
     }
 
-    pub fn resetWait(self: *Self) !void {
+    pub fn resetWait(self: *const Self) !void {
         if (!self.reset()) {
             return error.OperationFailed;
         }
         try self.waitConnected();
     }
 
-    pub fn resetPoll(self: *Self) PollingStatus {
+    pub fn resetPoll(self: *const Self) PollingStatus {
         return c.PQresetPoll(self.conn);
     }
 
-    pub fn setNonBlocking(self: *Self, arg: bool) !void {
+    pub fn setNonBlocking(self: *const Self, arg: bool) !void {
         const rs = c.PQsetnonblocking(self.conn, if (arg) 1 else 0);
         if (rs < 0) {
             return error.OperationFailed;
         }
     }
 
-    pub fn exec(self: *Self, query: [:0]const u8) !Result {
+    pub fn exec(self: *const Self, query: [:0]const u8) !Result {
         const rc = c.PQsendQuery(self.conn, query);
         if (rc == 0) {
             pqError(@src(), self.conn) catch |e| return e;
@@ -207,7 +203,7 @@ pub const Conn = struct {
         return try Self.initExecResult(self.conn, res);
     }
 
-    pub fn execCommand(self: *Self, command: [:0]const u8, args: anytype) !void {
+    pub fn execCommand(self: *const Self, command: [:0]const u8, args: anytype) !void {
         var arena = std.heap.ArenaAllocator.init(self.allocator);
         defer arena.deinit();
         const local_allocator = arena.allocator();
@@ -220,7 +216,7 @@ pub const Conn = struct {
         res.deinit();
     }
 
-    pub fn execParams(self: *Self, command: [:0]const u8, params: PGQueryParams) !Result {
+    pub fn execParams(self: *const Self, command: [:0]const u8, params: PGQueryParams) !Result {
         const rc = c.PQsendQueryParams(
             self.conn,
             command,
@@ -264,7 +260,7 @@ pub const Conn = struct {
         }
     }
 
-    pub fn sendCommand(self: *Self, command: []const u8, args: anytype) !void {
+    pub fn sendCommand(self: *const Self, command: [:0]const u8, args: anytype) !void {
         var arena = std.heap.ArenaAllocator.init(self.allocator);
         defer arena.deinit();
         const local_allocator = arena.allocator();
@@ -278,7 +274,7 @@ pub const Conn = struct {
 
     /// Send a query with parameters. We assume that the values are encoded in
     /// text format.
-    pub fn sendQueryParams(self: *Self, query: [:0]const u8, params: PGQueryParams) !void {
+    pub fn sendQueryParams(self: *const Self, query: [:0]const u8, params: PGQueryParams) !void {
         std.log.info("conn '{*}' sendQueryParams: {s}", .{ self.conn, query });
 
         const n = params.values.len;
@@ -314,7 +310,7 @@ pub const Conn = struct {
         }
     }
 
-    pub fn sendQuery(self: *Self, query: []const u8) !void {
+    pub fn sendQuery(self: *const Self, query: []const u8) !void {
         const rc = c.PQsendQuery(self.conn, query);
         if (rc == 0) {
             pqError(@src()) catch |e| return e;
@@ -325,7 +321,7 @@ pub const Conn = struct {
     // Consumes the next result and returns true if the result was not null and
     // and the status is PGRES_COMMAND_OK.
     // The result struct is cleared right away.
-    pub fn getCommandOk(self: *Self) !bool {
+    pub fn getCommandOk(self: *const Self) !bool {
         while (true) {
             if (try self.getResult()) |r| {
                 if (r.is_error()) {
@@ -348,17 +344,17 @@ pub const Conn = struct {
         }
     }
 
-    pub fn getResult(self: *Self) !?Result {
+    pub fn getResult(self: *const Self) !?Result {
         const res = try self.getRawResult();
         return if (res) |r| Result.init(r) else null;
     }
 
-    pub fn getRawResult(self: *Self) !?*c.PGresult {
+    pub fn getRawResult(self: *const Self) !?*c.PGresult {
         try self.waitReady();
         return c.PQgetResult(self.conn);
     }
 
-    pub fn getRawResultLast(self: *Self) !?*c.PGresult {
+    pub fn getRawResultLast(self: *const Self) !?*c.PGresult {
         var last: ?*c.PGresult = null;
         errdefer {
             if (last) |r| c.PQclear(r);
@@ -390,7 +386,7 @@ pub const Conn = struct {
     //
     // `waitReady` handles signals and will return an error if the postmaster
     // or CheckForInterrupts indicates that we should shutdown.
-    pub fn waitReady(self: *Self) !void {
+    pub fn waitReady(self: *const Self) !void {
         try intr.CheckForInterrupts();
         while (true) {
             var wait_flag: c_int = 0;
@@ -425,7 +421,7 @@ pub const Conn = struct {
 
     // Flush the send queue. Returns true if the all data has been sent or if the queue is empty.
     // Return false is the send queue is not send completely.
-    pub fn flush(self: *Self) !bool {
+    pub fn flush(self: *const Self) !bool {
         const rc = c.PQflush(self.conn);
         if (rc < 0) {
             pqError(@src(), self.conn) catch |e| return e;
@@ -434,7 +430,7 @@ pub const Conn = struct {
         return rc == 0;
     }
 
-    pub fn consumeInput(self: *Self) !void {
+    pub fn consumeInput(self: *const Self) !void {
         const rc = c.PQconsumeInput(self.conn);
         if (rc == 0) {
             pqError(@src(), self.conn) catch |e| return e;
@@ -442,7 +438,7 @@ pub const Conn = struct {
         }
     }
 
-    pub fn finish(self: *Self) void {
+    pub fn finish(self: *const Self) void {
         c.pqsrv_disconnect(self.conn);
     }
 
@@ -531,7 +527,7 @@ pub const PollStartState = struct {
 
     const Self = @This();
 
-    pub fn new(conn: *Conn) Self {
+    pub fn new(conn: *const Conn) Self {
         var self: Self = undefined;
         self.init();
         _ = self.update(conn);
@@ -542,7 +538,7 @@ pub const PollStartState = struct {
         self.* = .{ .polltype = 0 };
     }
 
-    pub fn update(self: *Self, conn: *Conn) bool {
+    pub fn update(self: *Self, conn: *const Conn) bool {
         const pq_status = conn.status();
         var status_update = switch (pq_status) {
             c.CONNECTION_OK => StartupStatus.CONNECTED,
@@ -589,7 +585,7 @@ fn responseCodeFatal(response_code: c.ExecStatusType) bool {
     };
 }
 
-const PGQueryParams = struct {
+pub const PGQueryParams = struct {
     values: []const [*c]const u8,
 
     // Optional OID types of the values. Required for binary encodings.
