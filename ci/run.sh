@@ -27,12 +27,8 @@ test_pgaudit_zig() {
 }
 
 test_spi_sql() {
-	extension_create spi_sql
-
 	local rc=0
 	run_regression_tests ./examples/spi_sql || rc=1
-
-	extension_drop spi_sql
 	return $rc
 }
 
@@ -98,6 +94,7 @@ main() {
 
 	extension_build ./examples/char_count_zig || fail "Failed to build char_count_zig"
 	extension_build ./examples/pgaudit_zig || fail "Failed to build pgaudit_zig"
+	extension_build ./examples/spi_sql || fail "Failed to build spi_sql"
 
 	echo "Start PostgreSQL"
 	pgstart || fail "Failed to start PostgreSQL"
