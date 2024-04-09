@@ -27,13 +27,13 @@ test_pgaudit_zig() {
 }
 
 test_spi_sql() {
-  extension_create spi_sql
+	extension_create spi_sql
 
-  local rc=0
-  run_regression_tests ./examples/spi_sql || rc=1
+	local rc=0
+	run_regression_tests ./examples/spi_sql || rc=1
 
-  extension_drop spi_sql
-  return $rc
+	extension_drop spi_sql
+	return $rc
 }
 
 extension_build() {
@@ -73,7 +73,7 @@ run_unit_tests() {
 
 run_test_suites() {
 	for t in "$@"; do
-    echo ""
+		echo ""
 		echo "# Run $t"
 		if ! $t; then
 			return 1
