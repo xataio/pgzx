@@ -26,6 +26,16 @@ test_pgaudit_zig() {
 	run_unit_tests ./examples/pgaudit_zig
 }
 
+test_spi_sql() {
+  extension_create spi_sql
+
+  local rc=0
+  run_regression_tests ./examples/spi_sql || rc=1
+
+  extension_drop spi_sql
+  return $rc
+}
+
 extension_build() {
 	cwd=$(pwd)
 	cd "$1" || return 1
@@ -63,6 +73,7 @@ run_unit_tests() {
 
 run_test_suites() {
 	for t in "$@"; do
+    echo ""
 		echo "# Run $t"
 		if ! $t; then
 			return 1
@@ -93,7 +104,7 @@ main() {
 	trap pgstop TERM INT EXIT
 
 	ok=true
-	run_test_suites test_pgzx test_char_count_zig test_pgaudit_zig || ok=false
+	run_test_suites test_pgzx test_char_count_zig test_pgaudit_zig test_spi_sql || ok=false
 
 	if ! $ok; then
 		printf "\n\nServer log:"

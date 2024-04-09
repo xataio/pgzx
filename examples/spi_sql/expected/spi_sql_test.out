@@ -1,0 +1,66 @@
+CREATE EXTENSION spi_sql;
+SELECT spi_sql.query_by_id(0); -- return 'Hello'
+ query_by_id 
+-------------
+ Hello
+(1 row)
+
+SELECT spi_sql.query_by_id(1); -- return 'World'
+ query_by_id 
+-------------
+ World
+(1 row)
+
+SELECT spi_sql.query_by_id(2); -- Fail
+ERROR:  Unknown id: 2
+SELECT spi_sql.query_by_value('Hello'); -- return 0
+ query_by_value 
+----------------
+              0
+(1 row)
+
+SELECT spi_sql.query_by_value('World'); -- return 1
+ query_by_value 
+----------------
+              1
+(1 row)
+
+SELECT spi_sql.query_by_value('test'); -- FAIL
+ERROR:  Value 'test' not found
+SELECT spi_sql.ins_value(2, 'test');
+ ins_value 
+-----------
+         2
+(1 row)
+
+SELECT spi_sql.query_by_id(2); -- return 'test'
+ query_by_id 
+-------------
+ test
+(1 row)
+
+SELECT spi_sql.query_by_value('test'); -- return 2
+ query_by_value 
+----------------
+              2
+(1 row)
+
+SELECT spi_sql.test_iter();
+INFO:  id: 0, value: Hello
+INFO:  id: 1, value: World
+INFO:  id: 2, value: test
+ test_iter 
+-----------
+ 
+(1 row)
+
+SELECT spi_sql.test_rows_of();
+INFO:  id: 0, value: Hello
+INFO:  id: 1, value: World
+INFO:  id: 2, value: test
+ test_rows_of 
+--------------
+ 
+(1 row)
+
+DROP EXTENSION spi_sql;

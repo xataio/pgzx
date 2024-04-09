@@ -40,7 +40,9 @@ pub const ExecOptions = struct {
     args: ?Args = null,
 };
 
-pub fn exec(sql: [:0]const u8, options: ExecOptions) err.PGError!c_int {
+pub const SPIError = err.PGError || std.mem.Allocator.Error;
+
+pub fn exec(sql: [:0]const u8, options: ExecOptions) SPIError!c_int {
     if (options.args) |args| {
         if (args.types.len != args.values.len) {
             return err.PGError.SPIArgument;
@@ -89,7 +91,7 @@ pub fn exec(sql: [:0]const u8, options: ExecOptions) err.PGError!c_int {
     }
 }
 
-pub fn query(sql: [:0]const u8, options: ExecOptions) err.PGError!Rows {
+pub fn query(sql: [:0]const u8, options: ExecOptions) SPIError!Rows {
     _ = try exec(sql, options);
     return Rows.init();
 }

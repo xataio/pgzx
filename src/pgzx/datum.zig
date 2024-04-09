@@ -168,7 +168,7 @@ pub const Float32 = ConvNoFail(f32, c.DatumGetFloat4, c.Float4GetDatum);
 pub const Float64 = ConvNoFail(f64, c.DatumGetFloat8, c.Float8GetDatum);
 
 pub const SliceU8 = Conv([]const u8, getDatumTextSlice, sliceToDatumText);
-pub const SliceU8Z = Conv([:0]const u8, getDatumTextSliceZ, sliceToDatumText);
+pub const SliceU8Z = Conv([:0]const u8, getDatumTextSliceZ, sliceToDatumTextZ);
 
 pub const PGDatum = ConvNoFail(c.Datum, idDatum, idDatum);
 const PGNullableDatum = struct {
