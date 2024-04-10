@@ -164,7 +164,7 @@ const Run = struct {
 
     fn make(step: *Step, prog_node: *std.Progress.Node) !void {
         _ = prog_node;
-        const self = @fieldParentPtr(Run, "step", step);
+        const self: *Run = @fieldParentPtr("step", step);
         const b = self.owner.std_build;
 
         var child = std.process.Child.init(self.argv.items, b.allocator);
