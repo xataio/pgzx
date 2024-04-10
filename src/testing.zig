@@ -10,6 +10,8 @@ comptime {
             pgzx.collections.slist.TestSuite_SList,
             pgzx.collections.dlist.TestSuite_DList,
             pgzx.collections.htab.TestSuite_HTab,
+
+            pgzx.meta.TestSuite_Meta,
         },
     );
 }
