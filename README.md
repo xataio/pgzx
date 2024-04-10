@@ -461,7 +461,7 @@ $ ziglocal --commit 0b744da84
 
 This step will take a while. You will find the compiler and library of your local debug build in the `out/zig/build/stage3` directory.
 
-## QA
+## Q&A
 
 ### Which Zig version do you support?
 
@@ -496,7 +496,7 @@ zig-out/share/postgresql/extension/char_count_zig.control
 zig-out/share/postgresql/extension/char_count_zig--0.1.sql
 ```
 
-If you are not sure wether the build system puts all files into the correct location or in case you generate code it can be helpful to debug your build scripts to install into `zig-out`.
+If you are not sure whether the build system puts all files into the correct location or in case you generate code it can be helpful to debug your build scripts to install into `zig-out`.
 
 To install the extension with your local Postgres instance you need to pass the path prefix where postgres was installed to using the `-p` flag:
 
