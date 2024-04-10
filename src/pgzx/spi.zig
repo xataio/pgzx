@@ -2,7 +2,7 @@ const std = @import("std");
 const mem = @import("mem.zig");
 const err = @import("err.zig");
 const c = @import("c.zig");
-const fmgr = @import("fmgr.zig");
+const datum = @import("datum.zig");
 
 pub fn connect() err.PGError!void {
     const status = c.SPI_connect();
@@ -40,7 +40,9 @@ pub const ExecOptions = struct {
     args: ?Args = null,
 };
 
-pub fn exec(sql: [:0]const u8, options: ExecOptions) !c_int {
+pub const SPIError = err.PGError || std.mem.Allocator.Error;
+
+pub fn exec(sql: [:0]const u8, options: ExecOptions) SPIError!c_int {
     if (options.args) |args| {
         if (args.types.len != args.values.len) {
             return err.PGError.SPIArgument;
@@ -89,7 +91,7 @@ pub fn exec(sql: [:0]const u8, options: ExecOptions) !c_int {
     }
 }
 
-pub fn query(sql: [:0]const u8, options: ExecOptions) !Rows {
+pub fn query(sql: [:0]const u8, options: ExecOptions) SPIError!Rows {
     _ = try exec(sql, options);
     return Rows.init();
 }
@@ -195,10 +197,10 @@ pub fn convProcessed(comptime T: type, row: c_int, col: c_int) !T {
 pub fn convBinValue(comptime T: type, table: *c.SPITupleTable, row: usize, col: c_int) !T {
     // TODO: check index?
 
-    var datum: c.NullableDatum = undefined;
-    datum.value = c.SPI_getbinval(table.*.vals[row], table.*.tupdesc, col, @ptrCast(&datum.isnull));
+    var nd: c.NullableDatum = undefined;
+    nd.value = c.SPI_getbinval(table.*.vals[row], table.*.tupdesc, col, @ptrCast(&nd.isnull));
     try checkStatus(c.SPI_result);
-    return try fmgr.conv.fromNullableDatum(T, datum);
+    return try datum.fromNullableDatum(T, nd);
 }
 
 fn checkStatus(st: c_int) err.PGError!void {

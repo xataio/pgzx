@@ -26,6 +26,12 @@ test_pgaudit_zig() {
 	run_unit_tests ./examples/pgaudit_zig
 }
 
+test_spi_sql() {
+	local rc=0
+	run_regression_tests ./examples/spi_sql || rc=1
+	return $rc
+}
+
 extension_build() {
 	cwd=$(pwd)
 	cd "$1" || return 1
@@ -63,6 +69,7 @@ run_unit_tests() {
 
 run_test_suites() {
 	for t in "$@"; do
+		echo ""
 		echo "# Run $t"
 		if ! $t; then
 			return 1
@@ -87,13 +94,14 @@ main() {
 
 	extension_build ./examples/char_count_zig || fail "Failed to build char_count_zig"
 	extension_build ./examples/pgaudit_zig || fail "Failed to build pgaudit_zig"
+	extension_build ./examples/spi_sql || fail "Failed to build spi_sql"
 
 	echo "Start PostgreSQL"
 	pgstart || fail "Failed to start PostgreSQL"
 	trap pgstop TERM INT EXIT
 
 	ok=true
-	run_test_suites test_pgzx test_char_count_zig test_pgaudit_zig || ok=false
+	run_test_suites test_pgzx test_char_count_zig test_pgaudit_zig test_spi_sql || ok=false
 
 	if ! $ok; then
 		printf "\n\nServer log:"

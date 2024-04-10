@@ -1,0 +1,6 @@
+comment = 'pgzx: SPI SQL test extension'
+default_version = '0.1'
+module_pathname = '$libdir/spi_sql'
+relocatable = false
+superuser = false
+schema = 'spi_sql'
