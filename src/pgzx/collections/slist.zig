@@ -108,7 +108,7 @@ fn SListMeta(comptime T: type, comptime node_field: std.meta.FieldEnum(T)) type 
         }
 
         inline fn nodeParentPtr(n: *c.slist_node) ?*T {
-            return @fieldParentPtr(T, node, n);
+            return @fieldParentPtr(node, n);
         }
 
         inline fn optNodeParentPtr(n: ?*c.slist_node) ?*T {

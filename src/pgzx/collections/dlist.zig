@@ -221,7 +221,7 @@ pub fn DListDescr(comptime T: type, comptime node_field: std.meta.FieldEnum(T)) 
         }
 
         pub inline fn nodeParentPtr(n: *c.dlist_node) *T {
-            return @fieldParentPtr(T, node, n);
+            return @fieldParentPtr(node, n);
         }
 
         pub inline fn optNodeParentPtr(n: ?*c.dlist_node) ?*T {
