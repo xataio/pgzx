@@ -56,6 +56,13 @@ This step will create a working extension named 'my_extension'. The extension ex
 
 The templates [README.md](./nix/templates/init/README.md) file already contains instructions on how to enter the development shell, build, and test the extension. You can follow the instructions and verify that your setup is functioning. Do not forget to use `pgstop` before quitting the development shell.
 
+The development shell declares a few environment variables used by the project (see [devshell.nix](./devshell.nix)):
+- `PRJ_ROOT`: folder of the current project. If not set some shell scripts will
+  ask `git` to find the projects folder. Some scripts use this environment variable to ensure that you can run the script from within any folder within your project.
+- `PG_HOME`: Installation path of your postgres instance. When building postgres from scratch this matches the 
+path prefix used by `make install`. When using the development shell we will relocate/build the postgres extension into the `./out` folder and create a symlink `./out/default` to the local version. If you plan to build and install the extension with another PostgresSQL installation set `PG_HOME=$(dirname $(pg_config --bindir))`.
+
+
 Next we want to rename the project to match our extension name. To do so update the file names in the `extension` folder, and replace `my_extension` with you project name in the `README.md`, `build.zig`, `build.zig.zon` and extensions SQL file.
 
 ### Logging and error handling
@@ -453,6 +460,51 @@ $ ziglocal --commit 0b744da84
 ```
 
 This step will take a while. You will find the compiler and library of your local debug build in the `out/zig/build/stage3` directory.
+
+## Q&A
+
+### Which Zig version do you support?
+
+The Zig toolchain, including the compiler, build system and standard library is still in development and breaking changes do happen every now and then. For this reason this project follows the [Zig master branch](https://github.com/ziglang/zig).
+
+The Nix based development shell uses [zig-overlay](https://github.com/mitchellh/zig-overlay) in conjunction with the `flake.lock` file to pin the zig toolchain version to a recent commit ID.
+
+The dependency is updated by us every now and so often and we try to test and fix breaking changes when updating the toolchain version. We highly recommend to use the projects develoment shell when testing the example extensions provided, otherwise you might have problems to compile the extensions at all.
+
+We understand not everyone is keen to install Nix locally. For getting to know the environment you can build and run a the development shell in a local docker container. Use `./dev/docker/build.sh` to build the container and `./dev/docker/run.sh` to start the dockerized development shell.
+
+The current stable release is verion 0.11. As the build system APIs and package management system are undergoing heavy development recently we chose to stick with the `master` branch for now.
+
+
+### Where is my extension installed?
+
+By default the zig build system installs all artifacts into the local `zig-out` folder.
+
+For example we can see that behavior when building the `char_count_zig` extension:
+
+```
+$ cd examples/char_count_zig
+$ zig build
+$ find zig-out
+zig-out
+zig-out/lib
+zig-out/lib/char_count_zig.dylib
+zig-out/share
+zig-out/share/postgresql
+zig-out/share/postgresql/extension
+zig-out/share/postgresql/extension/char_count_zig.control
+zig-out/share/postgresql/extension/char_count_zig--0.1.sql
+```
+
+If you are not sure whether the build system puts all files into the correct location or in case you generate code it can be helpful to debug your build scripts to install into `zig-out`.
+
+To install the extension with your local Postgres instance you need to pass the path prefix where postgres was installed to using the `-p` flag:
+
+```
+$ zig build -p <path/to/postgres>
+```
+
+You can run `dirname $(pg_config --bindir)` from your shell to find the installation prefix. We set `PG_HOME` to the expected path in the development shell, assuming you use the `pglocal` or `pgbuild` scripts to prepare a local postgres installation for development.
 
 ## See also
 
