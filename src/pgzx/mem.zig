@@ -53,7 +53,7 @@ fn pg_resize(ctx: *anyopaque, buf: []u8, buf_align: u8, new_len: usize, ret_addr
 }
 
 pub fn getErrorContext() MemoryContextAllocator {
-    return MemoryContextAllocator.init(c.ErrorContext);
+    return MemoryContextAllocator.new(c.ErrorContext);
 }
 
 /// ErrorContext based memory context allocator.
