@@ -100,7 +100,7 @@ pg_ctl -t 60 -D "$data_dir" -l "$log_file" start || {
 # createdb $database
 createuser -d -e -i -l -r -s "$user"
 if [ "postgres" != "$database" ]; then
-  createdb -U "$user" "$database"
+	createdb -U "$user" "$database"
 fi
 
 if [ -n "$init_path" ]; then
