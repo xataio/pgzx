@@ -415,7 +415,7 @@ To debug Zig build scripts or the standard library all you need is the original 
 
 ```
 $ zig version
-0.12.0-dev.3154+0b744da84
+0.13.0-dev.28+3c5e84073
 ```
 
 The version shown here for example indicates that we use a nightly build. The commit ID of that build is `0b744da84`.
@@ -473,7 +473,7 @@ The dependency is updated by us every now and so often and we try to test and fi
 
 We understand not everyone is keen to install Nix locally. For getting to know the environment you can build and run a the development shell in a local docker container. Use `./dev/docker/build.sh` to build the container and `./dev/docker/run.sh` to start the dockerized development shell.
 
-The current stable release is verion 0.11. As the build system APIs and package management system are undergoing heavy development recently we chose to stick with the `master` branch for now.
+The current stable release is verion 0.12. As the build system APIs and package management system are undergoing heavy development recently we chose to stick with the `master` branch for now.
 
 
 ### Where is my extension installed?
