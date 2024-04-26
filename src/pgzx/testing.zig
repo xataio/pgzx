@@ -78,7 +78,10 @@ fn runTestSuite(T: anytype) !u32 {
         if (comptime std.mem.startsWith(u8, f.name, "test")) {
             elog.Info(@src(), "Running test: {s}\n", .{f.name});
 
-            try runTestSuiteTest(@field(T, f.name));
+            runTestSuiteTest(@field(T, f.name)) catch |e| {
+                elog.Info(@src(), "FAIL: {s}\n", .{f.name});
+                return e;
+            };
             success_count += 1;
         }
     }
