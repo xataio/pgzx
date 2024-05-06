@@ -235,10 +235,9 @@ fn freeEvent(event: *AuditEvent) void {
     memctx.deinit();
 }
 
-fn pgaudit_zig_MemoryContextCallback(arg: ?*anyopaque) callconv(.C) void {
+fn pgaudit_zig_MemoryContextCallback(memctx: pg.MemoryContext) void {
     std.log.debug("pgaudit_zig: MemoryContextCallback\n", .{});
 
-    const memctx: pg.MemoryContext = @alignCast(@ptrCast(arg));
     const list = getAuditList() catch return;
     const event = popEvent(list, memctx) catch |err| {
         if (err == error.EventNotFound) {

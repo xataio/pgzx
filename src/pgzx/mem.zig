@@ -6,6 +6,7 @@
 const std = @import("std");
 
 const c = @import("c.zig");
+const meta = @import("meta.zig");
 const err = @import("err.zig");
 
 /// Simple allocator that uses palloc, pfree, and repalloc.
@@ -46,6 +47,7 @@ fn pg_resize(ctx: *anyopaque, buf: []u8, buf_align: u8, new_len: usize, ret_addr
     _ = buf_align;
     _ = buf;
     _ = ctx;
+
     // Postgres API only support realloc and might therefore relocate the buffer.
     // resize is not allowed to relocate the buffer, so we have to return false
     // and force the zig allocator to allocate a new buffer.
@@ -53,13 +55,13 @@ fn pg_resize(ctx: *anyopaque, buf: []u8, buf_align: u8, new_len: usize, ret_addr
 }
 
 pub fn getErrorContext() MemoryContextAllocator {
-    return MemoryContextAllocator.init(c.ErrorContext);
+    return MemoryContextAllocator.init(c.ErrorContext, .{});
 }
 
 /// ErrorContext based memory context allocator.
 /// The allocator is configure to use PostgreSQL-throw (longjump) on OOM.
 pub fn getErrorContextThrowOOM() MemoryContextAllocator {
-    return MemoryContextAllocator.newWith(c.ErrorContext, 0);
+    return MemoryContextAllocator.init(c.ErrorContext, .{ .flags = 0 });
 }
 
 pub const AllocSetOptions = struct {
@@ -67,6 +69,8 @@ pub const AllocSetOptions = struct {
     init_size: c.Size = @intCast(c.ALLOCSET_DEFAULT_INITSIZE),
     min_size: c.Size = @intCast(c.ALLOCSET_DEFAULT_MINSIZE),
     max_size: c.Size = @intCast(c.ALLOCSET_DEFAULT_MAXSIZE),
+
+    flags: c_int = MemoryContextAllocator.DEFAULT_FLAGS,
 };
 
 /// Create a new AllocSet based memory context.
@@ -77,44 +81,52 @@ pub fn createAllocSetContext(comptime name: [:0]const u8, options: AllocSetOptio
         c.AllocSetContextCreateInternal,
         .{ options.parent, name.ptr, options.init_size, options.min_size, options.max_size },
     );
-    return MemoryContextAllocator.new(ctx);
+    return MemoryContextAllocator.init(ctx, .{
+        .flags = options.flags,
+    });
 }
 
 /// Create a temporary AllocSet based memory context and update the CurrentMemoryContext to be
 /// the new context.
 /// Use `deinit` to restore the previous memory context.
 pub fn createTempAllocSet(comptime name: [:0]const u8, options: AllocSetOptions) !TempMemoryContext {
-    return TempMemoryContext.new(try createAllocSetContext(name, options));
+    return TempMemoryContext.init(try createAllocSetContext(name, options));
 }
 
 const SlabContextOptions = struct {
     parent: c.MemoryContext = null,
     block_size: c.Size = @intCast(c.SLAB_DEFAULT_BLOCK_SIZE),
     chunk_size: c.Size,
+
+    flags: c_int = MemoryContextAllocator.DEFAULT_FLAGS,
 };
 
 pub fn createSlabContext(comptime name: [:0]const u8, options: SlabContextOptions) !MemoryContextAllocator {
     const ctx: c.MemoryContext = try err.wrap(
-        c.SlabContextCreateInternal,
+        c.SlabContextCreate,
         .{ options.parent, name.ptr, options.block_size, options.chunk_size },
     );
-    return MemoryContextAllocator.new(ctx);
+    return MemoryContextAllocator.init(ctx, .{
+        .flags = options.flags,
+    });
 }
 
 pub fn createTempSlab(comptime name: [:0]const u8, options: SlabContextOptions) !TempMemoryContext {
-    return TempMemoryContext.new(try createSlabContext(name, options));
+    return TempMemoryContext.init(try createSlabContext(name, options));
 }
 
 pub fn createGenerationContext(comptime name: [:0]const u8, options: AllocSetOptions) !MemoryContextAllocator {
     const ctx: c.MemoryContext = try err.wrap(
-        c.GenerationContextCreateInternal,
-        .{ options.parent, name.ptr, options.init_size, options.min_size, options.max_size },
+        c.GenerationContextCreate,
+        .{ options.parent, name.ptr, options.min_size, options.init_size, options.max_size },
     );
-    return MemoryContextAllocator.new(ctx);
+    return MemoryContextAllocator.init(ctx, .{
+        .flags = options.flags,
+    });
 }
 
 pub fn createTempGeneration(comptime name: [:0]const u8, options: AllocSetOptions) !TempMemoryContext {
-    return TempMemoryContext.new(try createGenerationContext(name, options));
+    return TempMemoryContext.init(try createGenerationContext(name, options));
 }
 
 pub const TempMemoryContext = struct {
@@ -123,20 +135,20 @@ pub const TempMemoryContext = struct {
 
     const Self = @This();
 
-    fn new(a: MemoryContextAllocator) Self {
+    fn init(a: MemoryContextAllocator) Self {
         var self: Self = undefined;
-        self.init(a);
+        self.switchTo(a);
         return self;
-    }
-
-    fn init(self: *Self, ctx: MemoryContextAllocator) void {
-        self.current = ctx;
-        self.old = c.MemoryContextSwitchTo(ctx.ctx);
     }
 
     pub fn deinit(self: *Self) void {
         _ = c.MemoryContextSwitchTo(self.old);
         self.current.deinit();
+    }
+
+    fn switchTo(self: *Self, ctx: MemoryContextAllocator) void {
+        self.current = ctx;
+        self.old = c.MemoryContextSwitchTo(ctx.ctx);
     }
 
     pub fn allocator(self: *Self) std.mem.Allocator {
@@ -151,7 +163,11 @@ pub const TempMemoryContext = struct {
         self.current.registerResetCallback(cb);
     }
 
-    pub fn registerAllocResetCallback(self: *Self, data: ?*anyopaque, f: c.MemoryContextCallbackFunction) !void {
+    pub fn registerAllocResetCallbackFn(self: *Self, data: ?*anyopaque, f: c.MemoryContextCallbackFunction) !void {
+        try self.current.registerAllocResetCallbackFn(data, f);
+    }
+
+    pub fn registerAllocResetCallback(self: *Self, data: anytype, f: fn (@TypeOf(data)) void) !void {
         try self.current.registerAllocResetCallback(data, f);
     }
 
@@ -169,38 +185,41 @@ pub const MemoryContextAllocator = struct {
 
     const Self = @This();
 
-    pub fn new(ctx: c.MemoryContext) Self {
+    const Options = struct {
+        flags: c_int = DEFAULT_FLAGS,
+    };
+
+    const DEFAULT_FLAGS: c_int = c.MCXT_ALLOC_NO_OOM;
+
+    pub fn init(ctx: c.MemoryContext, opts: Options) Self {
         var self: Self = undefined;
-        self.init(ctx);
+        self.setContext(ctx, opts);
         return self;
     }
-
-    pub fn newWith(ctx: c.MemoryContext, flags: c_int) Self {
-        var self: Self = undefined;
-        self.initWith(ctx, flags);
-        return self;
-    }
-
-    /// init the allocator with the given context.
-    /// The context given MUST NOT be null.
-    pub fn init(self: *Self, ctx: *c.struct_MemoryContextData) void {
-        self.initWith(ctx, c.MCXT_ALLOC_NO_OOM);
-    }
-
-    pub fn initWith(self: *Self, ctx: *c.struct_MemoryContextData, flags: c_int) void {
-        self.* = .{ .ctx = ctx, .flags = flags };
-    }
-
-    // /// Catpure the currently active memory context.
-    // pub fn init_from_current(self: *Self) void {
-    //     self.* = .{ .context = c.CurrentMemoryContext, flags = c.MCXT_ALLOC_NO_OOM };
-    // }
 
     /// Delete the underlying memory context. Only use this function if you
     /// have created a temporary memory context yourself.
     pub fn deinit(self: *Self) void {
         c.MemoryContextDelete(self.ctx);
         self.ctx = null;
+    }
+
+    /// init the allocator with the given context.
+    /// The context given MUST NOT be null.
+    pub fn setContext(self: *Self, ctx: c.MemoryContext, opts: Options) void {
+        std.debug.assert(ctx != null);
+        self.* = .{ .ctx = ctx, .flags = opts.flags };
+    }
+
+    pub fn allocated(self: *Self, recurse: bool) usize {
+        return c.MemoryContextMemAllocated(self.ctx, recurse);
+    }
+
+    pub fn stats(self: *Self) c.MemoryContextCounters {
+        var counters: c.MemoryContextCounters = undefined;
+        self.ctx.*.methods.*.stats.?(self.ctx, null, null, &counters, false);
+        std.log.info("MemoryContextCounters: {}", .{counters});
+        return counters;
     }
 
     pub fn reset(self: *Self) void {
@@ -215,10 +234,28 @@ pub const MemoryContextAllocator = struct {
         c.MemoryContextRegisterResetCallback(self.ctx, cb);
     }
 
-    pub fn registerAllocResetCallback(self: *Self, data: ?*anyopaque, f: c.MemoryContextCallbackFunction) !void {
+    pub fn registerAllocResetCallbackFn(self: *Self, data: ?*anyopaque, f: c.MemoryContextCallbackFunction) !void {
         const cb = try self.allocator().create(c.MemoryContextCallback);
         cb.* = .{ .func = f, .arg = data };
         self.registerResetCallback(cb);
+    }
+
+    pub fn registerAllocResetCallback(self: *Self, data: anytype, f: fn (@TypeOf(data)) void) !void {
+        const data_type = @typeInfo(@TypeOf(data));
+        if (data_type != .Pointer) {
+            @compileError("data must be a pointer");
+        }
+        switch (data_type.Pointer.size) {
+            .One => {},
+            .C => {}, // allow C pointer types to raw Postgres data types.
+            else => @compileError("data must be a pointer, found slice"),
+        }
+
+        try self.registerAllocResetCallbackFn(@ptrCast(data), struct {
+            fn wrapper(data_ptr: ?*anyopaque) callconv(.C) void {
+                f(@ptrCast(@alignCast(data_ptr)));
+            }
+        }.wrapper);
     }
 
     pub fn allocator(self: *Self) std.mem.Allocator {
@@ -240,5 +277,114 @@ pub const MemoryContextAllocator = struct {
         const memctx = self.ctx;
         const ptr = c.MemoryContextAllocAligned(memctx, len, ptr_align, self.flags);
         return @ptrCast(ptr);
+    }
+};
+
+pub const TestSuite_Mem = struct {
+    pub fn testCurrentContextAllocator() !void {
+        const allocator = PGCurrentContextAllocator;
+        var buf = try allocator.alloc(u8, 10);
+        defer allocator.free(buf);
+
+        try std.testing.expectEqual(10, buf.len);
+
+        buf = try allocator.realloc(buf, 20);
+        try std.testing.expectEqual(20, buf.len);
+    }
+
+    pub fn testAPI_GetErrorContext() !void {
+        // Just test that we can get the error context.
+        var allocator = getErrorContext();
+        allocator = getErrorContextThrowOOM();
+    }
+
+    pub fn testAPI_createAllocSetContext() !void {
+        var memctx = try createAllocSetContext("testAllocSetContext", .{});
+        memctx.deinit();
+    }
+
+    pub fn testAPI_createTempAllocSet() !void {
+        const old_current = c.CurrentMemoryContext;
+
+        var temp = try createTempAllocSet("testTempAllocSet", .{});
+        errdefer temp.deinit();
+
+        try std.testing.expect(c.CurrentMemoryContext == temp.context());
+
+        temp.deinit();
+        try std.testing.expect(c.CurrentMemoryContext == old_current);
+    }
+
+    pub fn testAPI_creaetSlabContext() !void {
+        var memctx = try createSlabContext("testSlabContext", .{
+            .chunk_size = 16,
+        });
+        memctx.deinit();
+    }
+
+    pub fn testAPI_createTempSlabContext() !void {
+        const old_current = c.CurrentMemoryContext;
+
+        var temp = try createTempSlab("testTempSlab", .{
+            .chunk_size = 16,
+        });
+        errdefer temp.deinit();
+
+        try std.testing.expect(c.CurrentMemoryContext == temp.context());
+
+        temp.deinit();
+        try std.testing.expect(c.CurrentMemoryContext == old_current);
+    }
+
+    pub fn testAPI_createGenerationContext() !void {
+        var memctx = try createGenerationContext("testGenerationContext", .{});
+        memctx.deinit();
+    }
+
+    pub fn testAPI_createTempGenerationContext() !void {
+        const old_current = c.CurrentMemoryContext;
+
+        var temp = try createTempGeneration("testTempGeneration", .{});
+        errdefer temp.deinit();
+
+        try std.testing.expect(c.CurrentMemoryContext == temp.context());
+
+        temp.deinit();
+        try std.testing.expect(c.CurrentMemoryContext == old_current);
+    }
+
+    pub fn testMemoryContext_allocator() !void {
+        var memctx = try createAllocSetContext("testAllocator", .{});
+        defer memctx.deinit();
+
+        const allocator = memctx.allocator();
+        var buf = try allocator.alloc(u8, 10);
+        defer allocator.free(buf);
+
+        try std.testing.expectEqual(10, buf.len);
+
+        buf = try allocator.realloc(buf, 20);
+        try std.testing.expectEqual(20, buf.len);
+    }
+
+    pub fn testMemoryContext_reset() !void {
+        var memctx = try createAllocSetContext("testReset", .{});
+        defer memctx.deinit();
+        const freespace_init = memctx.stats().freespace;
+
+        var cb_count: usize = 0;
+        try memctx.registerAllocResetCallback(&cb_count, struct {
+            fn cb(cb_count_ptr: *usize) void {
+                cb_count_ptr.* += 1;
+            }
+        }.cb);
+
+        const buf = try memctx.allocator().alloc(u8, 10);
+        _ = buf;
+        try std.testing.expect(freespace_init > memctx.stats().freespace);
+
+        memctx.reset();
+        try std.testing.expectEqual(freespace_init, memctx.stats().freespace);
+        try std.testing.expectEqual(1, cb_count);
     }
 };
