@@ -28,6 +28,8 @@ pub const err = @import("pgzx/err.zig");
 pub const PGError = err.PGError;
 pub const pgRethrow = err.pgRethrow;
 
+pub const fdw = @import("pgzx/fdw.zig");
+
 pub const fmgr = @import("pgzx/fmgr.zig");
 pub const PG_MODULE_MAGIC = fmgr.PG_MODULE_MAGIC;
 pub const PG_FUNCTION_V1 = fmgr.PG_FUNCTION_V1;
