@@ -3,6 +3,7 @@ const std = @import("std");
 const c = @import("c.zig");
 const elog = @import("elog.zig");
 const datum = @import("datum.zig");
+const meta = @import("meta.zig");
 
 pub const args = @import("fmgr/args.zig");
 pub const varatt = c.varatt;
@@ -93,12 +94,16 @@ pub inline fn pgCall(
         }
     }
 
-    const value = @call(.no_async, impl, callArgs) catch |e| elog.throwAsPostgresError(src, e);
-    const resultConv = datum.findConv(@TypeOf(value));
-    const nullableDatum = resultConv.toNullableDatum(value) catch |e| elog.throwAsPostgresError(src, e);
-    if (nullableDatum.isnull) {
+    const value = switch (@typeInfo(meta.fnReturnType(fnType))) {
+        .ErrorUnion, .ErrorSet => @call(.no_async, impl, callArgs) catch |e| elog.throwAsPostgresError(src, e),
+        else => @call(.no_async, impl, callArgs),
+    };
+
+    const result_conv = datum.findConv(@TypeOf(value));
+    const nullable_datum = result_conv.toNullableDatum(value) catch |e| elog.throwAsPostgresError(src, e);
+    if (nullable_datum.isnull) {
         fcinfo.*.isnull = true;
         return 0;
     }
-    return nullableDatum.value;
+    return nullable_datum.value;
 }
