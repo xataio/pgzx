@@ -8,6 +8,94 @@ const includes = @cImport({
     @cInclude("miscadmin.h");
     @cInclude("varatt.h");
 
+    @cInclude("access/reloptions.h");
+
+    @cInclude("catalog/binary_upgrade.h");
+    @cInclude("catalog/catalog.h");
+    @cInclude("catalog/catversion.h");
+    @cInclude("catalog/dependency.h");
+    @cInclude("catalog/genbki.h");
+    @cInclude("catalog/heap.h");
+    @cInclude("catalog/index.h");
+    @cInclude("catalog/indexing.h");
+    @cInclude("catalog/namespace.h");
+    @cInclude("catalog/objectaccess.h");
+    @cInclude("catalog/objectaddress.h");
+    @cInclude("catalog/partition.h");
+    @cInclude("catalog/pg_aggregate.h");
+    @cInclude("catalog/pg_am.h");
+    @cInclude("catalog/pg_amop.h");
+    @cInclude("catalog/pg_amproc.h");
+    @cInclude("catalog/pg_attrdef.h");
+    @cInclude("catalog/pg_attribute.h");
+    @cInclude("catalog/pg_auth_members.h");
+    @cInclude("catalog/pg_authid.h");
+    @cInclude("catalog/pg_cast.h");
+    @cInclude("catalog/pg_class.h");
+    @cInclude("catalog/pg_collation.h");
+    @cInclude("catalog/pg_constraint.h");
+    @cInclude("catalog/pg_control.h");
+    @cInclude("catalog/pg_conversion.h");
+    @cInclude("catalog/pg_database.h");
+    @cInclude("catalog/pg_db_role_setting.h");
+    @cInclude("catalog/pg_default_acl.h");
+    @cInclude("catalog/pg_depend.h");
+    @cInclude("catalog/pg_description.h");
+    @cInclude("catalog/pg_enum.h");
+    @cInclude("catalog/pg_event_trigger.h");
+    @cInclude("catalog/pg_extension.h");
+    @cInclude("catalog/pg_foreign_data_wrapper.h");
+    @cInclude("catalog/pg_foreign_server.h");
+    @cInclude("catalog/pg_foreign_table.h");
+    @cInclude("catalog/pg_index.h");
+    @cInclude("catalog/pg_inherits.h");
+    @cInclude("catalog/pg_init_privs.h");
+    @cInclude("catalog/pg_language.h");
+    @cInclude("catalog/pg_largeobject.h");
+    @cInclude("catalog/pg_largeobject_metadata.h");
+    @cInclude("catalog/pg_namespace.h");
+    @cInclude("catalog/pg_opclass.h");
+    @cInclude("catalog/pg_operator.h");
+    @cInclude("catalog/pg_opfamily.h");
+    @cInclude("catalog/pg_parameter_acl.h");
+    @cInclude("catalog/pg_partitioned_table.h");
+    @cInclude("catalog/pg_policy.h");
+    @cInclude("catalog/pg_proc.h");
+    @cInclude("catalog/pg_publication.h");
+    @cInclude("catalog/pg_publication_namespace.h");
+    @cInclude("catalog/pg_publication_rel.h");
+    @cInclude("catalog/pg_range.h");
+    @cInclude("catalog/pg_replication_origin.h");
+    @cInclude("catalog/pg_rewrite.h");
+    @cInclude("catalog/pg_seclabel.h");
+    @cInclude("catalog/pg_sequence.h");
+    @cInclude("catalog/pg_shdepend.h");
+    @cInclude("catalog/pg_shdescription.h");
+    @cInclude("catalog/pg_shseclabel.h");
+    @cInclude("catalog/pg_statistic.h");
+    @cInclude("catalog/pg_statistic_ext.h");
+    @cInclude("catalog/pg_statistic_ext_data.h");
+    @cInclude("catalog/pg_subscription.h");
+    @cInclude("catalog/pg_subscription_rel.h");
+    @cInclude("catalog/pg_tablespace.h");
+    @cInclude("catalog/pg_transform.h");
+    @cInclude("catalog/pg_trigger.h");
+    @cInclude("catalog/pg_ts_config.h");
+    @cInclude("catalog/pg_ts_config_map.h");
+    @cInclude("catalog/pg_ts_dict.h");
+    @cInclude("catalog/pg_ts_parser.h");
+    @cInclude("catalog/pg_ts_template.h");
+    @cInclude("catalog/pg_type.h");
+    @cInclude("catalog/pg_user_mapping.h");
+    @cInclude("catalog/storage.h");
+    @cInclude("catalog/storage_xlog.h");
+    @cInclude("catalog/toasting.h");
+
+    @cInclude("commands/defrem.h");
+
+    @cInclude("foreign/foreign.h");
+    @cInclude("foreign/fdwapi.h");
+
     @cInclude("executor/spi.h");
     @cInclude("executor/executor.h");
 
@@ -33,7 +121,9 @@ const includes = @cImport({
     @cInclude("utils/memutils.h");
     @cInclude("utils/wait_event.h");
     @cInclude("utils/jsonb.h");
+    @cInclude("utils/syscache.h");
     @cInclude("utils/lsyscache.h");
+    @cInclude("utils/varlena.h");
 
     @cInclude("access/xact.h");
 
