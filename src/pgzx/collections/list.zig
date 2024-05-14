@@ -110,6 +110,10 @@ pub fn PointerListOf(comptime T: type) type {
             return Iterator.init(self.list);
         }
 
+        pub fn iteratorFrom(from: ?*c.List) Iterator {
+            return Self.initFrom(from).iterator();
+        }
+
         pub fn append(self: *Self, value: *T) void {
             var list: ?*c.List = self.list;
             list = c.lappend(list, value);
@@ -124,8 +128,12 @@ pub fn PointerListOf(comptime T: type) type {
             self.list = c.list_concat_unique_ptr(self.list, other.list);
         }
 
-        pub fn iterRev(self: Self) ReverseIterator {
+        pub fn reverseIterator(self: Self) ReverseIterator {
             return ReverseIterator.init(self.list);
+        }
+
+        pub fn reverseIteratorFrom(from: ?*c.List) ReverseIterator {
+            return Self.initFrom(from).reverseIterator();
         }
 
         pub fn member(self: Self, value: *T) bool {
@@ -280,7 +288,7 @@ pub const TestSuite_PointerList = struct {
         list.append(@constCast(&elems[5]));
         defer list.deinit();
 
-        var it = list.iterRev();
+        var it = list.reverseIterator();
         var i: i32 = 6;
         while (it.next()) |elem| {
             try std.testing.expect(i > 0);
