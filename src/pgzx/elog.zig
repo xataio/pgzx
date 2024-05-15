@@ -176,6 +176,9 @@ pub const Report = struct {
     const Details = struct {
         code: ?c_int = null,
         message: ?[:0]const u8 = null,
+        detail: ?[:0]const u8 = null,
+        detail_log: ?[:0]const u8 = null,
+        hint: ?[:0]const u8 = null,
     };
 
     /// Raises a postgres error report similat to `ereport` in C.
@@ -217,6 +220,9 @@ pub const Report = struct {
             .elevel = self.level,
             .sqlerrcode = details.code orelse 0,
             .message = if (details.message) |m| @constCast(m.ptr) else null,
+            .detail = if (details.detail) |m| @constCast(m.ptr) else null,
+            .detail_log = if (details.detail_log) |m| @constCast(m.ptr) else null,
+            .hint = if (details.hint) |m| @constCast(m.ptr) else null,
             .hide_stmt = true,
             .hide_ctx = true,
             .filename = self.src.file,
