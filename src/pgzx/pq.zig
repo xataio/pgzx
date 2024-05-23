@@ -304,14 +304,14 @@ pub const Conn = struct {
     }
 
     pub fn waitCommandComplete(self: *const Self) !void {
-        const ok = try self.commandOk();
+        const ok = try self.getCommandOk();
         if (!ok) {
             return Error.OperationFailed;
         }
     }
 
     pub fn waitLastCommandComplete(self: *const Self) !void {
-        while (self.tryGegCommandOk()) |ok| {
+        while (try self.tryGetCommandOk()) |ok| {
             if (!ok) {
                 return Error.OperationFailed;
             }
