@@ -92,73 +92,54 @@ pub const Conn = struct {
     conn: *c.PGconn,
     allocator: std.mem.Allocator,
 
-    pub fn connect(allocator: std.mem.Allocator, conninfo: []const u8) !Self {
-        return try Self.connectWith(pqsrv.connectAsync, allocator, conninfo);
+    const Options = struct {
+        wait: bool = false,
+        check: bool = false,
+    };
+
+    pub fn init(allocator: std.mem.Allocator, conn: *c.PGconn) Self {
+        return Self{ .conn = conn, .allocator = allocator };
     }
 
-    pub fn connectParams(allocator: std.mem.Allocator, conn_params: ConnParams) !Self {
-        return try Self.connectParamsWith(pqsrv.connectParamsAsync, allocator, conn_params);
-    }
-
-    pub fn connectParamsWait(allocator: std.mem.Allocator, conn_params: ConnParams) !Self {
-        return try Self.connectParamsWith(pqsrv.connectParams, allocator, conn_params);
-    }
-
-    pub fn connectWait(allocator: std.mem.Allocator, conninfo: []const u8) !Self {
-        return try Self.connectWith(pqsrv.connect, allocator, conninfo);
-    }
-
-    pub fn connectWaitCheck(allocator: std.mem.Allocator, conninfo: []const u8) !Self {
-        var self = Self.connectWait(allocator, conninfo);
-        self.checkConnSuccess() catch |e| {
-            self.finish();
-            return e;
-        };
-        return self;
-    }
-
-    pub fn connectParamsWaitCheck(allocator: std.mem.Allocator, conn_params: ConnParams) !Self {
-        var self = try Self.connectParamsWait(allocator, conn_params);
-        self.checkConnSuccess() catch |e| {
-            self.finish();
-            return e;
-        };
-        return self;
-    }
-
-    fn connectWith(
-        connector: anytype,
-        allocator: std.mem.Allocator,
-        conninfo: []const u8,
-    ) !Self {
+    pub fn connect(allocator: std.mem.Allocator, conninfo: [:0]const u8, options: Options) !Self {
         var arena = std.heap.ArenaAllocator.init(allocator);
         defer arena.deinit();
         const local_allocator = arena.allocator();
 
         const conninfoZ = try local_allocator.dupeZ(u8, conninfo);
-        const conn = try connector(conninfoZ);
-        return Self{ .conn = conn, .allocator = allocator };
+        const connector = if (options.wait) &pqsrv.connect else &pqsrv.connectAsync;
+        const conn = Self.init(allocator, try connector(conninfoZ));
+        conn.checkConnSuccess(options) catch |e| {
+            conn.finish();
+            return e;
+        };
+        return conn;
     }
 
-    fn connectParamsWith(
-        comptime connector: fn ([*]const [*c]const u8, [*c]const [*c]const u8, c_int) Error!*c.PGconn,
-        allocator: std.mem.Allocator,
-        conn_params: std.StringHashMap([]const u8),
-    ) !Self {
+    pub fn connectParams(allocator: std.mem.Allocator, params: ConnParams, options: Options) !Self {
         var arena = std.heap.ArenaAllocator.init(allocator);
         defer arena.deinit();
         const local_allocator = arena.allocator();
 
-        const c_params = try PGConnParams.init(local_allocator, conn_params);
-        const conn = try connector(c_params.keys, c_params.values, 0);
-        return Self{ .conn = conn, .allocator = allocator };
+        const c_params = try PGConnParams.init(local_allocator, params);
+        const connector = if (options.wait) &pqsrv.connectParams else &pqsrv.connectParamsAsync;
+        const conn = Self.init(allocator, try connector(c_params.keys, c_params.values, 0));
+        conn.checkConnSuccess(options) catch |e| {
+            conn.finish();
+            return e;
+        };
+        return conn;
     }
 
     fn waitConnected(self: *const Self) !void {
         return pqsrv.waitConnected(self.conn);
     }
 
-    fn checkConnSuccess(self: *const Self) !void {
+    inline fn checkConnSuccess(self: *const Self, options: Options) !void {
+        if (!options.wait or !options.check) {
+            return;
+        }
+
         if (self.status() != c.CONNECTION_OK) {
             if (self.errorMessage()) |msg| {
                 std.log.err("Connection error: {s}", .{msg});
@@ -231,6 +212,10 @@ pub const Conn = struct {
             pqError(@src(), self.conn) catch |e| return e;
             return Error.SendFailed;
         }
+        return try self.getResultLast();
+    }
+
+    pub fn getResultLast(self: *const Self) !Result {
         const res = try self.getRawResultLast();
         return try Self.initExecResult(self.conn, res);
     }
@@ -318,13 +303,35 @@ pub const Conn = struct {
         }
     }
 
+    pub fn waitCommandComplete(self: *const Self) !void {
+        const ok = try self.getCommandOk();
+        if (!ok) {
+            return Error.OperationFailed;
+        }
+    }
+
+    pub fn waitLastCommandComplete(self: *const Self) !void {
+        while (try self.tryGetCommandOk()) |ok| {
+            if (!ok) {
+                return Error.OperationFailed;
+            }
+        }
+    }
+
     // Consumes the next result and returns true if the result was not null and
     // and the status is PGRES_COMMAND_OK.
     // The result struct is cleared right away.
     pub fn getCommandOk(self: *const Self) !bool {
+        return if (try self.tryGetCommandOk()) |r| r else error.EmptyQueue;
+    }
+
+    pub fn tryGetCommandOk(self: *const Self) !?bool {
         while (true) {
             if (try self.getResult()) |r| {
                 if (r.is_error()) {
+                    if (r.errorMessage()) |msg| {
+                        elog.Warning(@src(), "libpq error message: {s}", .{msg});
+                    }
                     return false;
                 }
                 if (r.status() == c.PGRES_NONFATAL_ERROR) { // ignore NOTICE or WARNING
@@ -339,7 +346,7 @@ pub const Conn = struct {
                     else => false,
                 };
             } else {
-                return Error.EmptyQueue;
+                return null;
             }
         }
     }
