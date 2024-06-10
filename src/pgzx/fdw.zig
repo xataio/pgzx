@@ -7,6 +7,10 @@ const pg = @import("c.zig");
 
 pub const DefElem = pg.DefElem;
 
+pub fn defElemMatchName(def: *const pg.DefElem, name: []const u8) bool {
+    return std.mem.eql(u8, name, std.mem.span(def.defname));
+}
+
 pub const DefElemList = collections.list.PointerListOf(DefElem);
 
 pub const Option = struct {
@@ -63,11 +67,11 @@ pub const Option = struct {
     }
 
     pub fn matches(self: *const Self, name: []const u8, context: pg.Oid) bool {
-        return self.context == context and std.mem.eql(u8, self.keyword, name);
+        return (context == pg.InvalidOid or self.context == context) and std.mem.eql(u8, self.keyword, name);
     }
 
     pub fn matchesZ(self: *const Self, name: [:0]const u8, context: pg.Oid) bool {
-        return self.context == context and std.mem.eql(u8, self.keyword, name);
+        return (context == pg.InvalidOid or self.context == context) and std.mem.eql(u8, self.keyword, name);
     }
 
     pub fn validate(self: *const Self, def: *const pg.DefElem, catalog: pg.Oid) void {
@@ -187,12 +191,22 @@ pub fn findOptionByName(list: []Option, name: []const u8, context: pg.Oid) ?*con
     return OptionList.init(list).findOptionByName(name, context);
 }
 
-pub fn findOption(list: []Option, def: *DefElem, context: pg.Oid) ?*const Option {
+pub fn findOption(list: []Option, def: *const DefElem, context: pg.Oid) ?*const Option {
     return OptionList.init(list).findOption(def, context);
 }
 
 pub fn findAndValidateOption(list: []Option, def: *DefElem, context: pg.Oid) bool {
     return OptionList.init(list).findAndValidateOption(def, context);
+}
+
+pub fn listFindOption(list: ?*pg.List, name: []const u8) ?*const DefElem {
+    var iter = DefElemList.iteratorFrom(list);
+    while (iter.next()) |def| {
+        if (defElemMatchName(def.?, name)) {
+            return def;
+        }
+    }
+    return null;
 }
 
 pub fn validateOptions(list: anytype, options: *pg.List, context: pg.Oid) void {
@@ -229,6 +243,10 @@ pub fn validateString(def: *const pg.DefElem, context: pg.Oid) void {
     if (std.mem.len(pg.defGetString(@constCast(def))) == 0) {
         elog.ErrorThrow(@src(), "option {s} must not be empty", .{def.defname});
     }
+}
+
+pub fn getString(def: *const pg.DefElem) []const u8 {
+    return std.mem.span(pg.defGetString(@constCast(def)));
 }
 
 pub fn getBool(def: *const pg.DefElem) bool {
