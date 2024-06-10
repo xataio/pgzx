@@ -151,6 +151,21 @@ pub fn Panic(src: SourceLocation, comptime fmt: []const u8, args: anytype) void 
     sendElog(src, c.PANIC, fmt, args);
 }
 
+/// Emit an error log. Returns the error as Zig error if the error level is
+/// ERROR. Lower levels will just be reported but return normally.
+///
+/// Shortcut for: Report.init(...).raise(...)
+pub fn raise(src: SourceLocation, level: c_int, details: Details) error{PGErrorStack}!void {
+    try Report.init(src, level).raise(details);
+}
+
+/// Raise a postgres error. Will do a longkump if the error level is ERROR. Lower levels will just be reported.
+///
+/// Shortcut for: Report.init(...).pgRaise(...)
+pub fn pgRaise(src: SourceLocation, level: c_int, details: Details) void {
+    Report.init(src, level).pgRaise(details);
+}
+
 fn sendElog(src: SourceLocation, comptime level: c_int, comptime fmt: []const u8, args: anytype) void {
     const ArgsType = @TypeOf(args);
     const args_type_info = @typeInfo(ArgsType);
@@ -163,6 +178,59 @@ fn sendElog(src: SourceLocation, comptime level: c_int, comptime fmt: []const u8
     Report.init(src, level).pgRaise(.{ .message = msg });
 }
 
+pub const Details = struct {
+    code: ?c_int = null,
+    message: ?[:0]const u8 = null,
+    detail: ?[:0]const u8 = null,
+    detail_log: ?[:0]const u8 = null,
+    hint: ?[:0]const u8 = null,
+
+    pub inline fn init() Details {
+        return Details{};
+    }
+
+    pub inline fn initCode(code: c_int) Details {
+        return Details{ .code = code };
+    }
+
+    pub inline fn initErrmsg(format: []const u8, args: anytype) Details {
+        return Details.init().errmsg(format, args);
+    }
+
+    pub inline fn initErrdetails(format: []const u8, args: anytype) Details {
+        return Details.init().errdetails(format, args);
+    }
+
+    pub inline fn initErrhint(format: []const u8, args: anytype) Details {
+        return Details.init().errhint(format, args);
+    }
+
+    pub inline fn errcode(self: Details, code: c_int) Details {
+        self.code = code;
+    }
+
+    pub inline fn errmsg(self: Details, format: []const u8, args: anytype) Details {
+        var details = self;
+        var memctx = mem.getErrorContextThrowOOM();
+        details.message = std.fmt.allocPrintZ(memctx.allocator(), format, args) catch unreachable();
+        return details;
+    }
+
+    pub inline fn errdetails(self: Details, format: []const u8, args: anytype) Details {
+        var details = self;
+        const memctx = mem.getErrorContextThrowOOM();
+        details.detail = std.fmt.allocPrintZ(memctx.allocator(), format, args) catch unreachable();
+        return details;
+    }
+
+    pub inline fn errhint(self: Details, format: []const u8, args: anytype) Details {
+        var details = self;
+        const memctx = mem.getErrorContextThrowOOM();
+        details.hint = std.fmt.allocPrintZ(memctx.allocator(), format, args) catch unreachable();
+        return details;
+    }
+};
+
 pub const Report = struct {
     src: std.builtin.SourceLocation,
     level: c_int,
@@ -172,14 +240,6 @@ pub const Report = struct {
     pub fn init(src: SourceLocation, level: c_int) Self {
         return .{ .src = src, .level = level };
     }
-
-    const Details = struct {
-        code: ?c_int = null,
-        message: ?[:0]const u8 = null,
-        detail: ?[:0]const u8 = null,
-        detail_log: ?[:0]const u8 = null,
-        hint: ?[:0]const u8 = null,
-    };
 
     /// Raises a postgres error report similat to `ereport` in C.
     /// But we capture the postgres longjmp and rethrow it as zig error.
