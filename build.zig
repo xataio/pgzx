@@ -21,13 +21,11 @@ pub fn build(b: *std.Build) void {
     // Reusable modules
     const pgzx = blk: {
         const module = b.addModule("pgzx", .{
-            .root_source_file = .{ .path = "./src/pgzx.zig" },
+            .root_source_file = b.path("./src/pgzx.zig"),
             .target = target,
             .optimize = optimize,
         });
-        module.addIncludePath(.{
-            .path = "./src/pgzx/c/include/",
-        });
+        module.addIncludePath(b.path("./src/pgzx/c/include/"));
         module.addIncludePath(.{
             .cwd_relative = pgbuild.getIncludeServerDir(),
         });
@@ -60,16 +58,12 @@ pub fn build(b: *std.Build) void {
         const tests = pgbuild.addInstallExtension(.{
             .name = "pgzx_unit",
             .version = .{ .major = 0, .minor = 1 },
-            .root_source_file = .{
-                .path = "src/testing.zig",
-            },
+            .root_source_file = b.path("src/testing.zig"),
             .root_dir = "src/testing",
             .link_libc = true,
             .link_allow_shlib_undefined = true,
         });
-        tests.lib.root_module.addIncludePath(.{
-            .path = b.pathFromRoot("./src/pgzx/c/include/"),
-        });
+        tests.lib.root_module.addIncludePath(b.path("./src/pgzx/c/include/"));
         tests.lib.root_module.addImport("pgzx", pgzx);
         tests.lib.root_module.addOptions("build_options", test_options);
 

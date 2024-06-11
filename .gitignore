@@ -1,7 +1,7 @@
 /.pre-commit-config.yaml
 compile_commands.json
 .cache
-zig-cache/
+.zig-cache/
 zig-out/
 regression.out
 regression.diffs

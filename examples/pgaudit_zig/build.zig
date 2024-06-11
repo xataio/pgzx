@@ -25,9 +25,7 @@ pub fn build(b: *std.Build) void {
     const ext = pgbuild.addInstallExtension(.{
         .name = name,
         .version = version,
-        .root_source_file = .{
-            .path = "src/main.zig",
-        },
+        .root_source_file = b.path("src/main.zig"),
         .root_dir = ".",
     });
     ext.lib.root_module.addImport("pgzx", pgzx);
@@ -40,9 +38,7 @@ pub fn build(b: *std.Build) void {
     const test_ext = pgbuild.addInstallExtension(.{
         .name = name,
         .version = version,
-        .root_source_file = .{
-            .path = "src/main.zig",
-        },
+        .root_source_file = b.path("src/main.zig"),
         .root_dir = ".",
     });
     test_ext.lib.root_module.addImport("pgzx", pgzx);
