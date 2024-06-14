@@ -89,9 +89,27 @@ pub fn Log(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
 
 /// Use PostgreSQL elog to log a formatted message using the `LOG` level.
 ///
+/// Append the error name to the error message or emit the top message from the
+/// error stack if cause == PGErrorStack.
+pub fn LogWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []const u8, args: anytype) void {
+    sendElogWithCause(src, c.LOG, cause, fmt, args);
+}
+
+/// Use PostgreSQL elog to log a formatted message using the `LOG` level.
+///
 /// Similar to `Log`, but message is never send to clients.
 pub fn LogServerOnly(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
     sendElog(src, c.LOG_SERVER_ONLY, fmt, args);
+}
+
+/// Use PostgreSQL elog to log a formatted message using the `LOG` level.
+///
+/// Similar to `LogWithCause`, but message is never send to clients.
+///
+/// Append the error name to the error message or emit the top message from the
+/// error stack if cause == PGErrorStack.
+pub fn LogServerOnlyWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []const u8, args: anytype) void {
+    sendElogWithCause(src, c.LOG_SERVER_ONLY, cause, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message at `Info` level.
@@ -99,9 +117,25 @@ pub fn Info(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
     sendElog(src, c.INFO, fmt, args);
 }
 
+/// Use PostgreSQL elog to log a formatted message at `Info` level.
+///
+/// Append the error name to the error message or emit the top message from the
+/// error stack if cause == PGErrorStack.
+pub fn InfoWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []const u8, args: anytype) void {
+    sendElogWithCause(src, c.INFO, cause, fmt, args);
+}
+
 /// Use PostgreSQL elog to log a formatted message at `Notice` level.
 pub fn Notice(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
     sendElog(src, c.NOTICE, fmt, args);
+}
+
+/// Use PostgreSQL elog to log a formatted message at `Notice` level.
+///
+/// Append the error name to the error message or emit the top message from the
+/// error stack if cause == PGErrorStack.
+pub fn NoticeWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []const u8, args: anytype) void {
+    sendElogWithCause(src, c.NOTICE, cause, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message at `Warning` level.
@@ -109,9 +143,25 @@ pub fn Warning(src: SourceLocation, comptime fmt: []const u8, args: anytype) voi
     sendElog(src, c.WARNING, fmt, args);
 }
 
+/// Use PostgreSQL elog to log a formatted message at `Warning` level.
+///
+/// Append the error name to the error message or emit the top message from the
+/// error stack if cause == PGErrorStack.
+pub fn WarningWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []const u8, args: anytype) void {
+    sendElogWithCause(src, c.WARNING, cause, fmt, args);
+}
+
 /// Use PostgreSQL elog to log a formatted message at `PGWARNING` level.
 pub fn PGWarning(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
     sendElog(src, c.PGWARNING, fmt, args);
+}
+
+/// Use PostgreSQL elog to log a formatted message at `PGWARNING` level.
+///
+/// Append the error name to the error message or emit the top message from the
+/// error stack if cause == PGErrorStack.
+pub fn PGWarningWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []const u8, args: anytype) void {
+    sendElogWithCause(src, c.PGWARNING, cause, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message at `Error` level.
@@ -120,6 +170,17 @@ pub fn PGWarning(src: SourceLocation, comptime fmt: []const u8, args: anytype) v
 /// Using Error will cause Postgres to throw an error by using `longjump`.
 pub fn ErrorThrow(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
     sendElog(src, c.ERROR, fmt, args);
+}
+
+/// Use PostgreSQL elog to log a formatted message at `Error` level.
+///
+/// Append the error name to the error message or emit the top message from the
+/// error stack if cause == PGErrorStack.
+///
+/// Warning:
+/// Using Error will cause Postgres to throw an error by using `longjump`.
+pub fn ErrorThrowWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []const u8, args: anytype) void {
+    sendElogWithCause(src, c.ERROR, cause, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message at `Error` level.
@@ -138,10 +199,34 @@ pub fn Error(src: SourceLocation, comptime fmt: []const u8, args: anytype) error
     }
 }
 
+/// Use PostgreSQL elog to log a formatted message at `Error` level.
+///
+/// Append the error name to the error message or emit the top message from the
+/// error stack if cause == PGErrorStack.
+pub fn ErrorWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []const u8, args: anytype) error{PGErrorStack} {
+    var errctx = err.Context.init();
+    defer errctx.pg_try_end();
+    if (errctx.pg_try()) {
+        sendElogWithCause(src, c.ERROR, cause, fmt, args);
+        unreachable;
+    } else {
+        return error.PGErrorStack;
+    }
+}
+
 /// Use PostgreSQL elog to log a formatted message at `Fatal` level.
 /// This will cause Postgres to kill the current process.
 pub fn Fatal(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
     sendElog(src, c.FATAL, fmt, args);
+}
+
+/// Use PostgreSQL elog to log a formatted message at `Fatal` level.
+/// This will cause Postgres to kill the current process.o
+///
+/// Append the error name to the error message or emit the top message from the
+/// error stack if cause == PGErrorStack.
+pub fn FatalWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []const u8, args: anytype) void {
+    sendElogWithCause(src, c.FATAL, cause, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message at `PANIC` level.
@@ -149,6 +234,16 @@ pub fn Fatal(src: SourceLocation, comptime fmt: []const u8, args: anytype) void 
 /// This will cause Postgres to stop the cluster.
 pub fn Panic(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
     sendElog(src, c.PANIC, fmt, args);
+}
+
+/// Use PostgreSQL elog to log a formatted message at `PANIC` level.
+///
+/// Append the error name to the error message or emit the top message from the
+/// error stack if cause == PGErrorStack.
+///
+/// This will cause Postgres to stop the cluster.
+pub fn PanicWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []const u8, args: anytype) void {
+    sendElogWithCause(src, c.PANIC, cause, fmt, args);
 }
 
 /// Emit an error log. Returns the error as Zig error if the error level is
@@ -166,6 +261,14 @@ pub fn pgRaise(src: SourceLocation, level: c_int, details: Details) void {
     Report.init(src, level).pgRaise(details);
 }
 
+pub fn emitIfPGError(e: anyerror) bool {
+    if (e == error.PGErrorStack) {
+        c.EmitErrorReport();
+        return true;
+    }
+    return false;
+}
+
 fn sendElog(src: SourceLocation, comptime level: c_int, comptime fmt: []const u8, args: anytype) void {
     const ArgsType = @TypeOf(args);
     const args_type_info = @typeInfo(ArgsType);
@@ -176,6 +279,24 @@ fn sendElog(src: SourceLocation, comptime level: c_int, comptime fmt: []const u8
     var memctx = mem.getErrorContextThrowOOM();
     const msg = std.fmt.allocPrintZ(memctx.allocator(), fmt, args) catch unreachable();
     Report.init(src, level).pgRaise(.{ .message = msg });
+}
+
+fn sendElogWithCause(src: SourceLocation, comptime level: c_int, cause: anyerror, comptime fmt: []const u8, args: anytype) void {
+    if (emitIfPGError(cause)) {
+        sendElog(src, level, fmt, args);
+        return;
+    }
+
+    const errName = @errorName(cause);
+
+    var memctx = mem.getErrorContextThrowOOM();
+    var buf = std.ArrayList(u8).initCapacity(memctx.allocator(), fmt.len + errName.len + 20) catch unreachable;
+    buf.writer().print(fmt, args) catch unreachable;
+    buf.writer().writeAll(": ") catch unreachable;
+    buf.writer().writeAll(errName) catch unreachable;
+    buf.writer().writeByte(0) catch unreachable;
+
+    Report.init(src, level).pgRaise(.{ .message = buf.items[0 .. buf.items.len - 1 :0] });
 }
 
 pub const Details = struct {
