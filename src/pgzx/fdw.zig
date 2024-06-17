@@ -209,7 +209,7 @@ pub fn listFindOption(list: ?*pg.List, name: []const u8) ?*const DefElem {
     return null;
 }
 
-pub fn validateOptions(list: anytype, options: *pg.List, context: pg.Oid) void {
+pub fn validateOptions(list: anytype, options: ?*pg.List, context: pg.Oid) void {
     var iter = DefElemList.iteratorFrom(options);
     while (iter.next()) |def| {
         const found = list.findAndValidateOption(def.?, context);
