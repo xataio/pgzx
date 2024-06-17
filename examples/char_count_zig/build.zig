@@ -15,7 +15,15 @@ pub fn build(b: *std.Build) void {
     // Load the pgzx module and initialize the build utilities
     const dep_pgzx = b.dependency("pgzx", .{ .target = target, .optimize = optimize });
     const pgzx = dep_pgzx.module("pgzx");
-    var pgbuild = PGBuild.create(b, .{ .target = target, .optimize = optimize });
+    var pgbuild = PGBuild.create(b, .{
+        .target = target,
+        .optimize = optimize,
+        .debug = .{
+            .pg_config = false,
+            .extension_dir = true,
+            .extension_lib = false,
+        },
+    });
 
     const build_options = b.addOptions();
     build_options.addOption(bool, "testfn", b.option(bool, "testfn", "Register test function") orelse false);
@@ -25,9 +33,7 @@ pub fn build(b: *std.Build) void {
     const ext = pgbuild.addInstallExtension(.{
         .name = name,
         .version = version,
-        .root_source_file = .{
-            .path = "src/main.zig",
-        },
+        .root_source_file = b.path("src/main.zig"),
         .root_dir = ".",
     });
     ext.lib.root_module.addImport("pgzx", pgzx);
@@ -55,9 +61,7 @@ pub fn build(b: *std.Build) void {
     const test_ext = pgbuild.addInstallExtension(.{
         .name = name,
         .version = version,
-        .root_source_file = .{
-            .path = "src/main.zig",
-        },
+        .root_source_file = b.path("src/main.zig"),
         .root_dir = ".",
     });
     test_ext.lib.root_module.addImport("pgzx", pgzx);

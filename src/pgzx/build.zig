@@ -7,8 +7,15 @@ std_build: *std.Build,
 paths: Paths,
 target: std.Build.ResolvedTarget,
 optimize: std.builtin.Mode,
+debug: DebugOptions,
 
 const Build = @This();
+
+pub const DebugOptions = struct {
+    pg_config: bool = false,
+    extension_dir: bool = false,
+    extension_lib: bool = false,
+};
 
 const Paths = struct {
     cwd: ?[]const u8 = null,
@@ -54,7 +61,7 @@ pub const InstallExtension = struct {
 
     pub fn create(b: *Build, options: Options) *InstallExtension {
         const PGIncludeServerDir: LazyPath = .{
-            .path = b.getIncludeServerDir(),
+            .cwd_relative = b.getIncludeServerDir(),
         };
 
         const root_dir = options.root_dir orelse
@@ -105,7 +112,7 @@ pub const InstallExtension = struct {
         }
         if (resolvePath(b, root_dir, null, default)) |path| {
             return .{
-                .path = path,
+                .cwd_relative = path,
             };
         }
         return null;
@@ -162,8 +169,9 @@ const Run = struct {
         return true;
     }
 
-    fn make(step: *Step, prog_node: *std.Progress.Node) !void {
+    fn make(step: *Step, prog_node: std.Progress.Node) anyerror!void {
         _ = prog_node;
+
         const self: *Run = @fieldParentPtr("step", step);
         const b = self.owner.std_build;
 
@@ -298,6 +306,7 @@ pub const SharedLibraryExtension = struct {};
 pub const InitOptions = struct {
     target: std.Build.ResolvedTarget,
     optimize: std.builtin.Mode,
+    debug: DebugOptions = .{},
 };
 
 pub fn create(b: *std.Build, options: InitOptions) *Build {
@@ -307,6 +316,7 @@ pub fn create(b: *std.Build, options: InitOptions) *Build {
         .paths = .{},
         .target = options.target,
         .optimize = options.optimize,
+        .debug = options.debug,
     };
     return self;
 }
@@ -376,35 +386,72 @@ pub fn addInstallExtension(self: *Build, options: InstallExtension.Options) *Ins
     return InstallExtension.create(self, options);
 }
 
-pub fn installExtension(self: *Build, options: InstallExtension.Options) void {
-    self.std_build.getInstallStep().dependOn(&self.addInstallExtension(options).step);
+pub fn installExtension(self: *Build, options: InstallExtension.Options) *InstallExtension {
+    const ext = self.addInstallExtension(options);
+    self.std_build.getInstallStep().dependOn(&ext.step);
+    return ext;
 }
 
-pub fn installExtensionLibArtifact(self: *Build, artifact: *Step.Compile, name: []const u8) void {
-    self.std_build.getInstallStep().dependOn(&self.addInstallExtensionLibArtifact(artifact, name).step);
+pub fn installExtensionLibArtifact(self: *Build, artifact: *Step.Compile, name: []const u8) *Step.InstallFile {
+    const file_artifact = self.addInstallExtensionLibArtifact(artifact, name);
+    self.std_build.getInstallStep().dependOn(&file_artifact.step);
+    return file_artifact;
 }
 
 pub fn addInstallExtensionLibArtifact(self: *Build, artifact: *Step.Compile, name: []const u8) *Step.InstallFile {
     const lib_suffix = artifact.rootModuleTarget().dynamicLibSuffix();
     const plugin_name = std.fmt.allocPrint(self.std_build.allocator, "{s}{s}", .{ name, lib_suffix }) catch @panic("OOM");
+
+    // TODO: resolve paths to ensures they are canonicalized.
+
+    // Normally it is expected that the package libdir is a subdirectory of the pg_home.
+    // Unfortunately in Nix the path can be reconfigured using an environment
+    // variable, in which case the libdir is no subfolder of the Postgres
+    // installation.
+    //
+    // If that is the case we only copy the shared library to the libdir if the
+    // installation prefix is indeed the local postgres installation path.
+    // Otherwise we force the shared library to be copied to the prefix path
+    // directly (no sub folders).
+    const pg_home = self.getPGHome();
+    const package_lib_dir = self.getPackageLibDir();
+    const is_deploy = std.mem.eql(u8, self.std_build.install_prefix, pg_home);
+    const target_lib_dir = if (is_deploy or std.mem.startsWith(u8, package_lib_dir, pg_home))
+        self.makeRelPath(package_lib_dir)
+    else
+        ".";
+
+    const artifact_file = artifact.getEmittedBin();
+    if (self.debug.extension_lib) {
+        std.debug.print("pg_home: {s}\n", .{self.getPGHome()});
+        std.debug.print("Package lib dir: {s}\n", .{package_lib_dir});
+
+        std.debug.print("Configure step: install extension lib: {s} -> {s}/{s}\n", .{
+            artifact_file.getDisplayName(),
+            target_lib_dir,
+            plugin_name,
+        });
+    }
+
     return self.std_build.addInstallFileWithDir(
-        artifact.getEmittedBin(),
-        .{
-            .custom = self.makeRelPath(self.getPackageLibDir()),
-        },
+        artifact_file,
+        .{ .custom = target_lib_dir },
         plugin_name,
     );
 }
 
 pub fn addInstallExtensionDir(self: *Build, source_dir: []const u8) *Step.InstallDir {
+    const source_dir_path = self.std_build.path(source_dir);
+    const ext_dir = self.getExtensionDir();
+
+    if (self.debug.extension_dir) {
+        std.debug.print("Configure step: install extension dir: {s} -> {s}\n", .{ source_dir, ext_dir });
+    }
+
     return self.std_build.addInstallDirectory(.{
-        .source_dir = .{
-            .path = source_dir,
-        },
-        .install_dir = .{
-            .custom = "",
-        },
-        .install_subdir = self.getExtensionDir(),
+        .source_dir = source_dir_path,
+        .install_dir = .prefix,
+        .install_subdir = ext_dir,
     });
 }
 
@@ -446,6 +493,10 @@ pub fn runPGConfig(self: *Build, question: []const u8) []const u8 {
         question,
     };
 
+    if (self.debug.pg_config) {
+        std.debug.print("Running pg_config: {s}\n", .{argv});
+    }
+
     var child = std.process.Child.init(&argv, allocator);
     child.stdout_behavior = .Pipe;
     child.stderr_behavior = .Pipe;
@@ -464,16 +515,16 @@ pub fn runPGConfig(self: *Build, question: []const u8) []const u8 {
         @panic("pg_config failed");
     }
 
+    if (self.debug.pg_config) {
+        std.debug.print("pg_config returned: {s}\n", .{path});
+    }
+
     // Copy the result onto the builders allocator
     return self.std_build.dupe(path);
 }
 
 pub fn getPGHome(self: *Build) []const u8 {
     self.paths.pg_home = self.paths.pg_home orelse blk: {
-        if (std.posix.getenv("PG_HOME")) |path| {
-            break :blk path;
-        }
-
         const bindir = self.getBinDir();
         break :blk std.fs.path.dirname(bindir);
     };
