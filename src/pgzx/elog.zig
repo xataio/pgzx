@@ -287,13 +287,13 @@ fn sendElogWithCause(src: SourceLocation, comptime level: c_int, cause: anyerror
         return;
     }
 
-    const errName = @errorName(cause);
+    const err_name = @errorName(cause);
 
     var memctx = mem.getErrorContextThrowOOM();
-    var buf = std.ArrayList(u8).initCapacity(memctx.allocator(), fmt.len + errName.len + 20) catch unreachable;
+    var buf = std.ArrayList(u8).initCapacity(memctx.allocator(), fmt.len + err_name.len + 20) catch unreachable;
     buf.writer().print(fmt, args) catch unreachable;
     buf.writer().writeAll(": ") catch unreachable;
-    buf.writer().writeAll(errName) catch unreachable;
+    buf.writer().writeAll(err_name) catch unreachable;
     buf.writer().writeByte(0) catch unreachable;
 
     Report.init(src, level).pgRaise(.{ .message = buf.items[0 .. buf.items.len - 1 :0] });
