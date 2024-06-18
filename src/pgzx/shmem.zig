@@ -1,4 +1,40 @@
+const std = @import("std");
+
 const c = @import("c.zig");
+
+pub inline fn registerHooks(comptime T: anytype) void {
+    if (std.meta.hasFn(T, "requestHook")) {
+        registerRequestHook(T.requestHook);
+    }
+    if (std.meta.hasFn(T, "startupHook")) {
+        registerStartupHook(T.startupHook);
+    }
+}
+
+pub inline fn registerSharedState(comptime T: type, shared_state: **T) void {
+    registerHooks(struct {
+        pub fn requestHook() void {
+            if (std.meta.hasFn(T, "shmemRequest")) {
+                T.shmemRequest();
+            } else {
+                requestSpaceFor(T);
+            }
+        }
+
+        pub fn startupHook() void {
+            var found = false;
+            const ptr = c.ShmemInitStruct(T.SHMEM_NAME, @sizeOf(T), &found);
+            shared_state.* = @ptrCast(@alignCast(ptr));
+            if (!found) {
+                if (std.meta.hasFn(T, "init")) {
+                    shared_state.*.* = T.init();
+                } else {
+                    shared_state.*.* = std.mem.zeroes(T);
+                }
+            }
+        }
+    });
+}
 
 pub inline fn registerRequestHook(f: anytype) void {
     registerHook(f, &c.shmem_request_hook);
@@ -25,6 +61,16 @@ inline fn registerHook(f: anytype, hook: anytype) void {
 
 pub inline fn requestSpaceFor(comptime T: type) void {
     c.RequestAddinShmemSpace(@sizeOf(T));
+}
+
+pub inline fn createAndZero(comptime T: type) *T {
+    var found = false;
+    const ptr = c.ShmemInitStruct(T.SHMEM_NAME, @sizeOf(T), &found);
+    const shared_state: *T = @ptrCast(@alignCast(ptr));
+    if (!found) {
+        shared_state.* = std.mem.zeroes(T);
+    }
+    return shared_state;
 }
 
 pub inline fn createAndInit(comptime T: type) *T {
