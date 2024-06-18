@@ -232,7 +232,7 @@ pub const Conn = struct {
         if (pgres) |r| {
             var res = Result.init(r);
             errdefer res.deinit();
-            if (res.is_error()) {
+            if (res.isError()) {
                 if (res.errorMessage()) |msg| {
                     return elog.Error(@src(), "{s}", .{msg});
                 }
@@ -328,7 +328,7 @@ pub const Conn = struct {
     pub fn tryGetCommandOk(self: *const Self) !?bool {
         while (true) {
             if (try self.getResult()) |r| {
-                if (r.is_error()) {
+                if (r.isError()) {
                     if (r.errorMessage()) |msg| {
                         elog.Warning(@src(), "libpq error message: {s}", .{msg});
                     }
@@ -689,7 +689,7 @@ const Result = struct {
         return c.PQresultStatus(self.result);
     }
 
-    pub fn is_error(self: Self) bool {
+    pub fn isError(self: Self) bool {
         return switch (self.status()) {
             c.PGRES_EMPTY_QUERY,
             c.PGRES_COMMAND_OK,
