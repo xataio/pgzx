@@ -1,9 +1,10 @@
-const c = @import("c.zig");
+const pg = @import("pgzx_pgsys");
+
 const err = @import("err.zig");
 
 /// Use Signal to create volatile variables that you can set in signal
 /// handlers.
-pub const Signal = Volatile(c.sig_atomic_t);
+pub const Signal = Volatile(pg.sig_atomic_t);
 
 /// Use SignalOf to create volatile variables based on existing C based
 /// `volatile sig_atomic_t` variables.
@@ -12,7 +13,7 @@ pub const Signal = Volatile(c.sig_atomic_t);
 /// The zig translator does not translate support the C `volatile` keyword,
 /// because you can only mark pointers as volatile. For this reason we MUST
 /// wrap C based `volatile sig_atomic_t` variables.
-pub const SignalOf = VolatilePtr(c.sig_atomic_t);
+pub const SignalOf = VolatilePtr(pg.sig_atomic_t);
 
 pub fn VolatilePtr(comptime T: type) type {
     return struct {
@@ -82,25 +83,25 @@ pub fn Volatile(comptime T: type) type {
 
 pub const Pending = struct {
     // signals
-    pub const Interrupt = SignalOf.create(&c.InterruptPending);
-    pub const QueryCancel = SignalOf.create(&c.QueryCancelPending);
-    pub const ProcDie = SignalOf.create(&c.ProcDiePending);
-    pub const CheckClientConnection = SignalOf.create(&c.CheckClientConnectionPending);
-    pub const ClientConnectionLost = SignalOf.create(&c.ClientConnectionLost);
-    pub const IdleInTransactionSessionTimeout = SignalOf.create(&c.IdleInTransactionSessionTimeoutPending);
-    pub const IdleSessionTimeout = SignalOf.create(&c.IdleSessionTimeoutPending);
-    pub const ProcSignalBarrier = SignalOf.create(&c.ProcSignalBarrierPending);
-    pub const LogMemoryContext = SignalOf.create(&c.LogMemoryContextPending);
-    pub const IdleStatsUpdateTimeout = SignalOf.create(&c.IdleStatsUpdateTimeoutPending);
+    pub const Interrupt = SignalOf.create(&pg.InterruptPending);
+    pub const QueryCancel = SignalOf.create(&pg.QueryCancelPending);
+    pub const ProcDie = SignalOf.create(&pg.ProcDiePending);
+    pub const CheckClientConnection = SignalOf.create(&pg.CheckClientConnectionPending);
+    pub const ClientConnectionLost = SignalOf.create(&pg.ClientConnectionLost);
+    pub const IdleInTransactionSessionTimeout = SignalOf.create(&pg.IdleInTransactionSessionTimeoutPending);
+    pub const IdleSessionTimeout = SignalOf.create(&pg.IdleSessionTimeoutPending);
+    pub const ProcSignalBarrier = SignalOf.create(&pg.ProcSignalBarrierPending);
+    pub const LogMemoryContext = SignalOf.create(&pg.LogMemoryContextPending);
+    pub const IdleStatsUpdateTimeout = SignalOf.create(&pg.IdleStatsUpdateTimeoutPending);
 
     // counts:
-    pub const InterruptHoldoffCount = VolatilePtr(u32).create(&c.InterruptHoldoffCount);
-    pub const QueryCancelHoldoffCount = VolatilePtr(u32).create(&c.QueryCancelHoldoffCount);
-    pub const CritSectionCount = VolatilePtr(u32).create(&c.CritSectionCount);
+    pub const InterruptHoldoffCount = VolatilePtr(u32).create(&pg.InterruptHoldoffCount);
+    pub const QueryCancelHoldoffCount = VolatilePtr(u32).create(&pg.QueryCancelHoldoffCount);
+    pub const CritSectionCount = VolatilePtr(u32).create(&pg.CritSectionCount);
 };
 
 pub inline fn CheckForInterrupts() !void {
     if (Pending.Interrupt.read() != 0) {
-        try err.wrap(c.ProcessInterrupts, .{});
+        try err.wrap(pg.ProcessInterrupts, .{});
     }
 }

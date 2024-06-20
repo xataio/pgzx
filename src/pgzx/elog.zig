@@ -1,7 +1,9 @@
 const std = @import("std");
+
+const pg = @import("pgzx_pgsys");
+
 const err = @import("err.zig");
 const mem = @import("mem.zig");
-const c = @import("c.zig");
 
 const SourceLocation = std.builtin.SourceLocation;
 
@@ -27,8 +29,8 @@ pub fn throwAsPostgresError(src: SourceLocation, e: anyerror) noreturn {
 
     switch (e) {
         errset.PGErrorStack => err.pgRethrow(),
-        errset.OutOfMemory => Report.init(src, c.ERROR).pgRaise(.{
-            .code = c.ERRCODE_OUT_OF_MEMORY,
+        errset.OutOfMemory => Report.init(src, pg.ERROR).pgRaise(.{
+            .code = pg.ERRCODE_OUT_OF_MEMORY,
             .message = "Not enough memory",
         }),
         else => |leftover_err| {
@@ -36,8 +38,8 @@ pub fn throwAsPostgresError(src: SourceLocation, e: anyerror) noreturn {
 
             var buf: [1024]u8 = undefined;
             const msg = std.fmt.bufPrintZ(buf[0..], "Unexpected error: {s}", .{@errorName(leftover_err)}) catch unexpected;
-            Report.init(src, c.ERROR).pgRaise(.{
-                .code = c.ERRCODE_INTERNAL_ERROR,
+            Report.init(src, pg.ERROR).pgRaise(.{
+                .code = pg.ERRCODE_INTERNAL_ERROR,
                 .message = msg,
             });
         },
@@ -53,7 +55,7 @@ pub fn isPostgresError(e: anyerror) bool {
 
 /// Provide support to integrate std.log with Postgres elog.
 pub var options: struct {
-    postgresLogFnLeven: c_int = c.LOG_SERVER_ONLY,
+    postgresLogFnLeven: c_int = pg.LOG_SERVER_ONLY,
 } = .{};
 
 pub fn logFn(
@@ -75,7 +77,7 @@ pub fn logFn(
 
     const src = std.mem.zeroInit(SourceLocation, .{});
     Report.init(src, options.postgresLogFnLeven).raise(.{
-        .code = c.ERRCODE_INTERNAL_ERROR,
+        .code = pg.ERRCODE_INTERNAL_ERROR,
         .message = buf.items[0 .. buf.items.len - 1 :0],
     }) catch {};
 }
@@ -84,7 +86,7 @@ pub fn logFn(
 ///
 /// Messages using `LOG` are send to the server by default.
 pub fn Log(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
-    sendElog(src, c.LOG, fmt, args);
+    sendElog(src, pg.LOG, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message using the `LOG` level.
@@ -92,14 +94,14 @@ pub fn Log(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
 /// Append the error name to the error message or emit the top message from the
 /// error stack if cause == PGErrorStack.
 pub fn LogWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []const u8, args: anytype) void {
-    sendElogWithCause(src, c.LOG, cause, fmt, args);
+    sendElogWithCause(src, pg.LOG, cause, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message using the `LOG` level.
 ///
 /// Similar to `Log`, but message is never send to clients.
 pub fn LogServerOnly(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
-    sendElog(src, c.LOG_SERVER_ONLY, fmt, args);
+    sendElog(src, pg.LOG_SERVER_ONLY, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message using the `LOG` level.
@@ -109,12 +111,12 @@ pub fn LogServerOnly(src: SourceLocation, comptime fmt: []const u8, args: anytyp
 /// Append the error name to the error message or emit the top message from the
 /// error stack if cause == PGErrorStack.
 pub fn LogServerOnlyWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []const u8, args: anytype) void {
-    sendElogWithCause(src, c.LOG_SERVER_ONLY, cause, fmt, args);
+    sendElogWithCause(src, pg.LOG_SERVER_ONLY, cause, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message at `Info` level.
 pub fn Info(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
-    sendElog(src, c.INFO, fmt, args);
+    sendElog(src, pg.INFO, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message at `Info` level.
@@ -122,12 +124,12 @@ pub fn Info(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
 /// Append the error name to the error message or emit the top message from the
 /// error stack if cause == PGErrorStack.
 pub fn InfoWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []const u8, args: anytype) void {
-    sendElogWithCause(src, c.INFO, cause, fmt, args);
+    sendElogWithCause(src, pg.INFO, cause, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message at `Notice` level.
 pub fn Notice(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
-    sendElog(src, c.NOTICE, fmt, args);
+    sendElog(src, pg.NOTICE, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message at `Notice` level.
@@ -135,12 +137,12 @@ pub fn Notice(src: SourceLocation, comptime fmt: []const u8, args: anytype) void
 /// Append the error name to the error message or emit the top message from the
 /// error stack if cause == PGErrorStack.
 pub fn NoticeWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []const u8, args: anytype) void {
-    sendElogWithCause(src, c.NOTICE, cause, fmt, args);
+    sendElogWithCause(src, pg.NOTICE, cause, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message at `Warning` level.
 pub fn Warning(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
-    sendElog(src, c.WARNING, fmt, args);
+    sendElog(src, pg.WARNING, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message at `Warning` level.
@@ -148,12 +150,12 @@ pub fn Warning(src: SourceLocation, comptime fmt: []const u8, args: anytype) voi
 /// Append the error name to the error message or emit the top message from the
 /// error stack if cause == PGErrorStack.
 pub fn WarningWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []const u8, args: anytype) void {
-    sendElogWithCause(src, c.WARNING, cause, fmt, args);
+    sendElogWithCause(src, pg.WARNING, cause, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message at `PGWARNING` level.
 pub fn PGWarning(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
-    sendElog(src, c.PGWARNING, fmt, args);
+    sendElog(src, pg.PGWARNING, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message at `PGWARNING` level.
@@ -161,7 +163,7 @@ pub fn PGWarning(src: SourceLocation, comptime fmt: []const u8, args: anytype) v
 /// Append the error name to the error message or emit the top message from the
 /// error stack if cause == PGErrorStack.
 pub fn PGWarningWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []const u8, args: anytype) void {
-    sendElogWithCause(src, c.PGWARNING, cause, fmt, args);
+    sendElogWithCause(src, pg.PGWARNING, cause, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message at `Error` level.
@@ -169,7 +171,7 @@ pub fn PGWarningWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []
 /// Warning:
 /// Using Error will cause Postgres to throw an error by using `longjump`.
 pub fn ErrorThrow(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
-    sendElog(src, c.ERROR, fmt, args);
+    sendElog(src, pg.ERROR, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message at `Error` level.
@@ -180,7 +182,7 @@ pub fn ErrorThrow(src: SourceLocation, comptime fmt: []const u8, args: anytype) 
 /// Warning:
 /// Using Error will cause Postgres to throw an error by using `longjump`.
 pub fn ErrorThrowWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []const u8, args: anytype) void {
-    sendElogWithCause(src, c.ERROR, cause, fmt, args);
+    sendElogWithCause(src, pg.ERROR, cause, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message at `Error` level.
@@ -192,7 +194,7 @@ pub fn Error(src: SourceLocation, comptime fmt: []const u8, args: anytype) error
     var errctx = err.Context.init();
     defer errctx.pg_try_end();
     if (errctx.pg_try()) {
-        sendElog(src, c.ERROR, fmt, args);
+        sendElog(src, pg.ERROR, fmt, args);
         unreachable;
     } else {
         return error.PGErrorStack;
@@ -207,7 +209,7 @@ pub fn ErrorWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []cons
     var errctx = err.Context.init();
     defer errctx.pg_try_end();
     if (errctx.pg_try()) {
-        sendElogWithCause(src, c.ERROR, cause, fmt, args);
+        sendElogWithCause(src, pg.ERROR, cause, fmt, args);
         unreachable;
     } else {
         return error.PGErrorStack;
@@ -217,7 +219,7 @@ pub fn ErrorWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []cons
 /// Use PostgreSQL elog to log a formatted message at `Fatal` level.
 /// This will cause Postgres to kill the current process.
 pub fn Fatal(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
-    sendElog(src, c.FATAL, fmt, args);
+    sendElog(src, pg.FATAL, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message at `Fatal` level.
@@ -226,14 +228,14 @@ pub fn Fatal(src: SourceLocation, comptime fmt: []const u8, args: anytype) void 
 /// Append the error name to the error message or emit the top message from the
 /// error stack if cause == PGErrorStack.
 pub fn FatalWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []const u8, args: anytype) void {
-    sendElogWithCause(src, c.FATAL, cause, fmt, args);
+    sendElogWithCause(src, pg.FATAL, cause, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message at `PANIC` level.
 ///
 /// This will cause Postgres to stop the cluster.
 pub fn Panic(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
-    sendElog(src, c.PANIC, fmt, args);
+    sendElog(src, pg.PANIC, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message at `PANIC` level.
@@ -243,7 +245,7 @@ pub fn Panic(src: SourceLocation, comptime fmt: []const u8, args: anytype) void 
 ///
 /// This will cause Postgres to stop the cluster.
 pub fn PanicWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []const u8, args: anytype) void {
-    sendElogWithCause(src, c.PANIC, cause, fmt, args);
+    sendElogWithCause(src, pg.PANIC, cause, fmt, args);
 }
 
 /// Emit an error log. Returns the error as Zig error if the error level is
@@ -263,7 +265,7 @@ pub fn pgRaise(src: SourceLocation, level: c_int, details: Details) void {
 
 pub fn emitIfPGError(e: anyerror) bool {
     if (e == error.PGErrorStack) {
-        c.EmitErrorReport();
+        pg.EmitErrorReport();
         return true;
     }
     return false;
@@ -393,11 +395,11 @@ pub const Report = struct {
     /// the error must be rethrown (see [pgRethrow]) or cleaned up (see [FlushErrorState]).
     pub fn pgRaise(self: Self, details: Details) void {
         var data = self.init_err_data(details);
-        c.ThrowErrorData(&data);
+        pg.ThrowErrorData(&data);
     }
 
-    inline fn init_err_data(self: Self, details: Details) c.ErrorData {
-        return std.mem.zeroInit(c.ErrorData, .{
+    inline fn init_err_data(self: Self, details: Details) pg.ErrorData {
+        return std.mem.zeroInit(pg.ErrorData, .{
             .elevel = self.level,
             .sqlerrcode = details.code orelse 0,
             .message = if (details.message) |m| @constCast(m.ptr) else null,
@@ -409,7 +411,7 @@ pub const Report = struct {
             .filename = self.src.file,
             .lineno = @as(c_int, @intCast(self.src.line)),
             .funcname = self.src.fn_name,
-            .assoc_context = c.CurrentMemoryContext,
+            .assoc_context = pg.CurrentMemoryContext,
         });
     }
 };

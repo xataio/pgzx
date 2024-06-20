@@ -1,6 +1,6 @@
 const std = @import("std");
 
-const c = @import("c.zig");
+const pg = @import("pgzx_pgsys");
 
 pub inline fn registerHooks(comptime T: anytype) void {
     if (std.meta.hasFn(T, "requestHook")) {
@@ -23,7 +23,7 @@ pub inline fn registerSharedState(comptime T: type, shared_state: **T) void {
 
         pub fn startupHook() void {
             var found = false;
-            const ptr = c.ShmemInitStruct(T.SHMEM_NAME, @sizeOf(T), &found);
+            const ptr = pg.ShmemInitStruct(T.SHMEM_NAME, @sizeOf(T), &found);
             shared_state.* = @ptrCast(@alignCast(ptr));
             if (!found) {
                 if (std.meta.hasFn(T, "init")) {
@@ -37,11 +37,11 @@ pub inline fn registerSharedState(comptime T: type, shared_state: **T) void {
 }
 
 pub inline fn registerRequestHook(f: anytype) void {
-    registerHook(f, &c.shmem_request_hook);
+    registerHook(f, &pg.shmem_request_hook);
 }
 
 pub inline fn registerStartupHook(f: anytype) void {
-    registerHook(f, &c.shmem_startup_hook);
+    registerHook(f, &pg.shmem_startup_hook);
 }
 
 inline fn registerHook(f: anytype, hook: anytype) void {
@@ -60,12 +60,12 @@ inline fn registerHook(f: anytype, hook: anytype) void {
 }
 
 pub inline fn requestSpaceFor(comptime T: type) void {
-    c.RequestAddinShmemSpace(@sizeOf(T));
+    pg.RequestAddinShmemSpace(@sizeOf(T));
 }
 
 pub inline fn createAndZero(comptime T: type) *T {
     var found = false;
-    const ptr = c.ShmemInitStruct(T.SHMEM_NAME, @sizeOf(T), &found);
+    const ptr = pg.ShmemInitStruct(T.SHMEM_NAME, @sizeOf(T), &found);
     const shared_state: *T = @ptrCast(@alignCast(ptr));
     if (!found) {
         shared_state.* = std.mem.zeroes(T);
@@ -77,7 +77,7 @@ pub inline fn createAndInit(comptime T: type) *T {
     // TODO: check that T implements init
 
     var found = false;
-    const ptr = c.ShmemInitStruct(T.SHMEM_NAME, @sizeOf(T), &found);
+    const ptr = pg.ShmemInitStruct(T.SHMEM_NAME, @sizeOf(T), &found);
     const shared_state: *T = @ptrCast(@alignCast(ptr));
     if (!found) {
         shared_state.init();

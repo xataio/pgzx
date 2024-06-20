@@ -1,15 +1,16 @@
 const std = @import("std");
 
-const c = @import("c.zig");
+const pg = @import("pgzx_pgsys");
+
 const elog = @import("elog.zig");
 const datum = @import("datum.zig");
 const meta = @import("meta.zig");
 
 pub const args = @import("fmgr/args.zig");
-pub const varatt = c.varatt;
+pub const varatt = pg.varatt;
 
-pub const Pg_magic_struct = c.Pg_magic_struct;
-pub const Pg_finfo_record = c.Pg_finfo_record;
+pub const Pg_magic_struct = pg.Pg_magic_struct;
+pub const Pg_finfo_record = pg.Pg_finfo_record;
 
 pub const MAGIC = [*c]const Pg_magic_struct;
 pub const FN_INFO_V1 = [*c]const Pg_finfo_record;
@@ -18,11 +19,11 @@ pub const FN_INFO_V1 = [*c]const Pg_finfo_record;
 /// This value must be returned by a function named `Pg_magic_func`.
 pub const PG_MAGIC = Pg_magic_struct{
     .len = @bitCast(@as(c_uint, @truncate(@sizeOf(Pg_magic_struct)))),
-    .version = @divTrunc(c.PG_VERSION_NUM, @as(c_int, 100)),
-    .funcmaxargs = c.FUNC_MAX_ARGS,
-    .indexmaxkeys = c.INDEX_MAX_KEYS,
-    .namedatalen = c.NAMEDATALEN,
-    .float8byval = c.FLOAT8PASSBYVAL,
+    .version = @divTrunc(pg.PG_VERSION_NUM, @as(c_int, 100)),
+    .funcmaxargs = pg.FUNC_MAX_ARGS,
+    .indexmaxkeys = pg.INDEX_MAX_KEYS,
+    .namedatalen = pg.NAMEDATALEN,
+    .float8byval = pg.FLOAT8PASSBYVAL,
     .abi_extra = [32]u8{ 'P', 'o', 's', 't', 'g', 'r', 'e', 'S', 'Q', 'L', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
 };
 
@@ -67,7 +68,7 @@ pub inline fn PG_FUNCTION_V1(comptime name: []const u8, comptime callback: anyty
 inline fn genFnCall(comptime f: anytype) type {
     return struct {
         const function: @TypeOf(f) = f;
-        fn call(fcinfo: c.FunctionCallInfo) callconv(.C) c.Datum {
+        fn call(fcinfo: pg.FunctionCallInfo) callconv(.C) pg.Datum {
             return pgCall(@src(), function, fcinfo);
         }
     };
@@ -79,8 +80,8 @@ pub const ArgType = args.ArgType;
 pub inline fn pgCall(
     comptime src: std.builtin.SourceLocation,
     comptime impl: anytype,
-    fcinfo: c.FunctionCallInfo,
-) c.Datum {
+    fcinfo: pg.FunctionCallInfo,
+) pg.Datum {
     const fnType = @TypeOf(impl);
     const funcArgType = std.meta.ArgsTuple(fnType);
 

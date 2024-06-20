@@ -1,7 +1,7 @@
 //! varatt replaces the VA<...> macros from utils/varattr.h that Zig didn't
 //! compile correctly.
 
-const c = @import("c.zig");
+const pg = @import("pgzx_pgsys");
 
 // WARNING:
 // Taken from translated C code and mostly untested.
@@ -11,28 +11,28 @@ const c = @import("c.zig");
 // We do not want to expose these directly, but we must make sure that we test
 // all variable conversions to make sure that code actually compiles.
 
-pub const VARHDRSZ = c.VARHDRSZ;
+pub const VARHDRSZ = pg.VARHDRSZ;
 pub const VARHDRSZ_SHORT = @sizeOf(varattrib_1b);
 pub const VARHDRSZ_EXTERNAL = @sizeOf(varattrib_1b_e);
 
-pub const VARLENA_EXTSIZE_BITS = c.VARLENA_EXTSIZE_BITS;
+pub const VARLENA_EXTSIZE_BITS = pg.VARLENA_EXTSIZE_BITS;
 
-pub const VARTAG_EXPANDED_RO = c.VARTAG_EXPANDED_RO;
-pub const VARTAG_EXPANDED_RW = c.VARTAG_EXPANDED_RW;
-pub const VARTAG_INDIRECT = c.VARTAG_INDIRECT;
-pub const VARTAG_ONDISK = c.VARTAG_ONDISK;
+pub const VARTAG_EXPANDED_RO = pg.VARTAG_EXPANDED_RO;
+pub const VARTAG_EXPANDED_RW = pg.VARTAG_EXPANDED_RW;
+pub const VARTAG_INDIRECT = pg.VARTAG_INDIRECT;
+pub const VARTAG_ONDISK = pg.VARTAG_ONDISK;
 
-pub const SET_VARSIZE_4B = c.SET_VARSIZE_4B;
-pub const SET_VARSIZE_1B = c.SET_VARSIZE_1B;
-pub const SET_VARSIZE_4B_C = c.SET_VARSIZE_4B_C;
-pub const SET_VARTAG_1B_E = c.SET_VARTAG_1B_E;
+pub const SET_VARSIZE_4B = pg.SET_VARSIZE_4B;
+pub const SET_VARSIZE_1B = pg.SET_VARSIZE_1B;
+pub const SET_VARSIZE_4B_C = pg.SET_VARSIZE_4B_C;
+pub const SET_VARTAG_1B_E = pg.SET_VARTAG_1B_E;
 
-pub const varatt_indirect = c.varatt_indirect;
-pub const varatt_expanded = c.varatt_expanded;
-pub const varatt_external = c.varatt_external;
-pub const varattrib_1b = c.varattrib_1b;
-pub const varattrib_4b = c.varattrib_4b;
-pub const varattrib_1b_e = c.varattrib_1b_e;
+pub const varatt_indirect = pg.varatt_indirect;
+pub const varatt_expanded = pg.varatt_expanded;
+pub const varatt_external = pg.varatt_external;
+pub const varattrib_1b = pg.varattrib_1b;
+pub const varattrib_4b = pg.varattrib_4b;
+pub const varattrib_1b_e = pg.varattrib_1b_e;
 
 pub const VARLENA_EXTSIZE_MASK = (@as(c_uint, 1) << VARLENA_EXTSIZE_BITS) - @as(c_int, 1);
 
@@ -71,17 +71,17 @@ pub inline fn VARATT_IS_1B_E(PTR: anytype) @TypeOf(@import("std").zig.c_translat
     return @import("std").zig.c_translation.cast([*c]varattrib_1b, PTR).*.va_header == @as(c_int, 0x01);
 }
 
-pub inline fn VARATT_NOT_PAD_BYTE(PTR: anytype) @TypeOf(@import("std").zig.c_translation.cast([*c]c.uint8, PTR).* != @as(c_int, 0)) {
-    return @import("std").zig.c_translation.cast([*c]c.uint8, PTR).* != @as(c_int, 0);
+pub inline fn VARATT_NOT_PAD_BYTE(PTR: anytype) @TypeOf(@import("std").zig.c_translation.cast([*c]pg.uint8, PTR).* != @as(c_int, 0)) {
+    return @import("std").zig.c_translation.cast([*c]pg.uint8, PTR).* != @as(c_int, 0);
 }
 
-pub inline fn VARSIZE_4B(PTR: anytype) @TypeOf((@import("std").zig.c_translation.cast([*c]varattrib_4b, PTR).*.va_4byte.va_header >> @as(c.uint32, 2)) & @import("std").zig.c_translation.promoteIntLiteral(c.uint32, 0x3FFFFFFF, .hex)) {
+pub inline fn VARSIZE_4B(PTR: anytype) @TypeOf((@import("std").zig.c_translation.cast([*c]varattrib_4b, PTR).*.va_4byte.va_header >> @as(pg.uint32, 2)) & @import("std").zig.c_translation.promoteIntLiteral(pg.uint32, 0x3FFFFFFF, .hex)) {
     _ = &PTR;
-    return (@import("std").zig.c_translation.cast([*c]varattrib_4b, PTR).*.va_4byte.va_header >> @as(c.uint32, 2)) & @import("std").zig.c_translation.promoteIntLiteral(c.uint32, 0x3FFFFFFF, .hex);
+    return (@import("std").zig.c_translation.cast([*c]varattrib_4b, PTR).*.va_4byte.va_header >> @as(pg.uint32, 2)) & @import("std").zig.c_translation.promoteIntLiteral(pg.uint32, 0x3FFFFFFF, .hex);
 }
 
-pub inline fn VARSIZE_1B(PTR: anytype) @TypeOf((@import("std").zig.c_translation.cast([*c]varattrib_1b, PTR).*.va_header >> @as(c.uint32, 1)) & @as(c.uint32, 0x7F)) {
-    return (@import("std").zig.c_translation.cast([*c]varattrib_1b, PTR).*.va_header >> @as(c.uint32, 1)) & @as(c.uint32, 0x7F);
+pub inline fn VARSIZE_1B(PTR: anytype) @TypeOf((@import("std").zig.c_translation.cast([*c]varattrib_1b, PTR).*.va_header >> @as(pg.uint32, 1)) & @as(pg.uint32, 0x7F)) {
+    return (@import("std").zig.c_translation.cast([*c]varattrib_1b, PTR).*.va_header >> @as(pg.uint32, 1)) & @as(pg.uint32, 0x7F);
 }
 
 pub inline fn VARTAG_1B_E(PTR: anytype) @TypeOf(@import("std").zig.c_translation.cast([*c]varattrib_1b_e, PTR).*.va_tag) {

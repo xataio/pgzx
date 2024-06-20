@@ -4,16 +4,16 @@
 //! The global locks like `AddinShmemInitLock` are not directly accessible from
 //! the generated C bindings. We provide wrapper functions for them here.
 
-const c = @import("c.zig");
+const pg = @import("pgzx_pgsys");
 
 // access `MainLWLockArray`.
 //
 // We use a function because the Zig compiler currently complains that it can
 // access the ID only at runtime.
-inline fn mainLock(id: usize) fn () *c.LWLock {
+inline fn mainLock(id: usize) fn () *pg.LWLock {
     return struct {
-        fn call() *c.LWLock {
-            return &c.MainLWLockArray[id].lock;
+        fn call() *pg.LWLock {
+            return &pg.MainLWLockArray[id].lock;
         }
     }.call;
 }
