@@ -49,4 +49,6 @@ pub const testing = @import("pgzx/testing.zig");
 // helpers around at times.
 pub const meta = @import("pgzx/meta.zig");
 
+pub const node = @import("pgzx/node.zig");
+
 pub const guc = utils.guc;
