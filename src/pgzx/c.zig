@@ -99,6 +99,34 @@ const includes = @cImport({
     @cInclude("executor/spi.h");
     @cInclude("executor/executor.h");
 
+    @cInclude("optimizer/appendinfo.h");
+    @cInclude("optimizer/clauses.h");
+    @cInclude("optimizer/cost.h");
+    @cInclude("optimizer/geqo.h");
+    @cInclude("optimizer/geqo_copy.h");
+    @cInclude("optimizer/geqo_gene.h");
+    @cInclude("optimizer/geqo_misc.h");
+    @cInclude("optimizer/geqo_mutation.h");
+    @cInclude("optimizer/geqo_pool.h");
+    @cInclude("optimizer/geqo_random.h");
+    @cInclude("optimizer/geqo_recombination.h");
+    @cInclude("optimizer/geqo_selection.h");
+    @cInclude("optimizer/inherit.h");
+    @cInclude("optimizer/joininfo.h");
+    @cInclude("optimizer/optimizer.h");
+    @cInclude("optimizer/orclauses.h");
+    @cInclude("optimizer/paramassign.h");
+    @cInclude("optimizer/pathnode.h");
+    @cInclude("optimizer/paths.h");
+    @cInclude("optimizer/placeholder.h");
+    @cInclude("optimizer/plancat.h");
+    @cInclude("optimizer/planmain.h");
+    @cInclude("optimizer/planner.h");
+    @cInclude("optimizer/prep.h");
+    @cInclude("optimizer/restrictinfo.h");
+    @cInclude("optimizer/subselect.h");
+    @cInclude("optimizer/tlist.h");
+
     @cInclude("parser/parser.h");
 
     @cInclude("postmaster/bgworker.h");
