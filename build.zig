@@ -81,9 +81,12 @@ pub fn build(b: *std.Build) void {
             .link_libc = true,
             .link_allow_shlib_undefined = true,
         });
-        tests.lib.root_module.addIncludePath(b.path("./src/pgzx/c/include/"));
-        tests.lib.root_module.addImport("pgzx", pgzx);
         tests.lib.root_module.addOptions("build_options", test_options);
+
+        tests.lib.root_module.addIncludePath(b.path("./src/pgzx/c/include/"));
+
+        tests.lib.root_module.addImport("pgzx_pgsys", pgzx_pgsys);
+        tests.lib.root_module.addImport("pgzx", pgzx);
 
         break :blk tests;
     };
