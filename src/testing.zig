@@ -1,4 +1,4 @@
-const pgzx = @import("pgzx_pgsys");
+const pgzx = @import("pgzx.zig");
 
 comptime {
     pgzx.PG_MODULE_MAGIC();
