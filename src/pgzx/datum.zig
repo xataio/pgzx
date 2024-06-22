@@ -1,6 +1,7 @@
 const std = @import("std");
 
-const c = @import("c.zig");
+const pg = @import("pgzx_pgsys");
+
 const err = @import("err.zig");
 const mem = @import("mem.zig");
 const meta = @import("meta.zig");
@@ -9,13 +10,13 @@ const varatt = @import("varatt.zig");
 pub fn Conv(comptime T: type, comptime from: anytype, comptime to: anytype) type {
     return struct {
         pub const Type = T;
-        pub fn fromNullableDatum(d: c.NullableDatum) !Type {
+        pub fn fromNullableDatum(d: pg.NullableDatum) !Type {
             if (d.isnull) {
                 return err.PGError.UnexpectedNullValue;
             }
             return try from(d.value);
         }
-        pub fn toNullableDatum(v: Type) !c.NullableDatum {
+        pub fn toNullableDatum(v: Type) !pg.NullableDatum {
             return .{
                 .value = try to(v),
                 .isnull = false,
@@ -27,13 +28,13 @@ pub fn Conv(comptime T: type, comptime from: anytype, comptime to: anytype) type
 pub fn ConvNoFail(comptime T: type, comptime from: anytype, comptime to: anytype) type {
     return struct {
         pub const Type = T;
-        pub fn fromNullableDatum(d: c.NullableDatum) !T {
+        pub fn fromNullableDatum(d: pg.NullableDatum) !T {
             if (d.isnull) {
                 return err.PGError.UnexpectedNullValue;
             }
             return from(d.value);
         }
-        pub fn toNullableDatum(v: T) !c.NullableDatum {
+        pub fn toNullableDatum(v: T) !pg.NullableDatum {
             return .{
                 .value = to(v),
                 .isnull = false,
@@ -46,13 +47,13 @@ pub fn ConvNoFail(comptime T: type, comptime from: anytype, comptime to: anytype
 pub fn OptConv(comptime C: anytype) type {
     return struct {
         pub const Type = ?C.Type;
-        pub fn fromNullableDatum(d: c.NullableDatum) !Type {
+        pub fn fromNullableDatum(d: pg.NullableDatum) !Type {
             if (d.isnull) {
                 return null;
             }
             return try C.fromNullableDatum(d);
         }
-        pub fn toNullableDatum(v: Type) !c.NullableDatum {
+        pub fn toNullableDatum(v: Type) !pg.NullableDatum {
             if (v) |value| {
                 return try C.toNullableDatum(value);
             } else {
@@ -69,19 +70,19 @@ pub fn OptConv(comptime C: anytype) type {
 /// This allows us find to return pre-defined converters besides relying on
 /// reflection only.
 var directMappings = .{
-    .{ c.Datum, PGDatum },
-    .{ c.NullableDatum, PGNullableDatum },
+    .{ pg.Datum, PGDatum },
+    .{ pg.NullableDatum, PGNullableDatum },
 };
 
-pub fn fromNullableDatum(comptime T: type, d: c.NullableDatum) !T {
+pub fn fromNullableDatum(comptime T: type, d: pg.NullableDatum) !T {
     return findConv(T).fromNullableDatum(d);
 }
 
-pub fn fromDatum(comptime T: type, d: c.Datum, is_null: bool) !T {
+pub fn fromDatum(comptime T: type, d: pg.Datum, is_null: bool) !T {
     return findConv(T).fromNullableDatum(.{ .value = d, .isnull = is_null });
 }
 
-pub fn toNullableDatum(v: anytype) !c.NullableDatum {
+pub fn toNullableDatum(v: anytype) !pg.NullableDatum {
     return findConv(@TypeOf(v)).toNullableDatum(v);
 }
 
@@ -143,8 +144,8 @@ pub fn findConv(comptime T: type) type {
 inline fn isConv(comptime T: type) bool {
     // we require T to be a struct with the following fields:
     // Type: type
-    // fromDatum: fn(d: c.Datum) !Type
-    // toDatum: fn(v: Type) !c.Datum
+    // fromDatum: fn(d: pg.Datum) !Type
+    // toDatum: fn(v: Type) !pg.Datum
 
     if (@typeInfo(T) != .Struct) {
         return false;
@@ -155,28 +156,28 @@ inline fn isConv(comptime T: type) bool {
 }
 
 pub const Void = ConvNoFail(void, idDatum, toVoid);
-pub const Bool = ConvNoFail(bool, c.DatumGetBool, c.BoolGetDatum);
-pub const Int8 = ConvNoFail(i8, datumGetInt8, c.Int8GetDatum);
-pub const Int16 = ConvNoFail(i16, c.DatumGetInt16, c.Int16GetDatum);
-pub const Int32 = ConvNoFail(i32, c.DatumGetInt32, c.Int32GetDatum);
-pub const Int64 = ConvNoFail(i64, c.DatumGetInt64, c.Int64GetDatum);
-pub const UInt8 = ConvNoFail(u8, c.DatumGetUInt8, c.UInt8GetDatum);
-pub const UInt16 = ConvNoFail(u16, c.DatumGetUInt16, c.UInt16GetDatum);
-pub const UInt32 = ConvNoFail(u32, c.DatumGetUInt32, c.UInt32GetDatum);
-pub const UInt64 = ConvNoFail(u64, c.DatumGetUInt64, c.UInt64GetDatum);
-pub const Float32 = ConvNoFail(f32, c.DatumGetFloat4, c.Float4GetDatum);
-pub const Float64 = ConvNoFail(f64, c.DatumGetFloat8, c.Float8GetDatum);
+pub const Bool = ConvNoFail(bool, pg.DatumGetBool, pg.BoolGetDatum);
+pub const Int8 = ConvNoFail(i8, datumGetInt8, pg.Int8GetDatum);
+pub const Int16 = ConvNoFail(i16, pg.DatumGetInt16, pg.Int16GetDatum);
+pub const Int32 = ConvNoFail(i32, pg.DatumGetInt32, pg.Int32GetDatum);
+pub const Int64 = ConvNoFail(i64, pg.DatumGetInt64, pg.Int64GetDatum);
+pub const UInt8 = ConvNoFail(u8, pg.DatumGetUInt8, pg.UInt8GetDatum);
+pub const UInt16 = ConvNoFail(u16, pg.DatumGetUInt16, pg.UInt16GetDatum);
+pub const UInt32 = ConvNoFail(u32, pg.DatumGetUInt32, pg.UInt32GetDatum);
+pub const UInt64 = ConvNoFail(u64, pg.DatumGetUInt64, pg.UInt64GetDatum);
+pub const Float32 = ConvNoFail(f32, pg.DatumGetFloat4, pg.Float4GetDatum);
+pub const Float64 = ConvNoFail(f64, pg.DatumGetFloat8, pg.Float8GetDatum);
 
 pub const SliceU8 = Conv([]const u8, getDatumTextSlice, sliceToDatumText);
 pub const SliceU8Z = Conv([:0]const u8, getDatumTextSliceZ, sliceToDatumTextZ);
 
-pub const PGDatum = ConvNoFail(c.Datum, idDatum, idDatum);
+pub const PGDatum = ConvNoFail(pg.Datum, idDatum, idDatum);
 const PGNullableDatum = struct {
-    pub const Type = c.NullableDatum;
-    pub fn fromNullableDatum(d: c.NullableDatum) !Type {
+    pub const Type = pg.NullableDatum;
+    pub fn fromNullableDatum(d: pg.NullableDatum) !Type {
         return d;
     }
-    pub fn toNullableDatum(v: Type) !c.NullableDatum {
+    pub fn toNullableDatum(v: Type) !pg.NullableDatum {
         return v;
     }
 };
@@ -185,47 +186,47 @@ const PGNullableDatum = struct {
 
 // TODO: conversion decorator for jsonb decoding/encoding types
 
-fn idDatum(d: c.Datum) c.Datum {
+fn idDatum(d: pg.Datum) pg.Datum {
     return d;
 }
 
-fn toVoid(d: void) c.Datum {
+fn toVoid(d: void) pg.Datum {
     _ = d;
     return 0;
 }
 
-fn datumGetInt8(d: c.Datum) i8 {
+fn datumGetInt8(d: pg.Datum) i8 {
     return @as(i8, @bitCast(@as(i8, @truncate(d))));
 }
 
 /// Convert a datum to a TEXT slice. This function detoast the datum if necessary.
 /// All allocations will be performed in the Current Memory Context.
-pub fn getDatumTextSlice(datum: c.Datum) ![]const u8 {
+pub fn getDatumTextSlice(datum: pg.Datum) ![]const u8 {
     return getDatumTextSliceZ(datum);
 }
 
 /// Convert a datum to a TEXT slice. This function detoast the datum if necessary.
 /// All allocations will be performed in the Current Memory Context.
 ///
-pub fn getDatumTextSliceZ(datum: c.Datum) ![:0]const u8 {
-    const ptr = c.DatumGetTextPP(datum);
+pub fn getDatumTextSliceZ(datum: pg.Datum) ![:0]const u8 {
+    const ptr = pg.DatumGetTextPP(datum);
 
-    const unpacked = try err.wrap(c.pg_detoast_datum_packed, .{ptr});
+    const unpacked = try err.wrap(pg.pg_detoast_datum_packed, .{ptr});
     const len = varatt.VARSIZE_ANY_EXHDR(unpacked);
     var buffer = try mem.PGCurrentContextAllocator.alloc(u8, len + 1);
     std.mem.copyForwards(u8, buffer, varatt.VARDATA_ANY(unpacked)[0..len]);
     buffer[len] = 0;
     if (unpacked != ptr) {
-        c.pfree(unpacked);
+        pg.pfree(unpacked);
     }
     return buffer[0..len :0];
 }
 
-pub inline fn sliceToDatumText(slice: []const u8) !c.Datum {
-    const text = c.cstring_to_text_with_len(slice.ptr, @intCast(slice.len));
-    return c.PointerGetDatum(text);
+pub inline fn sliceToDatumText(slice: []const u8) !pg.Datum {
+    const text = pg.cstring_to_text_with_len(slice.ptr, @intCast(slice.len));
+    return pg.PointerGetDatum(text);
 }
 
-pub inline fn sliceToDatumTextZ(slice: [:0]const u8) !c.Datum {
+pub inline fn sliceToDatumTextZ(slice: [:0]const u8) !pg.Datum {
     return sliceToDatumText(slice);
 }

@@ -1,9 +1,10 @@
 const std = @import("std");
 
+const pg = @import("pgzx_pgsys");
+
 const elog = @import("elog.zig");
 const mem = @import("mem.zig");
 const collections = @import("collections.zig");
-const pg = @import("c.zig");
 
 pub const DefElem = pg.DefElem;
 

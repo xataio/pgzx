@@ -1,10 +1,11 @@
 const std = @import("std");
 
+pub const pg = @import("pgzx_pgsys");
+
 pub const err = @import("err.zig");
 pub const elog = @import("elog.zig");
 pub const fmgr = @import("fmgr.zig");
 pub const mem = @import("mem.zig");
-pub const pg = @import("c.zig");
 pub const pgzx_err = @import("err.zig");
 
 /// This function registers a set of test suites to be run inside the Postgres server. A `run_tests` function is

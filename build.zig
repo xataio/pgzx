@@ -18,17 +18,28 @@ pub fn build(b: *std.Build) void {
         docs.dependOn(&build_docs.step);
     }
 
-    // Reusable modules
-    const pgzx = blk: {
-        const module = b.addModule("pgzx", .{
-            .root_source_file = b.path("./src/pgzx.zig"),
+    // pgzx_pgsys module: C bindings to Postgres
+    const pgzx_pgsys = blk: {
+        const module = b.addModule("pgzx_pgsys", .{
+            .root_source_file = b.path("./src/pgzx/c.zig"),
             .target = target,
             .optimize = optimize,
         });
+
+        // Internal C headers
         module.addIncludePath(b.path("./src/pgzx/c/include/"));
+
+        // Postgres Headers
         module.addIncludePath(.{
             .cwd_relative = pgbuild.getIncludeServerDir(),
         });
+        module.addIncludePath(.{
+            .cwd_relative = pgbuild.getIncludeDir(),
+        });
+        module.addLibraryPath(.{
+            .cwd_relative = pgbuild.getLibDir(),
+        });
+
         // libpq support
         module.addCSourceFiles(.{
             .files = &[_][]const u8{
@@ -39,13 +50,20 @@ pub fn build(b: *std.Build) void {
                 "-I", pgbuild.getIncludeServerDir(),
             },
         });
-        module.addIncludePath(.{
-            .cwd_relative = pgbuild.getIncludeDir(),
-        });
-        module.addLibraryPath(.{
-            .cwd_relative = pgbuild.getLibDir(),
-        });
         module.linkSystemLibrary("pq", .{});
+
+        break :blk module;
+    };
+
+    // pgzx: main project module.
+    // This module re-exports pgzx_pgsys, other generated modules, and utility functions.
+    const pgzx = blk: {
+        const module = b.addModule("pgzx", .{
+            .root_source_file = b.path("./src/pgzx.zig"),
+            .target = target,
+            .optimize = optimize,
+        });
+        module.addImport("pgzx_pgsys", pgzx_pgsys);
 
         break :blk module;
     };
@@ -63,9 +81,12 @@ pub fn build(b: *std.Build) void {
             .link_libc = true,
             .link_allow_shlib_undefined = true,
         });
-        tests.lib.root_module.addIncludePath(b.path("./src/pgzx/c/include/"));
-        tests.lib.root_module.addImport("pgzx", pgzx);
         tests.lib.root_module.addOptions("build_options", test_options);
+
+        tests.lib.root_module.addIncludePath(b.path("./src/pgzx/c/include/"));
+
+        tests.lib.root_module.addImport("pgzx_pgsys", pgzx_pgsys);
+        tests.lib.root_module.addImport("pgzx", pgzx);
 
         break :blk tests;
     };

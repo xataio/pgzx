@@ -1,6 +1,7 @@
 const std = @import("std");
 
-const c = @import("c.zig");
+const pg = @import("pgzx_pgsys");
+
 const intr = @import("interrupts.zig");
 const elog = @import("elog.zig");
 const err = @import("err.zig");
@@ -19,9 +20,9 @@ pub const Error = error{
 
 pub const ConnParams = std.StringHashMap([]const u8);
 
-pub const ConnStatus = c.ConnStatusType;
-pub const PollingStatus = c.PostgresPollingStatusType;
-pub const TransactionStatus = c.PGTransactionStatusType;
+pub const ConnStatus = pg.ConnStatusType;
+pub const PollingStatus = pg.PostgresPollingStatusType;
+pub const TransactionStatus = pg.PGTransactionStatusType;
 
 // libpqsrv wrappers and extensions.
 const pqsrv = struct {
@@ -30,13 +31,13 @@ const pqsrv = struct {
     var wait_event_connect: u32 = 0;
     var wait_event_command: u32 = 0;
 
-    pub fn connectAsync(conninfo: [:0]const u8) Error!*c.PGconn {
-        try err.wrap(c.pqsrv_connect_prepare, .{});
-        return connOrErr(c.PQconnectStart(conninfo.ptr));
+    pub fn connectAsync(conninfo: [:0]const u8) Error!*pg.PGconn {
+        try err.wrap(pg.pqsrv_connect_prepare, .{});
+        return connOrErr(pg.PQconnectStart(conninfo.ptr));
     }
 
-    pub fn connect(conninfo: [:0]const u8) Error!*c.PGconn {
-        const maybeConn: ?*c.PGconn = try err.wrap(c.pqsrv_connect, .{ conninfo.ptr, try get_wait_event_connect() });
+    pub fn connect(conninfo: [:0]const u8) Error!*pg.PGconn {
+        const maybeConn: ?*pg.PGconn = try err.wrap(pg.pqsrv_connect, .{ conninfo.ptr, try get_wait_event_connect() });
         return connOrErr(maybeConn);
     }
 
@@ -44,26 +45,26 @@ const pqsrv = struct {
         keys: [*]const [*c]const u8,
         values: [*c]const [*c]const u8,
         expand_dbname: c_int,
-    ) Error!*c.PGconn {
-        try err.wrap(c.pqsrv_connect_prepare, .{});
-        return connOrErr(c.PQconnectStartParams(keys, values, expand_dbname));
+    ) Error!*pg.PGconn {
+        try err.wrap(pg.pqsrv_connect_prepare, .{});
+        return connOrErr(pg.PQconnectStartParams(keys, values, expand_dbname));
     }
 
     pub fn connectParams(
         keys: [*]const [*c]const u8,
         values: [*c]const [*c]const u8,
         expand_dbname: c_int,
-    ) Error!*c.PGconn {
-        const maybeConn = try err.wrap(c.pqsrv_connect_params, .{ keys, values, expand_dbname, try get_wait_event_connect() });
+    ) Error!*pg.PGconn {
+        const maybeConn = try err.wrap(pg.pqsrv_connect_params, .{ keys, values, expand_dbname, try get_wait_event_connect() });
         return connOrErr(@ptrCast(maybeConn));
     }
 
-    pub fn waitConnected(conn: *c.PGconn) !void {
-        try err.wrap(c.pqsrv_wait_connected, .{ conn, try get_wait_event_connect() });
+    pub fn waitConnected(conn: *pg.PGconn) !void {
+        try err.wrap(pg.pqsrv_wait_connected, .{ conn, try get_wait_event_connect() });
     }
 
     inline fn get_wait_event_connect() Error!u32 {
-        return c.PG_WAIT_EXTENSION;
+        return pg.PG_WAIT_EXTENSION;
         // if (wait_event_connect == 0) {
         //     wait_event_connect = try err.wrap(c.WaitEventExtensionNew, .{"pq_connect"});
         // }
@@ -71,14 +72,14 @@ const pqsrv = struct {
     }
 
     inline fn get_wait_event_command() Error!u32 {
-        return c.PG_WAIT_EXTENSION;
+        return pg.PG_WAIT_EXTENSION;
         // if (wait_event_command == 0) {
         //     wait_event_command = try err.wrap(c.WaitEventExtensionNew, .{"pq_command"});
         // }
         // return wait_event_command;
     }
 
-    fn connOrErr(maybe_conn: ?*c.PGconn) Error!*c.PGconn {
+    fn connOrErr(maybe_conn: ?*pg.PGconn) Error!*pg.PGconn {
         if (maybe_conn) |conn| {
             return conn;
         }
@@ -89,7 +90,7 @@ const pqsrv = struct {
 pub const Conn = struct {
     const Self = @This();
 
-    conn: *c.PGconn,
+    conn: *pg.PGconn,
     allocator: std.mem.Allocator,
 
     const Options = struct {
@@ -97,7 +98,7 @@ pub const Conn = struct {
         check: bool = false,
     };
 
-    pub fn init(allocator: std.mem.Allocator, conn: *c.PGconn) Self {
+    pub fn init(allocator: std.mem.Allocator, conn: *pg.PGconn) Self {
         return Self{ .conn = conn, .allocator = allocator };
     }
 
@@ -140,7 +141,7 @@ pub const Conn = struct {
             return;
         }
 
-        if (self.status() != c.CONNECTION_OK) {
+        if (self.status() != pg.CONNECTION_OK) {
             if (self.errorMessage()) |msg| {
                 std.log.err("Connection error: {s}", .{msg});
             }
@@ -149,11 +150,11 @@ pub const Conn = struct {
     }
 
     pub fn connectPoll(self: *const Self) PollingStatus {
-        return c.PQconnectPoll(self.conn);
+        return pg.PQconnectPoll(self.conn);
     }
 
     pub fn reset(self: *const Self) bool {
-        return c.PQresetStart(self.conn) != 0;
+        return pg.PQresetStart(self.conn) != 0;
     }
 
     pub fn resetWait(self: *const Self) !void {
@@ -164,18 +165,18 @@ pub const Conn = struct {
     }
 
     pub fn resetPoll(self: *const Self) PollingStatus {
-        return c.PQresetPoll(self.conn);
+        return pg.PQresetPoll(self.conn);
     }
 
     pub fn setNonBlocking(self: *const Self, arg: bool) !void {
-        const rs = c.PQsetnonblocking(self.conn, if (arg) 1 else 0);
+        const rs = pg.PQsetnonblocking(self.conn, if (arg) 1 else 0);
         if (rs < 0) {
             return error.OperationFailed;
         }
     }
 
     pub fn exec(self: *const Self, query: [:0]const u8) !Result {
-        const rc = c.PQsendQuery(self.conn, query);
+        const rc = pg.PQsendQuery(self.conn, query);
         if (rc == 0) {
             pqError(@src(), self.conn) catch |e| return e;
             return Error.SendFailed;
@@ -198,7 +199,7 @@ pub const Conn = struct {
     }
 
     pub fn execParams(self: *const Self, command: [:0]const u8, params: PGQueryParams) !Result {
-        const rc = c.PQsendQueryParams(
+        const rc = pg.PQsendQueryParams(
             self.conn,
             command,
             @as(c_int, @intCast(params.values.len)),
@@ -220,10 +221,10 @@ pub const Conn = struct {
         return try Self.initExecResult(self.conn, res);
     }
 
-    fn initExecResult(conn: ?*c.PGconn, pgres: ?*c.PGresult) !Result {
-        if (responseCodeFatal(c.PQresultStatus(pgres))) {
-            defer c.PQclear(pgres);
-            const raw_error = c.PQresultErrorMessage(pgres);
+    fn initExecResult(conn: ?*pg.PGconn, pgres: ?*pg.PGresult) !Result {
+        if (responseCodeFatal(pg.PQresultStatus(pgres))) {
+            defer pg.PQclear(pgres);
+            const raw_error = pg.PQresultErrorMessage(pgres);
             if (raw_error) |msg| {
                 return elog.Error(@src(), "{s}", .{std.mem.span(msg)});
             }
@@ -279,7 +280,7 @@ pub const Conn = struct {
             }
         }
 
-        const rc = c.PQsendQueryParams(
+        const rc = pg.PQsendQueryParams(
             self.conn,
             query,
             @intCast(n),
@@ -296,7 +297,7 @@ pub const Conn = struct {
     }
 
     pub fn sendQuery(self: *const Self, query: []const u8) !void {
-        const rc = c.PQsendQuery(self.conn, query);
+        const rc = pg.PQsendQuery(self.conn, query);
         if (rc == 0) {
             pqError(@src()) catch |e| return e;
             return Error.SendFailed;
@@ -334,14 +335,14 @@ pub const Conn = struct {
                     }
                     return false;
                 }
-                if (r.status() == c.PGRES_NONFATAL_ERROR) { // ignore NOTICE or WARNING
+                if (r.status() == pg.PGRES_NONFATAL_ERROR) { // ignore NOTICE or WARNING
                     continue;
                 }
 
                 return switch (r.status()) {
-                    c.PGRES_COMMAND_OK,
-                    c.PGRES_TUPLES_OK,
-                    c.PGRES_SINGLE_TUPLE,
+                    pg.PGRES_COMMAND_OK,
+                    pg.PGRES_TUPLES_OK,
+                    pg.PGRES_SINGLE_TUPLE,
                     => true,
                     else => false,
                 };
@@ -356,28 +357,28 @@ pub const Conn = struct {
         return if (res) |r| Result.init(r) else null;
     }
 
-    pub fn getRawResult(self: *const Self) !?*c.PGresult {
+    pub fn getRawResult(self: *const Self) !?*pg.PGresult {
         try self.waitReady();
-        return c.PQgetResult(self.conn);
+        return pg.PQgetResult(self.conn);
     }
 
-    pub fn getRawResultLast(self: *const Self) !?*c.PGresult {
-        var last: ?*c.PGresult = null;
+    pub fn getRawResultLast(self: *const Self) !?*pg.PGresult {
+        var last: ?*pg.PGresult = null;
         errdefer {
-            if (last) |r| c.PQclear(r);
+            if (last) |r| pg.PQclear(r);
         }
 
         while (true) {
             const res = try self.getRawResult();
             if (res == null) break;
 
-            if (last) |r| c.PQclear(r);
+            if (last) |r| pg.PQclear(r);
             last = res;
 
-            const stopLoop = switch (c.PQresultStatus(res)) {
-                c.PGRES_COPY_IN,
-                c.PGRES_COPY_OUT,
-                c.PGRES_COPY_BOTH,
+            const stopLoop = switch (pg.PQresultStatus(res)) {
+                pg.PGRES_COPY_IN,
+                pg.PGRES_COPY_OUT,
+                pg.PGRES_COPY_BOTH,
                 => true,
                 else => false,
             };
@@ -403,24 +404,24 @@ pub const Conn = struct {
             // sending pending messages that are still enqueued in memory only.
             const send_queue_empty = try self.flush();
             if (!send_queue_empty) {
-                wait_flag = c.WL_SOCKET_WRITEABLE;
+                wait_flag = pg.WL_SOCKET_WRITEABLE;
             }
 
             try self.consumeInput();
             if (self.isBusy()) {
-                wait_flag |= c.WL_SOCKET_READABLE;
+                wait_flag |= pg.WL_SOCKET_READABLE;
             }
 
             if (wait_flag == 0) {
                 break;
             }
 
-            const rc = c.WaitLatchOrSocket(c.MyLatch, wait_flag, self.socket(), 0, c.PG_WAIT_EXTENSION);
-            if (checkFlag(c.WL_POSTMASTER_DEATH, rc)) {
+            const rc = pg.WaitLatchOrSocket(pg.MyLatch, wait_flag, self.socket(), 0, pg.PG_WAIT_EXTENSION);
+            if (checkFlag(pg.WL_POSTMASTER_DEATH, rc)) {
                 return Error.PostmasterDied;
             }
-            if (checkFlag(c.WL_LATCH_SET, rc)) {
-                c.ResetLatch(c.MyLatch);
+            if (checkFlag(pg.WL_LATCH_SET, rc)) {
+                pg.ResetLatch(pg.MyLatch);
                 try intr.CheckForInterrupts();
             }
         }
@@ -429,7 +430,7 @@ pub const Conn = struct {
     // Flush the send queue. Returns true if the all data has been sent or if the queue is empty.
     // Return false is the send queue is not send completely.
     pub fn flush(self: *const Self) !bool {
-        const rc = c.PQflush(self.conn);
+        const rc = pg.PQflush(self.conn);
         if (rc < 0) {
             pqError(@src(), self.conn) catch |e| return e;
             return error.OperationFailed;
@@ -438,7 +439,7 @@ pub const Conn = struct {
     }
 
     pub fn consumeInput(self: *const Self) !void {
-        const rc = c.PQconsumeInput(self.conn);
+        const rc = pg.PQconsumeInput(self.conn);
         if (rc == 0) {
             pqError(@src(), self.conn) catch |e| return e;
             return error.OperationFailed;
@@ -446,50 +447,50 @@ pub const Conn = struct {
     }
 
     pub fn finish(self: *const Self) void {
-        c.pqsrv_disconnect(self.conn);
+        pg.pqsrv_disconnect(self.conn);
     }
 
     pub fn status(self: *const Self) ConnStatus {
-        return c.PQstatus(self.conn);
+        return pg.PQstatus(self.conn);
     }
 
     pub fn transactionStatus(self: *const Self) TransactionStatus {
-        return c.PQtransactionStatus(self.conn);
+        return pg.PQtransactionStatus(self.conn);
     }
 
     pub fn serverVersion(self: *const Self) c_int {
-        return c.PQserverVersion(self.conn);
+        return pg.PQserverVersion(self.conn);
     }
 
     pub fn errorMessage(self: *const Self) ?[:0]const u8 {
-        if (c.PQerrorMessage(self.conn)) |msg| {
+        if (pg.PQerrorMessage(self.conn)) |msg| {
             return std.mem.span(msg);
         }
         return null;
     }
 
     pub fn socket(self: *const Self) c_int {
-        return c.PQsocket(self.conn);
+        return pg.PQsocket(self.conn);
     }
 
     pub fn backendPID(self: *const Self) c_int {
-        return c.PQbackendPID(self.conn);
+        return pg.PQbackendPID(self.conn);
     }
 
     pub fn host(self: *const Self) [:0]const u8 {
-        return std.mem.span(c.PQhost(self.conn));
+        return std.mem.span(pg.PQhost(self.conn));
     }
 
     pub fn port(self: *const Self) [:0]const u8 {
-        return std.mem.span(c.PQport(self.conn));
+        return std.mem.span(pg.PQport(self.conn));
     }
 
     pub fn dbname(self: *const Self) [:0]const u8 {
-        return std.mem.span(c.PQdb(self.conn));
+        return std.mem.span(pg.PQdb(self.conn));
     }
 
     pub fn isBusy(self: *const Self) bool {
-        return c.PQisBusy(self.conn) != 0;
+        return pg.PQisBusy(self.conn) != 0;
     }
 };
 
@@ -529,7 +530,7 @@ pub const StartupStatus = enum {
 };
 
 pub const PollStartState = struct {
-    polltype: c.PostgresPollingStatusType,
+    polltype: pg.PostgresPollingStatusType,
     status: StartupStatus = StartupStatus.CONNECTING,
 
     const Self = @This();
@@ -548,8 +549,8 @@ pub const PollStartState = struct {
     pub fn update(self: *Self, conn: *const Conn) bool {
         const pq_status = conn.status();
         var status_update = switch (pq_status) {
-            c.CONNECTION_OK => StartupStatus.CONNECTED,
-            c.CONNECTION_BAD => StartupStatus.ERROR,
+            pg.CONNECTION_OK => StartupStatus.CONNECTED,
+            pg.CONNECTION_BAD => StartupStatus.ERROR,
             else => StartupStatus.CONNECTING,
         };
 
@@ -562,8 +563,8 @@ pub const PollStartState = struct {
         // still connecting
         self.polltype = conn.connectPoll();
         status_update = switch (self.polltype) {
-            c.PGRES_POLLING_FAILED => StartupStatus.ERROR,
-            c.PGRES_POLLING_OK => StartupStatus.CONNECTED,
+            pg.PGRES_POLLING_FAILED => StartupStatus.ERROR,
+            pg.PGRES_POLLING_OK => StartupStatus.CONNECTED,
             else => StartupStatus.CONNECTING,
         };
         const changed = self.status != status_update;
@@ -574,20 +575,20 @@ pub const PollStartState = struct {
     pub fn getEventMask(self: *const Self) u32 {
         if (self.status == StartupStatus.CONNECTING) {
             return switch (self.polltype) {
-                c.PGRES_POLLING_READING => c.WL_SOCKET_READABLE,
-                else => c.WL_SOCKET_WRITEABLE,
+                pg.PGRES_POLLING_READING => pg.WL_SOCKET_READABLE,
+                else => pg.WL_SOCKET_WRITEABLE,
             };
         }
         return 0;
     }
 };
 
-fn responseCodeFatal(response_code: c.ExecStatusType) bool {
+fn responseCodeFatal(response_code: pg.ExecStatusType) bool {
     return switch (response_code) {
-        c.PGRES_COMMAND_OK => false,
-        c.PGRES_TUPLES_OK => false,
-        c.PGRES_SINGLE_TUPLE => false,
-        c.PGRES_NONFATAL_ERROR => false,
+        pg.PGRES_COMMAND_OK => false,
+        pg.PGRES_TUPLES_OK => false,
+        pg.PGRES_SINGLE_TUPLE => false,
+        pg.PGRES_NONFATAL_ERROR => false,
         else => response_code > 0,
     };
 }
@@ -597,7 +598,7 @@ pub const PGQueryParams = struct {
 
     // Optional OID types of the values. Required for binary encodings.
     // In case of text encoding optional.
-    types: ?[]const c.Oid = null,
+    types: ?[]const pg.Oid = null,
 
     // byte length per value in case values are binary encoded.
     lengths: ?[]const c_int = null,
@@ -641,7 +642,7 @@ pub fn buildParams(
     var value_indices = try local_allocator.alloc(i32, argsInfo.Struct.fields.len);
 
     const writer: std.ArrayList(u8).Writer = buffer.writer();
-    var types = try allocator.alloc(c.Oid, argsInfo.Struct.fields.len);
+    var types = try allocator.alloc(pg.Oid, argsInfo.Struct.fields.len);
 
     inline for (argsInfo.Struct.fields, 0..) |field, idx| {
         const codec = conv.find(field.type);
@@ -673,39 +674,39 @@ pub fn buildParams(
 }
 
 const Result = struct {
-    result: *c.PGresult,
+    result: *pg.PGresult,
 
     const Self = @This();
 
-    fn init(result: *c.PGresult) Self {
+    fn init(result: *pg.PGresult) Self {
         return Result{ .result = result };
     }
 
     pub fn deinit(self: Self) void {
-        c.PQclear(self.result);
+        pg.PQclear(self.result);
     }
 
-    pub fn status(self: Self) c.ExecStatusType {
-        return c.PQresultStatus(self.result);
+    pub fn status(self: Self) pg.ExecStatusType {
+        return pg.PQresultStatus(self.result);
     }
 
     pub fn isError(self: Self) bool {
         return switch (self.status()) {
-            c.PGRES_EMPTY_QUERY,
-            c.PGRES_COMMAND_OK,
-            c.PGRES_TUPLES_OK,
-            c.PGRES_COPY_OUT,
-            c.PGRES_COPY_IN,
-            c.PGRES_COPY_BOTH,
-            c.PGRES_SINGLE_TUPLE,
-            c.PGRES_NONFATAL_ERROR, // warning or notice, but no error
+            pg.PGRES_EMPTY_QUERY,
+            pg.PGRES_COMMAND_OK,
+            pg.PGRES_TUPLES_OK,
+            pg.PGRES_COPY_OUT,
+            pg.PGRES_COPY_IN,
+            pg.PGRES_COPY_BOTH,
+            pg.PGRES_SINGLE_TUPLE,
+            pg.PGRES_NONFATAL_ERROR, // warning or notice, but no error
             => false,
             else => true,
         };
     }
 
     pub fn errorMessage(self: Self) ?[:0]const u8 {
-        if (c.PQresultErrorMessage(self.result)) |msg| {
+        if (pg.PQresultErrorMessage(self.result)) |msg| {
             return std.mem.span(msg);
         }
         return null;
@@ -716,13 +717,13 @@ fn checkFlag(comptime pattern: anytype, value: @TypeOf(pattern)) bool {
     return (value & pattern) == pattern;
 }
 
-fn pqError(src: std.builtin.SourceLocation, conn: ?*c.PGconn) error{PGErrorStack}!void {
-    const rawerr = c.PQerrorMessage(conn);
+fn pqError(src: std.builtin.SourceLocation, conn: ?*pg.PGconn) error{PGErrorStack}!void {
+    const rawerr = pg.PQerrorMessage(conn);
     if (rawerr == null) {
         return;
     }
 
-    try elog.Report.init(src, c.ERROR).raise(.{
+    try elog.Report.init(src, pg.ERROR).raise(.{
         .message = std.mem.span(rawerr),
     });
     unreachable;

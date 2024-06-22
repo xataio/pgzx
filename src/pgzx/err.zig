@@ -1,6 +1,7 @@
 const std = @import("std");
 
-const c = @import("c.zig");
+const pg = @import("pgzx_pgsys");
+
 const mem = @import("mem.zig");
 
 pub const PGError = error{
@@ -43,8 +44,8 @@ pub fn pgRethrow() callconv(.C) void {
     // ErrorContext when calling longjmp.
     // Because we did restore the memory context we want to make sure that we
     // set it back to ErrorContext before we rethrow the error
-    _ = c.MemoryContextSwitchTo(c.ErrorContext);
-    c.PG_RE_THROW();
+    _ = pg.MemoryContextSwitchTo(pg.ErrorContext);
+    pg.PG_RE_THROW();
 }
 
 /// Capture the postgres error context when calling into postgres functions.
@@ -97,17 +98,17 @@ pub fn pgRethrow() callconv(.C) void {
 ///   }
 ///
 pub const Context = struct {
-    exception_stack: [*c]c.sigjmp_buf,
-    context_stack: [*c]c.ErrorContextCallback,
-    memory_context: c.MemoryContext,
-    local_sigjump_buf: c.sigjmp_buf,
+    exception_stack: [*c]pg.sigjmp_buf,
+    context_stack: [*c]pg.ErrorContextCallback,
+    memory_context: pg.MemoryContext,
+    local_sigjump_buf: pg.sigjmp_buf,
 
     const Self = @This();
     pub fn init() Self {
         return .{
-            .exception_stack = c.PG_exception_stack,
-            .context_stack = c.error_context_stack,
-            .memory_context = c.CurrentMemoryContext,
+            .exception_stack = pg.PG_exception_stack,
+            .context_stack = pg.error_context_stack,
+            .memory_context = pg.CurrentMemoryContext,
             .local_sigjump_buf = undefined,
         };
     }
@@ -123,8 +124,8 @@ pub const Context = struct {
     /// within a function as we do here. By forcing the function to be inline
     /// the `sigsetjmp` happens correctly within the stack context of the caller.
     pub inline fn pg_try(self: *Self) bool {
-        if (c.sigsetjmp(&self.local_sigjump_buf, 0) == 0) {
-            c.PG_exception_stack = &self.local_sigjump_buf;
+        if (pg.sigsetjmp(&self.local_sigjump_buf, 0) == 0) {
+            pg.PG_exception_stack = &self.local_sigjump_buf;
             return true;
         } else {
             return false;
@@ -138,16 +139,16 @@ pub const Context = struct {
 
     /// Restore the error context to the state before `pg_try` was called.
     pub fn pg_try_end(self: *Self) void {
-        c.PG_exception_stack = self.exception_stack;
-        c.error_context_stack = self.context_stack;
-        _ = c.MemoryContextSwitchTo(self.memory_context);
+        pg.PG_exception_stack = self.exception_stack;
+        pg.error_context_stack = self.context_stack;
+        _ = pg.MemoryContextSwitchTo(self.memory_context);
     }
 
     /// Error handler to ignore the postgres error.
     /// The error stack with pending error messages will be cleaned up.
     pub fn ignore_err(self: *Self) void {
         _ = self;
-        c.FlushErrorState();
+        pg.FlushErrorState();
     }
 
     /// Turn a postgres longjmp based error into a zig error.

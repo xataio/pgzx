@@ -1,4 +1,4 @@
-const c = @import("../c.zig");
+const pg = @import("pgzx_pgsys");
 
 // Wrapper for postgres lists.
 //
@@ -12,15 +12,15 @@ pub fn PointerListOf(comptime T: type) type {
         const Iterator = IteratorOf(T);
         const ReverseIterator = ReverseIteratorOf(T);
 
-        list: ?*c.List,
+        list: ?*pg.List,
 
         pub fn init() Self {
             return Self.initFrom(null);
         }
 
-        pub fn initFrom(from: ?*c.List) Self {
+        pub fn initFrom(from: ?*pg.List) Self {
             if (from) |l| {
-                if (l.type != c.T_List) {
+                if (l.type != pg.T_List) {
                     @panic("Expected a pointer list");
                 }
             }
@@ -28,23 +28,23 @@ pub fn PointerListOf(comptime T: type) type {
         }
 
         pub fn init1(v: *T) Self {
-            return Self.initFrom(c.list_make1_impl(
-                c.T_List,
+            return Self.initFrom(pg.list_make1_impl(
+                pg.T_List,
                 .{ .ptr_value = v },
             ));
         }
 
         pub fn init2(v1: *T, v2: *T) Self {
-            return Self.initFrom(c.list_make2_impl(
-                c.T_List,
+            return Self.initFrom(pg.list_make2_impl(
+                pg.T_List,
                 .{ .ptr_value = v1 },
                 .{ .ptr_value = v2 },
             ));
         }
 
         pub fn init3(v1: *T, v2: *T, v3: *T) Self {
-            return Self.initFrom(c.list_make3_impl(
-                c.T_List,
+            return Self.initFrom(pg.list_make3_impl(
+                pg.T_List,
                 .{ .ptr_value = v1 },
                 .{ .ptr_value = v2 },
                 .{ .ptr_value = v3 },
@@ -52,8 +52,8 @@ pub fn PointerListOf(comptime T: type) type {
         }
 
         pub fn init4(v1: *T, v2: *T, v3: *T, v4: *T) Self {
-            return Self.initFrom(c.list_make4_impl(
-                c.T_List,
+            return Self.initFrom(pg.list_make4_impl(
+                pg.T_List,
                 .{ .ptr_value = v1 },
                 .{ .ptr_value = v2 },
                 .{ .ptr_value = v3 },
@@ -62,8 +62,8 @@ pub fn PointerListOf(comptime T: type) type {
         }
 
         pub fn init5(v1: *T, v2: *T, v3: *T, v4: *T, v5: *T) Self {
-            return Self.initFrom(c.list_make5_impl(
-                c.T_List,
+            return Self.initFrom(pg.list_make5_impl(
+                pg.T_List,
                 .{ .ptr_value = v1 },
                 .{ .ptr_value = v2 },
                 .{ .ptr_value = v3 },
@@ -73,156 +73,156 @@ pub fn PointerListOf(comptime T: type) type {
         }
 
         pub fn deinit(self: Self) void {
-            c.list_free(self.list);
+            pg.list_free(self.list);
         }
 
         pub fn deinitDeep(self: Self) void {
-            c.list_free_deep(self.list);
+            pg.list_free_deep(self.list);
         }
 
-        pub fn rawList(self: Self) ?*c.List {
+        pub fn rawList(self: Self) ?*pg.List {
             return self.list;
         }
 
         pub fn copy(self: Self) Self {
-            return Self.initFrom(c.list_copy(self.list));
+            return Self.initFrom(pg.list_copy(self.list));
         }
 
         pub fn copyDeep(self: Self) Self {
-            return Self.initFrom(c.list_copy_deep(self.list));
+            return Self.initFrom(pg.list_copy_deep(self.list));
         }
 
         pub fn sort(self: Self, cmp: fn (?*T, ?*T) c_int) void {
-            c.list_sort(self.list, struct {
-                fn c_cmp(a: [*c]c.ListCell, b: [*c]c.ListCell) c_int {
-                    const ptrA: ?*T = @ptrCast(@alignCast(c.lfirst(a)));
-                    const ptrB: ?*T = @ptrCast(@alignCast(c.lfirst(b)));
+            pg.list_sort(self.list, struct {
+                fn c_cmp(a: [*c]pg.ListCell, b: [*c]pg.ListCell) c_int {
+                    const ptrA: ?*T = @ptrCast(@alignCast(pg.lfirst(a)));
+                    const ptrB: ?*T = @ptrCast(@alignCast(pg.lfirst(b)));
                     return cmp(ptrA, ptrB);
                 }
             }.c_cmp);
         }
 
         pub fn len(self: Self) usize {
-            return c.list_length(self.list);
+            return pg.list_length(self.list);
         }
 
         pub fn iterator(self: Self) Iterator {
             return Iterator.init(self.list);
         }
 
-        pub fn iteratorFrom(from: ?*c.List) Iterator {
+        pub fn iteratorFrom(from: ?*pg.List) Iterator {
             return Self.initFrom(from).iterator();
         }
 
         pub fn append(self: *Self, value: *T) void {
-            var list: ?*c.List = self.list;
-            list = c.lappend(list, value);
+            var list: ?*pg.List = self.list;
+            list = pg.lappend(list, value);
             self.list = list;
         }
 
         pub fn concatUnique(self: *Self, other: Self) void {
-            self.list = c.list_concat_unique(self.list, other.list);
+            self.list = pg.list_concat_unique(self.list, other.list);
         }
 
         pub fn concatUniquePtr(self: *Self, other: Self) void {
-            self.list = c.list_concat_unique_ptr(self.list, other.list);
+            self.list = pg.list_concat_unique_ptr(self.list, other.list);
         }
 
         pub fn reverseIterator(self: Self) ReverseIterator {
             return ReverseIterator.init(self.list);
         }
 
-        pub fn reverseIteratorFrom(from: ?*c.List) ReverseIterator {
+        pub fn reverseIteratorFrom(from: ?*pg.List) ReverseIterator {
             return Self.initFrom(from).reverseIterator();
         }
 
         pub fn member(self: Self, value: *T) bool {
-            return c.list_member(self.list, value);
+            return pg.list_member(self.list, value);
         }
 
         pub fn memberPtr(self: Self, value: *T) bool {
-            return c.list_member_ptr(self.list, value);
+            return pg.list_member_ptr(self.list, value);
         }
 
         pub fn deleteNth(self: *Self, n: usize) void {
             if (n >= self.len()) {
                 @panic("Index out of bounds");
             }
-            self.list = c.list_delete_nth(self.list, @intCast(n));
+            self.list = pg.list_delete_nth(self.list, @intCast(n));
         }
 
         pub fn deleteFirst(self: *Self) void {
-            self.list = c.list_delete_first(self.list);
+            self.list = pg.list_delete_first(self.list);
         }
 
         pub fn deleteFirstN(self: *Self, n: usize) void {
-            self.list = c.list_delete_first_n(self.list, @intCast(n));
+            self.list = pg.list_delete_first_n(self.list, @intCast(n));
         }
 
         pub fn deleteLast(self: *Self) void {
-            self.list = c.list_delete_last(self.list);
+            self.list = pg.list_delete_last(self.list);
         }
 
         pub fn delete(self: *Self, value: *T) void {
-            self.list = c.list_delete(self.list, value);
+            self.list = pg.list_delete(self.list, value);
         }
 
         pub fn deletePointer(self: *Self, value: *T) void {
-            self.list = c.list_delete_ptr(self.list, value);
+            self.list = pg.list_delete_ptr(self.list, value);
         }
 
         pub fn createUnion(self: Self, other: *Self) Self {
-            return Self.initFrom(c.list_union(self.list, other.list));
+            return Self.initFrom(pg.list_union(self.list, other.list));
         }
 
         pub fn createUnionPtr(self: Self, other: Self) Self {
-            return Self.initFrom(c.list_union_ptr(self.list, other.list));
+            return Self.initFrom(pg.list_union_ptr(self.list, other.list));
         }
 
         pub fn createIntersection(self: Self, other: Self) Self {
-            return Self.initFrom(c.list_intersection(self.list, other.list));
+            return Self.initFrom(pg.list_intersection(self.list, other.list));
         }
 
         pub fn createIntersectionPtr(self: Self, other: Self) Self {
-            return Self.initFrom(c.list_intersection_ptr(self.list, other.list));
+            return Self.initFrom(pg.list_intersection_ptr(self.list, other.list));
         }
 
         pub fn createDifference(self: Self, other: Self) Self {
-            return Self.initFrom(c.list_difference(self.list, other.list));
+            return Self.initFrom(pg.list_difference(self.list, other.list));
         }
 
         pub fn createDifferencePtr(self: Self, other: Self) Self {
-            return Self.initFrom(c.list_difference_ptr(self.list, other.list));
+            return Self.initFrom(pg.list_difference_ptr(self.list, other.list));
         }
     };
 }
 
 pub fn IteratorOf(comptime T: type) type {
-    return IteratorOfWith(T, c.list_head, c.lnext);
+    return IteratorOfWith(T, pg.list_head, pg.lnext);
 }
 
 pub fn ReverseIteratorOf(comptime T: type) type {
-    return IteratorOfWith(T, c.list_last_cell, lprev);
+    return IteratorOfWith(T, pg.list_last_cell, lprev);
 }
 
-fn lprev(list: *c.List, cell: *c.ListCell) ?*c.ListCell {
-    const idx = c.list_cell_number(list, cell);
+fn lprev(list: *pg.List, cell: *pg.ListCell) ?*pg.ListCell {
+    const idx = pg.list_cell_number(list, cell);
     if (idx <= 0) {
         return null;
     }
-    return c.list_nth_cell(list, idx - 1);
+    return pg.list_nth_cell(list, idx - 1);
 }
 
 fn IteratorOfWith(comptime T: type, comptime fn_init: anytype, comptime fn_next: anytype) type {
     return struct {
-        list: *c.List,
-        cell: ?*c.ListCell,
+        list: *pg.List,
+        cell: ?*pg.ListCell,
 
         const Self = @This();
 
-        pub fn init(list: ?*c.List) Self {
+        pub fn init(list: ?*pg.List) Self {
             if (list) |l| {
-                if (l.type != c.T_List) {
+                if (l.type != pg.T_List) {
                     @panic("Expected a pointer list");
                 }
                 return Self{ .list = l, .cell = fn_init(l) };
@@ -235,7 +235,7 @@ fn IteratorOfWith(comptime T: type, comptime fn_init: anytype, comptime fn_next:
         pub fn next(self: *Self) ??*T {
             if (self.cell) |cell| {
                 self.cell = fn_next(self.list, cell);
-                const value: ?*T = @ptrCast(@alignCast(c.lfirst(cell)));
+                const value: ?*T = @ptrCast(@alignCast(pg.lfirst(cell)));
                 return value;
             }
             return null;

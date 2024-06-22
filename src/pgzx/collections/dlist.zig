@@ -1,9 +1,9 @@
 //! Postgres intrusive double linked list support.
 
 const std = @import("std");
-const c = @import("../c.zig");
+const pg = @import("pgzx_pgsys");
 
-fn initNode() c.dlist_node {
+fn initNode() pg.dlist_node {
     return .{ .prev = null, .next = null };
 }
 
@@ -14,7 +14,7 @@ pub fn DList(comptime T: type, comptime node_field: std.meta.FieldEnum(T)) type 
         pub const Iterator = DListIter(T, node_field);
         pub const descr = DListDescr(T, node_field);
 
-        list: c.dlist_head,
+        list: pg.dlist_head,
 
         pub inline fn init() Self {
             return .{ .list = .{ .head = initNode() } };
@@ -22,7 +22,7 @@ pub fn DList(comptime T: type, comptime node_field: std.meta.FieldEnum(T)) type 
 
         inline fn ensureInit(self: *Self) void {
             if (self.list.head.next == null) {
-                c.dlist_init(&self.list);
+                pg.dlist_init(&self.list);
             }
         }
 
@@ -42,7 +42,7 @@ pub fn DList(comptime T: type, comptime node_field: std.meta.FieldEnum(T)) type 
         // The elemenst in `other` must be of type T and the same member node
         // must have been used to insert the elements into `other`.
         //
-        pub inline fn appendFromDList(self: *Self, other: *c.dlist_head) void {
+        pub inline fn appendFromDList(self: *Self, other: *pg.dlist_head) void {
             appendDList(&self.list, other);
         }
 
@@ -54,7 +54,7 @@ pub fn DList(comptime T: type, comptime node_field: std.meta.FieldEnum(T)) type 
         //
         // The `other` list must be compatible with the current list. The
         // element type and the node members must match the type of Self.
-        pub inline fn appendToDList(self: *const Self, other: *c.dlist_head) void {
+        pub inline fn appendToDList(self: *const Self, other: *pg.dlist_head) void {
             appendDList(other, &self.list);
         }
 
@@ -69,7 +69,7 @@ pub fn DList(comptime T: type, comptime node_field: std.meta.FieldEnum(T)) type 
             }
         }
 
-        pub inline fn rawList(self: *Self) *c.dlist_head {
+        pub inline fn rawList(self: *Self) *pg.dlist_head {
             return &self.list;
         }
 
@@ -81,14 +81,14 @@ pub fn DList(comptime T: type, comptime node_field: std.meta.FieldEnum(T)) type 
         }
 
         pub inline fn isEmpty(self: *const Self) bool {
-            return c.dlist_is_empty(&self.list);
+            return pg.dlist_is_empty(&self.list);
         }
 
         pub inline fn headNode(self: *const Self) *T {
             if (self.isEmpty()) {
                 @panic("headNode on empty list");
             }
-            const node = c.dlist_head_node(@constCast(&self.list));
+            const node = pg.dlist_head_node(@constCast(&self.list));
             return descr.nodeParentPtr(node.?);
         }
 
@@ -96,48 +96,48 @@ pub fn DList(comptime T: type, comptime node_field: std.meta.FieldEnum(T)) type 
             if (self.isEmpty()) {
                 @panic("tailNode on empty list");
             }
-            const node = c.dlist_tail_node(@constCast(&self.list));
+            const node = pg.dlist_tail_node(@constCast(&self.list));
             return descr.nodeParentPtr(node.?);
         }
 
         pub inline fn pushHead(self: *Self, node: *T) void {
-            c.dlist_push_head(&self.list, descr.nodePtr(node));
+            pg.dlist_push_head(&self.list, descr.nodePtr(node));
         }
 
         pub inline fn pushTail(self: *Self, node: *T) void {
-            c.dlist_push_tail(&self.list, descr.nodePtr(node));
+            pg.dlist_push_tail(&self.list, descr.nodePtr(node));
         }
 
         pub inline fn popHead(self: *Self) *T {
             if (self.isEmpty()) {
                 @panic("popHead on empty list");
             }
-            return descr.nodeParentPtr(c.dlist_pop_head_node(&self.list));
+            return descr.nodeParentPtr(pg.dlist_pop_head_node(&self.list));
         }
 
         pub inline fn popTail(self: *Self) *T {
             if (self.isEmpty()) {
                 @panic("popTail on empty list");
             }
-            const tail = c.dlist_tail_node(&self.list);
-            c.dlist_delete(tail);
+            const tail = pg.dlist_tail_node(&self.list);
+            pg.dlist_delete(tail);
             return descr.nodeParentPtr(tail.?);
         }
 
         pub inline fn moveHead(self: *Self, node: *T) void {
-            c.dlist_move_head(&self.list, descr.nodePtr(node));
+            pg.dlist_move_head(&self.list, descr.nodePtr(node));
         }
 
         pub inline fn moveTail(self: *Self, node: *T) void {
-            c.dlist_move_tail(&self.list, descr.nodePtr(node));
+            pg.dlist_move_tail(&self.list, descr.nodePtr(node));
         }
 
         pub inline fn nextNode(self: *const Self, node: *T) *T {
-            return descr.nodeParentPtr(c.dlist_next_node(&self.list, descr.nodePtr(node)));
+            return descr.nodeParentPtr(pg.dlist_next_node(&self.list, descr.nodePtr(node)));
         }
 
         pub inline fn prevNode(self: *const Self, node: *T) *T {
-            return descr.nodeParentPtr(c.dlist_prev_node(&self.list, descr.nodePtr(node)));
+            return descr.nodeParentPtr(pg.dlist_prev_node(&self.list, descr.nodePtr(node)));
         }
 
         pub inline fn iterator(self: *const Self) Iterator {
@@ -145,33 +145,33 @@ pub fn DList(comptime T: type, comptime node_field: std.meta.FieldEnum(T)) type 
         }
 
         pub inline fn insertAfter(node: *T, new_node: *T) void {
-            c.dlist_insert_after(descr.nodePtr(node), descr.nodePtr(new_node));
+            pg.dlist_insert_after(descr.nodePtr(node), descr.nodePtr(new_node));
         }
 
         pub inline fn insertBefore(node: *T, new_node: *T) void {
-            c.dlist_insert_before(descr.nodePtr(node), descr.nodePtr(new_node));
+            pg.dlist_insert_before(descr.nodePtr(node), descr.nodePtr(new_node));
         }
 
         pub inline fn delete(node: *T) void {
-            c.dlist_delete(descr.nodePtr(node));
+            pg.dlist_delete(descr.nodePtr(node));
         }
 
         pub inline fn deleteThorougly(node: *T) void {
-            c.dlist_delete_thoroughly(descr.nodePtr(node));
+            pg.dlist_delete_thoroughly(descr.nodePtr(node));
         }
 
         pub inline fn isDetached(node: *T) bool {
-            return c.dlist_is_detached(descr.nodePtr(node));
+            return pg.dlist_is_detached(descr.nodePtr(node));
         }
     };
 }
 
-fn appendDList(to: *c.dlist_head, from: *c.dlist_head) void {
-    if (c.dlist_is_empty(from)) {
+fn appendDList(to: *pg.dlist_head, from: *pg.dlist_head) void {
+    if (pg.dlist_is_empty(from)) {
         return;
     }
     if (to.head.next == null) {
-        c.dlist_init(to);
+        pg.dlist_init(to);
     }
 
     to.*.head.prev.*.next = from.*.head.next;
@@ -179,7 +179,7 @@ fn appendDList(to: *c.dlist_head, from: *c.dlist_head) void {
     from.*.head.prev.*.next = &to.*.head;
     to.*.head.prev = from.*.head.prev;
 
-    c.dlist_init(from);
+    pg.dlist_init(from);
 }
 
 fn DListIter(comptime T: type, comptime node_field: std.meta.FieldEnum(T)) type {
@@ -188,9 +188,9 @@ fn DListIter(comptime T: type, comptime node_field: std.meta.FieldEnum(T)) type 
 
         const descr = DListDescr(T, node_field);
 
-        iter: c.dlist_iter,
+        iter: pg.dlist_iter,
 
-        pub fn init(list: *const c.dlist_head) Self {
+        pub fn init(list: *const pg.dlist_head) Self {
             const end = &list.head;
             return .{
                 .iter = .{
@@ -216,15 +216,15 @@ pub fn DListDescr(comptime T: type, comptime node_field: std.meta.FieldEnum(T)) 
     return struct {
         const node = std.meta.fieldInfo(T, node_field).name;
 
-        pub inline fn nodePtr(v: *T) *c.dlist_node {
+        pub inline fn nodePtr(v: *T) *pg.dlist_node {
             return &@field(v, node);
         }
 
-        pub inline fn nodeParentPtr(n: *c.dlist_node) *T {
+        pub inline fn nodeParentPtr(n: *pg.dlist_node) *T {
             return @fieldParentPtr(node, n);
         }
 
-        pub inline fn optNodeParentPtr(n: ?*c.dlist_node) ?*T {
+        pub inline fn optNodeParentPtr(n: ?*pg.dlist_node) ?*T {
             return if (n) |p| nodeParentPtr(p) else null;
         }
     };
@@ -235,7 +235,7 @@ pub const TestSuite_DList = struct {
 
     const T = struct {
         value: u32,
-        node: c.dlist_node = initNode(),
+        node: pg.dlist_node = initNode(),
     };
 
     pub fn testEmpty() !void {
