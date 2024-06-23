@@ -9,6 +9,9 @@ const includes = @cImport({
     @cInclude("varatt.h");
 
     @cInclude("access/reloptions.h");
+    @cInclude("access/tsmapi.h");
+
+    @cInclude("commands/event_trigger.h");
 
     @cInclude("catalog/binary_upgrade.h");
     @cInclude("catalog/catalog.h");
@@ -98,6 +101,34 @@ const includes = @cImport({
 
     @cInclude("executor/spi.h");
     @cInclude("executor/executor.h");
+    @cInclude("windowapi.h");
+
+    @cInclude("lib/ilist.h");
+
+    @cInclude("nodes/bitmapset.h");
+    @cInclude("nodes/execnodes.h");
+    @cInclude("nodes/extensible.h");
+    @cInclude("nodes/lockoptions.h");
+    @cInclude("nodes/makefuncs.h");
+    @cInclude("nodes/memnodes.h");
+    @cInclude("nodes/miscnodes.h");
+    @cInclude("nodes/multibitmapset.h");
+    @cInclude("nodes/nodeFuncs.h");
+    @cInclude("nodes/nodes.h");
+    @cInclude("nodes/params.h");
+    @cInclude("nodes/parsenodes.h");
+    @cInclude("nodes/pathnodes.h");
+    @cInclude("nodes/pg_list.h");
+    @cInclude("nodes/plannodes.h");
+    @cInclude("nodes/primnodes.h");
+    @cInclude("nodes/print.h");
+    @cInclude("nodes/queryjumble.h");
+    @cInclude("nodes/readfuncs.h");
+    @cInclude("nodes/replnodes.h");
+    @cInclude("nodes/subscripting.h");
+    @cInclude("nodes/supportnodes.h");
+    @cInclude("nodes/tidbitmap.h");
+    @cInclude("nodes/value.h");
 
     @cInclude("optimizer/appendinfo.h");
     @cInclude("optimizer/clauses.h");
@@ -134,8 +165,6 @@ const includes = @cImport({
     @cInclude("port.h");
 
     @cInclude("commands/extension.h");
-
-    @cInclude("lib/ilist.h");
 
     @cInclude("storage/ipc.h");
     @cInclude("storage/proc.h");
