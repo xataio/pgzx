@@ -264,7 +264,7 @@ pub const TestSuite_PointerList = struct {
 
     pub fn testAt() !void {
         var elems = &[_]i32{ 1, 2, 3 };
-        var list = PointerListOf(i32).init5(
+        var list = PointerListOf(i32).init3(
             @constCast(&elems[0]),
             @constCast(&elems[1]),
             @constCast(&elems[2]),
