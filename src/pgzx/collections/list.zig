@@ -103,7 +103,15 @@ pub fn PointerListOf(comptime T: type) type {
         }
 
         pub fn len(self: Self) usize {
-            return pg.list_length(self.list);
+            return @intCast(pg.list_length(self.list));
+        }
+
+        pub fn at(self: Self, n: usize) ?*T {
+            if (n >= self.len()) {
+                @panic("Index out of bounds");
+            }
+            const ptr = pg.list_nth(self.list, @intCast(n));
+            return @ptrCast(@alignCast(ptr));
         }
 
         pub fn iterator(self: Self) Iterator {
@@ -252,6 +260,19 @@ pub const TestSuite_PointerList = struct {
 
         var it = list.iterator();
         try std.testing.expect(it.next() == null);
+    }
+
+    pub fn testAt() !void {
+        var elems = &[_]i32{ 1, 2, 3 };
+        var list = PointerListOf(i32).init5(
+            @constCast(&elems[0]),
+            @constCast(&elems[1]),
+            @constCast(&elems[2]),
+        );
+
+        try std.testing.expect(list.at(0) == @constCast(&elems[0]));
+        try std.testing.expect(list.at(1) == @constCast(&elems[1]));
+        try std.testing.expect(list.at(2) == @constCast(&elems[2]));
     }
 
     pub fn testIterator_forward() !void {
