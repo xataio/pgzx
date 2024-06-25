@@ -7,6 +7,275 @@ const mem = @import("mem.zig");
 
 const SourceLocation = std.builtin.SourceLocation;
 
+/// The api module mirrors the PostgreSQL error and logging reporting macros;
+///
+/// Depending on the error level Postgres might
+/// kill the process, kill the cluster, do a longjmp or continue with
+/// normal control flow.
+///
+/// When raising an `Error` via `ereport` and similar functions, Postgres will use a longjump.
+///
+/// We also provide alternative `NoJump` functions that will return a Zig error
+/// if you don't want Postgres error handling to take control over the process
+/// flow. This is especially useful when you want to properly cleanup resources using defer or errdefer.
+///
+/// # Safety:
+///
+/// When calling report, then Postgres will use a longjmp if the the ERROR level is used.
+/// A `longjmp` WILL NOT UNWIND THE STACK properly. This means that any defer statements
+/// will not be execute. Use a `NoJump` variant if you want to emit a proper Zig error. Before returning to Postgres
+/// the error must be rethrown (see [pgRethrow]) or cleaned up (see [FlushErrorState]).
+///
+pub const api = struct {
+    pub const Level = enum(c_int) {
+        Debug5 = pg.DEBUG5,
+        Debug4 = pg.DEBUG4,
+        Debug3 = pg.DEBUG3,
+        Debug2 = pg.DEBUG2,
+        Debug1 = pg.DEBUG1,
+
+        Log = pg.LOG,
+        LogServerOnly = pg.LOG_SERVER_ONLY,
+
+        Info = pg.INFO,
+        Notice = pg.NOTICE,
+        Warning = pg.WARNING,
+        WarningClientOnly = pg.WARNING_CLIENT_ONLY,
+        Error = pg.ERROR,
+        Fatal = pg.FATAL,
+        Panic = pg.PANIC,
+    };
+
+    pub const Field = enum(c_int) {
+        SchemaName = pg.PG_DIAG_SCHEMA_NAME,
+        TableName = pg.PG_DIAG_TABLE_NAME,
+        ColumnName = pg.PG_DIAG_COLUMN_NAME,
+        DataTypeName = pg.PG_DIAG_DATATYPE_NAME,
+        ConstraintName = pg.PG_DIAG_CONSTRAINT_NAME,
+    };
+
+    pub inline fn ereport(src: SourceLocation, level: Level, opts: anytype) void {
+        ereportDomain(src, level, null, opts);
+    }
+
+    pub inline fn ereportNoJump(src: SourceLocation, level: Level, opts: anytype) err.PGError!void {
+        try ereportDomainNoJump(src, level, null, opts);
+    }
+
+    pub inline fn errsave(src: SourceLocation, context: ?*pg.Node, opts: anytype) void {
+        errsaveDomain(src, context, null, opts);
+    }
+
+    pub inline fn errsaveNoJump(src: SourceLocation, context: ?*pg.Node, opts: anytype) err.PGError!void {
+        try errsaveDomainNoJump(src, context, null, opts);
+    }
+
+    pub inline fn errsaveValue(comptime T: type, src: SourceLocation, context: ?*pg.Node, value: T, opts: anytype) T {
+        errsave(src, context, opts);
+        return value;
+    }
+
+    pub inline fn errsaveValueNoJump(comptime T: type, src: SourceLocation, context: ?*pg.Node, value: T, opts: anytype) err.PGError!T {
+        try errsaveNoJump(src, context, opts);
+        return value;
+    }
+
+    pub inline fn ereportDomain(src: SourceLocation, level: Level, domain: ?[:0]const u8, opts: anytype) void {
+        if (errstart(level, domain)) {
+            inline for (opts) |opt| opt.call();
+            errfinish(src, .{ .allow_longjmp = true }) catch unreachable;
+        }
+    }
+
+    pub inline fn ereportDomainNoJump(src: SourceLocation, level: Level, domain: ?[:0]const u8, opts: anytype) err.PGError!void {
+        if (errstart(level, domain)) {
+            inline for (opts) |opt| opt.call();
+            try errfinish(src, .{ .allow_longjmp = false });
+        }
+    }
+
+    pub inline fn errsaveDomain(src: SourceLocation, context: ?*pg.Node, domain: ?[:0]const u8, opts: anytype) void {
+        if (errsave_start(context, domain)) {
+            inline for (opts) |opt| opt.call();
+            errsave_finish(src, context, .{ .allow_longjmp = true }) catch unreachable;
+        }
+    }
+
+    pub inline fn errsaveDomainNoJump(src: SourceLocation, context: ?*pg.Node, domain: ?[:0]const u8, opts: anytype) err.PGError!void {
+        if (errsave_start(context, domain)) {
+            inline for (opts) |opt| opt.call();
+            try errsave_finish(src, context, .{ .allow_longjmp = false });
+        }
+    }
+
+    pub inline fn errsaveDomainValue(src: SourceLocation, context: ?*pg.Node, value: anytype, domain: ?[:0]const u8, opts: anytype) @TypeOf(value) {
+        errsaveDomain(src, context, domain, opts);
+        return value;
+    }
+
+    pub inline fn errsaveDomainValueNoJump(src: SourceLocation, context: ?*pg.Node, value: anytype, domain: ?[:0]const u8, opts: anytype) err.PGError!@TypeOf(value) {
+        try errsaveDomainNoJump(src, context, domain, opts);
+        return value;
+    }
+
+    pub inline fn errstart(level: Level, domain: ?[:0]const u8) bool {
+        return pg.errstart(@intFromEnum(level), if (domain) |d| d.ptr else null);
+    }
+
+    /// Finalize the current error report and raise a Postgres error if the error level is `ERROR`.
+    pub inline fn errfinish(src: SourceLocation, kargs: struct { allow_longjmp: bool }) err.PGError!void {
+        if (kargs.allow_longjmp) {
+            return pg.errfinish(src.file, @as(c_int, @intCast(src.line)), src.fn_name);
+        }
+        try err.wrap(pg.errfinish, .{ src.file, @as(c_int, @intCast(src.line)), src.fn_name });
+    }
+
+    pub inline fn errsave_start(context: ?*pg.Node, domain: ?[:0]const u8) bool {
+        return pg.errsave_start(context, if (domain) |d| d.ptr else null);
+    }
+
+    pub inline fn errsave_finish(src: SourceLocation, context: ?*pg.Node, kargs: struct { allow_longjmp: bool }) err.PGError!void {
+        if (kargs.allow_longjmp) {
+            pg.errsave_finish(context, src.file, @as(c_int, @intCast(src.line)), src.fn_name);
+        }
+        try err.wrap(pg.errsave_finish, .{ context, src.file, @as(c_int, @intCast(src.line)), src.fn_name });
+    }
+
+    const OptErrCode = struct {
+        code: c_int,
+        pub inline fn call(self: OptErrCode) void {
+            _ = pg.errcode(self.code);
+        }
+    };
+
+    /// Set the error code for the current error report.
+    pub inline fn errcode(comptime sqlerrcode: c_int) OptErrCode {
+        return OptErrCode{ .code = sqlerrcode };
+    }
+
+    fn FmtMessage(comptime msgtype: anytype, comptime fmt: []const u8, comptime Args: type) type {
+        return struct {
+            args: Args,
+
+            const Self = @This();
+
+            pub inline fn init(args: Args) Self {
+                return .{ .args = args };
+            }
+
+            pub inline fn call(self: Self) void {
+                var memctx = mem.getErrorContextThrowOOM();
+                const msg = std.fmt.allocPrintZ(memctx.allocator(), fmt, self.args) catch unreachable();
+                _ = msgtype(msg.ptr);
+            }
+        };
+    }
+
+    pub inline fn errmsg(comptime fmt: []const u8, args: anytype) FmtMessage(pg.errmsg, fmt, @TypeOf(args)) {
+        return FmtMessage(pg.errmsg, fmt, @TypeOf(args)).init(args);
+    }
+
+    pub inline fn errdetail(comptime fmt: []const u8, args: anytype) FmtMessage(pg.errdetail, fmt, @TypeOf(args)) {
+        return FmtMessage(pg.errdetail, fmt, @TypeOf(args)).init(args);
+    }
+
+    pub inline fn errdetail_log(comptime fmt: []const u8, args: anytype) FmtMessage(pg.errdetail_log, fmt, @TypeOf(args)) {
+        return FmtMessage(pg.errdetail_log, fmt, @TypeOf(args)).init(args);
+    }
+
+    pub inline fn errhint(comptime fmt: []const u8, args: anytype) FmtMessage(pg.errhint, fmt, @TypeOf(args)) {
+        return FmtMessage(pg.errhint, fmt, @TypeOf(args)).init(args);
+    }
+
+    const SpecialErrCode = enum {
+        ForFileAccess,
+        ForSocketAccess,
+
+        pub inline fn call(self: SpecialErrCode) void {
+            switch (self) {
+                SpecialErrCode.ForFileAccess => pg.errcode_for_file_access(),
+                SpecialErrCode.ForSocketAccess => pg.errcode_for_socket_access(),
+            }
+        }
+    };
+
+    pub inline fn errcodeForFile() SpecialErrCode {
+        return SpecialErrCode.ForFileAccess;
+    }
+
+    pub inline fn errcodeForSocket() SpecialErrCode {
+        return SpecialErrCode.ForSocketAccess;
+    }
+
+    const OptBacktrace = struct {
+        pub inline fn call(self: OptBacktrace) void {
+            _ = self;
+            pg.errbacktrace();
+        }
+    };
+
+    pub inline fn errbacktrace() OptBacktrace {
+        return .{};
+    }
+
+    pub const OptHideStatement = struct {
+        hide: bool = true,
+        pub inline fn call(self: OptHideStatement) void {
+            _ = pg.errhidestmt(self.hide);
+        }
+    };
+
+    pub inline fn errhidestmt(hide: bool) OptHideStatement {
+        return .{ .hide = hide };
+    }
+
+    pub const OptHideContext = struct {
+        hide: bool = true,
+        pub inline fn call(self: OptHideContext) void {
+            _ = pg.errhidecontext(self.hide);
+        }
+    };
+
+    pub inline fn errhidecontext(hide: bool) OptHideContext {
+        return .{ .hide = hide };
+    }
+
+    pub const OptField = struct {
+        field: Field,
+        value: [:0]const u8,
+
+        pub inline fn call(self: OptField) void {
+            _ = pg.err_generic_string(@intFromEnum(self.field), self.value);
+        }
+    };
+
+    pub inline fn errfield(field: Field, value: [:0]const u8) OptField {
+        return OptField{ .field = field, .value = value };
+    }
+
+    pub inline fn errschema(name: [:0]const u8) OptField {
+        return errfield(Field.SchemaName, name);
+    }
+
+    pub inline fn errtable(name: [:0]const u8) OptField {
+        return errfield(Field.TableName, name);
+    }
+
+    pub inline fn errcolumn(name: [:0]const u8) OptField {
+        return errfield(Field.ColumnName, name);
+    }
+
+    pub inline fn errdatatype(name: [:0]const u8) OptField {
+        return errfield(Field.DataTypeName, name);
+    }
+
+    pub inline fn errconstraint(name: [:0]const u8) OptField {
+        return errfield(Field.ConstraintName, name);
+    }
+};
+
+pub usingnamespace api;
+
 /// Turn the zig error into a postgres error. The errror will be send to
 /// Postgres and logged using the error level.
 ///
@@ -29,18 +298,14 @@ pub fn throwAsPostgresError(src: SourceLocation, e: anyerror) noreturn {
 
     switch (e) {
         errset.PGErrorStack => err.pgRethrow(),
-        errset.OutOfMemory => Report.init(src, pg.ERROR).pgRaise(.{
-            .code = pg.ERRCODE_OUT_OF_MEMORY,
-            .message = "Not enough memory",
+        errset.OutOfMemory => api.ereport(src, .Error, .{
+            api.errcode(pg.ERRCODE_OUT_OF_MEMORY),
+            api.errmsg("Not enough memory", .{}),
         }),
         else => |leftover_err| {
-            const unexpected = "Unexpeced error";
-
-            var buf: [1024]u8 = undefined;
-            const msg = std.fmt.bufPrintZ(buf[0..], "Unexpected error: {s}", .{@errorName(leftover_err)}) catch unexpected;
-            Report.init(src, pg.ERROR).pgRaise(.{
-                .code = pg.ERRCODE_INTERNAL_ERROR,
-                .message = msg,
+            api.ereport(src, .Error, .{
+                api.errcode(pg.ERRCODE_INTERNAL_ERROR),
+                api.errmsg("Unexpected error: {s}", .{@errorName(leftover_err)}),
             });
         },
     }
@@ -67,6 +332,11 @@ pub fn logFn(
     const scope_prefix = @tagName(scope) ++ " ";
     const prefix = "Internal [" ++ comptime level.asText() ++ "] " ++ scope_prefix;
 
+    if (!api.errstart(@enumFromInt(options.postgresLogFnLeven), null)) {
+        return;
+    }
+    api.errcode(pg.ERRCODE_INTERNAL_ERROR).call();
+
     // We nede a temporary buffer for writing. Postgres will copy the message, so we should
     // clean up the buffer ourselvesi.
     var buf = std.ArrayList(u8).initCapacity(mem.PGCurrentContextAllocator, prefix.len + format.len + 1) catch return;
@@ -74,12 +344,10 @@ pub fn logFn(
     buf.writer().print(prefix, .{}) catch return;
     buf.writer().print(format, args) catch return;
     buf.append(0) catch return;
+    _ = pg.errmsg("%s", buf.items[0 .. buf.items.len - 1 :0].ptr);
 
     const src = std.mem.zeroInit(SourceLocation, .{});
-    Report.init(src, options.postgresLogFnLeven).raise(.{
-        .code = pg.ERRCODE_INTERNAL_ERROR,
-        .message = buf.items[0 .. buf.items.len - 1 :0],
-    }) catch {};
+    api.errfinish(src, .{ .allow_longjmp = false }) catch {};
 }
 
 /// Use PostgreSQL elog to log a formatted message using the `LOG` level.
@@ -248,21 +516,6 @@ pub fn PanicWithCause(src: SourceLocation, cause: anyerror, comptime fmt: []cons
     sendElogWithCause(src, pg.PANIC, cause, fmt, args);
 }
 
-/// Emit an error log. Returns the error as Zig error if the error level is
-/// ERROR. Lower levels will just be reported but return normally.
-///
-/// Shortcut for: Report.init(...).raise(...)
-pub fn raise(src: SourceLocation, level: c_int, details: Details) error{PGErrorStack}!void {
-    try Report.init(src, level).raise(details);
-}
-
-/// Raise a postgres error. Will do a longkump if the error level is ERROR. Lower levels will just be reported.
-///
-/// Shortcut for: Report.init(...).pgRaise(...)
-pub fn pgRaise(src: SourceLocation, level: c_int, details: Details) void {
-    Report.init(src, level).pgRaise(details);
-}
-
 pub fn emitIfPGError(e: anyerror) bool {
     if (e == error.PGErrorStack) {
         pg.EmitErrorReport();
@@ -272,20 +525,18 @@ pub fn emitIfPGError(e: anyerror) bool {
 }
 
 fn sendElog(src: SourceLocation, comptime level: c_int, comptime fmt: []const u8, args: anytype) void {
-    const ArgsType = @TypeOf(args);
-    const args_type_info = @typeInfo(ArgsType);
-    if (args_type_info != .Struct) {
-        @compileError("expected tuple or struct argument, found " ++ @typeName(ArgsType));
-    }
-
-    var memctx = mem.getErrorContextThrowOOM();
-    const msg = std.fmt.allocPrintZ(memctx.allocator(), fmt, args) catch unreachable();
-    Report.init(src, level).pgRaise(.{ .message = msg });
+    api.ereport(src, @enumFromInt(level), .{
+        api.errmsg(fmt, args),
+    });
 }
 
 fn sendElogWithCause(src: SourceLocation, comptime level: c_int, cause: anyerror, comptime fmt: []const u8, args: anytype) void {
     if (emitIfPGError(cause)) {
         sendElog(src, level, fmt, args);
+        return;
+    }
+
+    if (!api.errstart(@enumFromInt(level), null)) {
         return;
     }
 
@@ -298,120 +549,7 @@ fn sendElogWithCause(src: SourceLocation, comptime level: c_int, cause: anyerror
     buf.writer().writeAll(err_name) catch unreachable;
     buf.writer().writeByte(0) catch unreachable;
 
-    Report.init(src, level).pgRaise(.{ .message = buf.items[0 .. buf.items.len - 1 :0] });
+    _ = pg.errmsg("%s", buf.items[0 .. buf.items.len - 1 :0].ptr);
+
+    api.errfinish(src, .{ .allow_longjmp = true }) catch unreachable;
 }
-
-pub const Details = struct {
-    code: ?c_int = null,
-    message: ?[:0]const u8 = null,
-    detail: ?[:0]const u8 = null,
-    detail_log: ?[:0]const u8 = null,
-    hint: ?[:0]const u8 = null,
-
-    pub inline fn init() Details {
-        return Details{};
-    }
-
-    pub inline fn initCode(code: c_int) Details {
-        return Details{ .code = code };
-    }
-
-    pub inline fn initErrmsg(format: []const u8, args: anytype) Details {
-        return Details.init().errmsg(format, args);
-    }
-
-    pub inline fn initErrdetails(format: []const u8, args: anytype) Details {
-        return Details.init().errdetails(format, args);
-    }
-
-    pub inline fn initErrhint(format: []const u8, args: anytype) Details {
-        return Details.init().errhint(format, args);
-    }
-
-    pub inline fn errcode(self: Details, code: c_int) Details {
-        self.code = code;
-    }
-
-    pub inline fn errmsg(self: Details, format: []const u8, args: anytype) Details {
-        var details = self;
-        var memctx = mem.getErrorContextThrowOOM();
-        details.message = std.fmt.allocPrintZ(memctx.allocator(), format, args) catch unreachable();
-        return details;
-    }
-
-    pub inline fn errdetails(self: Details, format: []const u8, args: anytype) Details {
-        var details = self;
-        const memctx = mem.getErrorContextThrowOOM();
-        details.detail = std.fmt.allocPrintZ(memctx.allocator(), format, args) catch unreachable();
-        return details;
-    }
-
-    pub inline fn errhint(self: Details, format: []const u8, args: anytype) Details {
-        var details = self;
-        const memctx = mem.getErrorContextThrowOOM();
-        details.hint = std.fmt.allocPrintZ(memctx.allocator(), format, args) catch unreachable();
-        return details;
-    }
-};
-
-pub const Report = struct {
-    src: std.builtin.SourceLocation,
-    level: c_int,
-
-    const Self = @This();
-
-    pub fn init(src: SourceLocation, level: c_int) Self {
-        return .{ .src = src, .level = level };
-    }
-
-    /// Raises a postgres error report similat to `ereport` in C.
-    /// But we capture the postgres longjmp and rethrow it as zig error.
-    /// This allows you to properly cleanup resources.
-    /// Use `pgRethrow` to give back control to PostgreSQL longjump based
-    /// error handling.
-    pub fn raise(self: Self, details: Details) error{PGErrorStack}!void {
-        return try err.wrap(Self.pgRaise, .{ self, details });
-    }
-
-    /// Throw a postgres error. Depending on the error level Postgres might
-    /// kill the process, kill the cluster, do a longjmp or continue with
-    /// normal control flow. In code that uses pgRaise assume that
-    /// Postgres will use longjmp and prepare your code to potentially capture the error
-    /// to ensure cleanups.
-    /// If you don't want Postgres error handling to take control better use `raise`.
-    ///
-    /// # Memory safety:
-    ///
-    /// Postgres error handling will copy all strings passed to pgRaise onto ErrorContext.
-    /// When passing formatted strings make sure that no allocation can leak.
-    /// For example by allocating into another MemoryContext that will be
-    /// cleaned up by Postgres once the call is handled. Or a small buffer on the stack itself.
-    ///
-    /// # Callstack safety:
-    ///
-    /// When calling pgRaise, then Postgres will use a longjmp if the the ERROR level is used.
-    /// A `longjmp` WILL NOT UNWIND THE STACK properly. This means that any defer statements
-    /// will not be execute. Use [raise] if you want to emit a proper Zig error. Before returning to Postgres
-    /// the error must be rethrown (see [pgRethrow]) or cleaned up (see [FlushErrorState]).
-    pub fn pgRaise(self: Self, details: Details) void {
-        var data = self.init_err_data(details);
-        pg.ThrowErrorData(&data);
-    }
-
-    inline fn init_err_data(self: Self, details: Details) pg.ErrorData {
-        return std.mem.zeroInit(pg.ErrorData, .{
-            .elevel = self.level,
-            .sqlerrcode = details.code orelse 0,
-            .message = if (details.message) |m| @constCast(m.ptr) else null,
-            .detail = if (details.detail) |m| @constCast(m.ptr) else null,
-            .detail_log = if (details.detail_log) |m| @constCast(m.ptr) else null,
-            .hint = if (details.hint) |m| @constCast(m.ptr) else null,
-            .hide_stmt = true,
-            .hide_ctx = true,
-            .filename = self.src.file,
-            .lineno = @as(c_int, @intCast(self.src.line)),
-            .funcname = self.src.fn_name,
-            .assoc_context = pg.CurrentMemoryContext,
-        });
-    }
-};

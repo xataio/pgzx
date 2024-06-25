@@ -723,8 +723,5 @@ fn pqError(src: std.builtin.SourceLocation, conn: ?*pg.PGconn) error{PGErrorStac
         return;
     }
 
-    try elog.Report.init(src, pg.ERROR).raise(.{
-        .message = std.mem.span(rawerr),
-    });
-    unreachable;
+    return elog.Error(src, "{s}", .{std.mem.span(rawerr)});
 }
