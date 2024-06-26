@@ -34,6 +34,7 @@ pub const fmgr = @import("pgzx/fmgr.zig");
 pub const PG_MODULE_MAGIC = fmgr.PG_MODULE_MAGIC;
 pub const PG_FUNCTION_V1 = fmgr.PG_FUNCTION_V1;
 pub const PG_FUNCTION_INFO_V1 = fmgr.PG_FUNCTION_INFO_V1;
+pub const PG_EXPORT = fmgr.PG_EXPORT;
 
 pub const lwlock = @import("pgzx/lwlock.zig");
 pub const mem = @import("pgzx/mem.zig");

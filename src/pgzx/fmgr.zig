@@ -65,6 +65,22 @@ pub inline fn PG_FUNCTION_V1(comptime name: []const u8, comptime callback: anyty
     @export(reg.call, .{ .name = name });
 }
 
+pub inline fn PG_EXPORT(comptime mod: type) void {
+    const decls = switch (@typeInfo(mod)) {
+        .Struct => |s| s.decls,
+        else => @compileError("PG_EXPORT requires a struct"),
+    };
+
+    inline for (decls) |decl| {
+        const value = @field(mod, decl.name);
+        const ft = @typeInfo(@TypeOf(value));
+        if (ft != .Fn or ft.Fn.is_generic or ft.Fn.is_var_args) {
+            continue;
+        }
+        PG_FUNCTION_V1(decl.name, value);
+    }
+}
+
 inline fn genFnCall(comptime f: anytype) type {
     return struct {
         const function: @TypeOf(f) = f;
