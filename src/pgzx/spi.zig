@@ -97,6 +97,11 @@ pub fn query(sql: [:0]const u8, options: ExecOptions) SPIError!Rows {
     return Rows.init();
 }
 
+pub fn queryTyped(comptime T: type, sql: [:0]const u8, options: ExecOptions) SPIError!RowsOf(T) {
+    const rows = try query(sql, options);
+    return rows.typed(T);
+}
+
 pub fn scanProcessed(row: usize, values: anytype) !void {
     if (pg.SPI_processed <= row) {
         return err.PGError.SPIInvalidRowIndex;
@@ -139,6 +144,10 @@ pub const Rows = struct {
 
     fn init() Self {
         return .{};
+    }
+
+    fn typed(self: Self, comptime T: type) RowsOf(T) {
+        return RowsOf(T).init(self);
     }
 
     pub fn deinit(self: *Self) void {
