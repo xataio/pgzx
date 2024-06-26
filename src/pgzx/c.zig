@@ -181,6 +181,7 @@ const includes = @cImport({
     @cInclude("utils/syscache.h");
     @cInclude("utils/lsyscache.h");
     @cInclude("utils/varlena.h");
+    @cInclude("utils/regproc.h");
 
     @cInclude("access/xact.h");
 
