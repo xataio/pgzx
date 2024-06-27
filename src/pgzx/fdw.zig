@@ -224,19 +224,18 @@ pub fn errorUnknownOption(list: anytype, def: *const DefElem, context: pg.Oid) v
     var errctx = mem.getErrorContextThrowOOM();
     const err_alloc = errctx.allocator();
 
-    const msg = std.fmt.allocPrintZ(err_alloc, "invalid option \"{s}\"", .{def.defname}) catch unreachable();
-
     var hint: [:0]const u8 = "There are no valid options in this context.";
     const match = list.findClosestMatch(def, context);
     if (match) |m| {
         hint = std.fmt.allocPrintZ(err_alloc, "did you mean \"{s}\"?", .{m.keyword}) catch unreachable();
     }
 
-    elog.Report.init(@src(), pg.ERROR).pgRaise(.{
-        .code = pg.ERRCODE_INVALID_PARAMETER_VALUE,
-        .message = msg,
-        .hint = hint,
+    elog.ereport(@src(), .Error, .{
+        elog.errcode(pg.ERRCODE_INVALID_PARAMETER_VALUE),
+        elog.errmsg("invalid option \"{s}\"", .{def.defname}),
+        elog.errhint("{s}", .{hint}),
     });
+    unreachable;
 }
 
 pub fn validateString(def: *const pg.DefElem, context: pg.Oid) void {
