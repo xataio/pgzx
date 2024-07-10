@@ -3,7 +3,7 @@
 #set -x
 set -o pipefail
 
-EXTENSION_NAME=char_count_zig
+EXTENSION_NAME=spi_sql
 
 build() {
 	echo "Build extension $EXTENSION_NAME"
