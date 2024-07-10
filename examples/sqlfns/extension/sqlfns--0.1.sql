@@ -1,0 +1,27 @@
+CREATE FUNCTION hello_world_c(name text) RETURNS text
+AS 'MODULE_PATHNAME'
+LANGUAGE C;
+
+CREATE FUNCTION hello_world_zig(name text) RETURNS text
+AS 'MODULE_PATHNAME'
+LANGUAGE C;
+
+CREATE FUNCTION hello_world_zig_null(name text) RETURNS text
+AS 'MODULE_PATHNAME'
+LANGUAGE C;
+
+CREATE FUNCTION hello_world_zig_datum(name text) RETURNS text
+AS 'MODULE_PATHNAME'
+LANGUAGE C;
+
+CREATE FUNCTION hello_world_anon(name text) RETURNS text
+AS 'MODULE_PATHNAME'
+LANGUAGE C;
+
+CREATE FUNCTION hello_world_mod(name text) RETURNS text
+AS 'MODULE_PATHNAME'
+LANGUAGE C;
+
+CREATE FUNCTION hello_world_file(name text) RETURNS text
+AS 'MODULE_PATHNAME'
+LANGUAGE C;
