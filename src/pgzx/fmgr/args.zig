@@ -1,5 +1,7 @@
 const std = @import("std");
 const pg = @import("pgzx_pgsys");
+
+const err = @import("../err.zig");
 const datum = @import("../datum.zig");
 
 /// Index function argument type.
@@ -58,7 +60,9 @@ fn readArg(comptime T: type, fcinfo: pg.FunctionCallInfo, argNum: u32) !readArgT
         return fcinfo;
     }
     const converter = comptime datum.findConv(T);
-    return converter.fromNullableDatum(try mustGetArgNullable(fcinfo, argNum));
+    const oid = try err.wrap(pg.get_fn_expr_argtype, .{ fcinfo.*.flinfo, @as(c_int, @intCast(argNum)) });
+    const ndatum = try mustGetArgNullable(fcinfo, argNum);
+    return converter.fromNullableDatumWithOID(ndatum, oid);
 }
 
 fn readOptionalArg(comptime T: type, fcinfo: pg.FunctionCallInfo, argNum: u32) !?T {

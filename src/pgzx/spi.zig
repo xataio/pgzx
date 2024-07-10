@@ -1,6 +1,7 @@
 const std = @import("std");
 const pg = @import("pgzx_pgsys");
 
+const meta = @import("meta.zig");
 const mem = @import("mem.zig");
 const err = @import("err.zig");
 const datum = @import("datum.zig");
@@ -43,7 +44,24 @@ pub const ExecOptions = struct {
 
 pub const SPIError = err.PGError || std.mem.Allocator.Error;
 
-pub fn exec(sql: [:0]const u8, options: ExecOptions) SPIError!c_int {
+pub fn exec(sql: [:0]const u8, options: ExecOptions) SPIError!isize {
+    const ret = try execImpl(sql, options);
+    var rows = Rows.init();
+    defer rows.deinit();
+    return @intCast(ret);
+}
+
+pub fn query(sql: [:0]const u8, options: ExecOptions) SPIError!Rows {
+    _ = try execImpl(sql, options);
+    return Rows.init();
+}
+
+pub fn queryTyped(comptime T: type, sql: [:0]const u8, options: ExecOptions) SPIError!RowsOf(T) {
+    const rows = try query(sql, options);
+    return rows.typed(T);
+}
+
+fn execImpl(sql: [:0]const u8, options: ExecOptions) SPIError!c_int {
     if (options.args) |args| {
         if (args.types.len != args.values.len) {
             return err.PGError.SPIArgument;
@@ -92,83 +110,128 @@ pub fn exec(sql: [:0]const u8, options: ExecOptions) SPIError!c_int {
     }
 }
 
-pub fn query(sql: [:0]const u8, options: ExecOptions) SPIError!Rows {
-    _ = try exec(sql, options);
-    return Rows.init();
+fn scanProcessed(row: usize, values: anytype) !void {
+    scanProcessedFrame(SPIFrame.get(), row, values);
 }
 
-pub fn queryTyped(comptime T: type, sql: [:0]const u8, options: ExecOptions) SPIError!RowsOf(T) {
-    const rows = try query(sql, options);
-    return rows.typed(T);
-}
-
-pub fn scanProcessed(row: usize, values: anytype) !void {
-    if (pg.SPI_processed <= row) {
-        return err.PGError.SPIInvalidRowIndex;
-    }
-
+inline fn scanProcessedFrame(frame: SPIFrame, row: usize, values: anytype) !void {
     var column: c_int = 1;
     inline for (std.meta.fields(@TypeOf(values)), 0..) |field, i| {
-        column = try scanField(field.type, values[i], row, column);
+        column = try scanField(field.type, frame, values[i], row, column);
     }
 }
 
-fn scanField(comptime fieldType: type, to: anytype, row: usize, column: c_int) !c_int {
-    const fieldInfo = @typeInfo(fieldType);
-    if (fieldInfo != .Pointer) {
+fn scanField(
+    comptime fieldType: type,
+    frame: SPIFrame,
+    to: anytype,
+    row: usize,
+    column: c_int,
+) !c_int {
+    const field_info = @typeInfo(fieldType);
+    if (field_info != .Pointer) {
         @compileError("scanField requires a pointer");
     }
-    if (fieldInfo.Pointer.size == .Slice) {
+    if (field_info.Pointer.size == .Slice) {
         @compileError("scanField requires a single pointer, not a slice");
     }
 
-    const childType = fieldInfo.Pointer.child;
-    if (@typeInfo(childType) == .Struct) {
-        var structColumn = column;
-        inline for (std.meta.fields(childType)) |field| {
-            const childPtr = &@field(to.*, field.name);
-            structColumn = try scanField(@TypeOf(childPtr), childPtr, row, structColumn);
+    const child_type = field_info.Pointer.child;
+    if (@typeInfo(child_type) == .Struct) {
+        var struct_column = column;
+        inline for (std.meta.fields(child_type)) |field| {
+            const child_ptr = &@field(to.*, field.name);
+            struct_column = try scanField(@TypeOf(child_ptr), frame, child_ptr, row, struct_column);
         }
-        return structColumn;
+        return struct_column;
     } else {
-        const value = try convBinValue(childType, pg.SPI_tuptable, row, column);
+        const value = try convBinValue(child_type, frame, row, column);
         to.* = value;
         return column + 1;
     }
 }
 
+pub fn OwnedSPIFrameRows(comptime R: type) type {
+    return struct {
+        rows: R,
+
+        const Self = @This();
+
+        pub inline fn init(r: R) Self {
+            return .{ .rows = r };
+        }
+
+        pub inline fn deinit(self: *Self) void {
+            self.rows.deinit();
+            finish();
+        }
+
+        pub fn next(self: *Self) meta.fnReturnType(@TypeOf(R.next)) {
+            return self.rows.next();
+        }
+
+        pub const scan = if (@hasField(R, "scan"))
+            R.scan
+        else
+            @compileError("no scan method available");
+    };
+}
+
+// Rows iterates over SPI_tuptable from the last executed SPI query.
+// When initializing a Rows iterator we capture the current SPI_tuptable from
+// the active SPI frame.
+//
+// Safety:
+// =======
+//
+// The underlying tuple table is released when the current frame is released
+// via `finish`. The iterator must not be used after. We have no way to check
+// if the current frame was released or not. Accessing the tuple table after a
+// release will result in undefined behavior.
+//
+// Due to SPI managing a stack of SPI frames it is safe to use `connect` to
+// create a child frame to run queries while iterating over the rows.
+//
 pub const Rows = struct {
-    row: isize = -1,
+    row: isize,
+    spi_frame: SPIFrame,
 
-    const Self = @This();
-
-    fn init() Self {
-        return .{};
+    fn init() Rows {
+        return .{
+            .row = -1,
+            .spi_frame = SPIFrame.get(),
+        };
     }
 
-    fn typed(self: Self, comptime T: type) RowsOf(T) {
+    fn typed(self: Rows, comptime T: type) RowsOf(T) {
         return RowsOf(T).init(self);
     }
 
-    pub fn deinit(self: *Self) void {
-        pg.SPI_freetuptable(pg.SPI_tuptable);
+    fn ownedSPIFrame(self: Rows) OwnedSPIFrameRows(Rows) {
+        return OwnedSPIFrameRows(Rows).init(self);
+    }
+
+    pub fn deinit(self: *Rows) void {
+        if (self.spi_frame.tuptable) |tt| {
+            pg.SPI_freetuptable(tt);
+        }
         self.row = -1;
     }
 
-    pub fn next(self: *Self) bool {
+    pub fn next(self: *Rows) bool {
         const next_idx = self.row + 1;
-        if (next_idx >= pg.SPI_processed) {
+        if (self.spi_frame.tuptable == null or next_idx >= self.spi_frame.processed) {
             return false;
         }
         self.row = next_idx;
         return true;
     }
 
-    pub fn scan(self: *Self, values: anytype) !void {
+    pub fn scan(self: *Rows, values: anytype) !void {
         if (self.row < 0) {
             return err.PGError.SPIInvalidRowIndex;
         }
-        try scanProcessed(@intCast(self.row), values);
+        try scanProcessedFrame(self.spi_frame, @intCast(self.row), values);
     }
 };
 
@@ -177,6 +240,7 @@ pub fn RowsOf(comptime T: type) type {
         rows: Rows,
 
         const Self = @This();
+        pub const Owned = OwnedSPIFrameRows(Self);
 
         pub fn init(rows: Rows) Self {
             return .{ .rows = rows };
@@ -184,6 +248,10 @@ pub fn RowsOf(comptime T: type) type {
 
         pub fn deinit(self: *Self) void {
             self.rows.deinit();
+        }
+
+        pub fn ownedSPIFrame(self: Self) Self.Owned {
+            return OwnedSPIFrameRows(Self).init(self);
         }
 
         pub fn next(self: *Self) !?T {
@@ -197,20 +265,37 @@ pub fn RowsOf(comptime T: type) type {
     };
 }
 
+// The SPI interface uses a
+const SPIFrame = struct {
+    processed: u64,
+    tuptable: ?*pg.SPITupleTable,
+
+    inline fn get() SPIFrame {
+        return .{
+            .processed = pg.SPI_processed,
+            .tuptable = pg.SPI_tuptable,
+        };
+    }
+};
+
 pub fn convProcessed(comptime T: type, row: c_int, col: c_int) !T {
     if (pg.SPI_processed <= row) {
         return err.PGError.SPIInvalidRowIndex;
     }
-    return convBinValue(T, pg.SPI_tuptable, row, col);
+    return convBinValue(T, SPIFrame.get(), row, col);
 }
 
-pub fn convBinValue(comptime T: type, table: *pg.SPITupleTable, row: usize, col: c_int) !T {
+pub fn convBinValue(comptime T: type, frame: SPIFrame, row: usize, col: c_int) !T {
     // TODO: check index?
 
     var nd: pg.NullableDatum = undefined;
-    nd.value = pg.SPI_getbinval(table.*.vals[row], table.*.tupdesc, col, @ptrCast(&nd.isnull));
+    const table = frame.tuptable.?;
+    const desc = table.*.tupdesc;
+    nd.value = pg.SPI_getbinval(table.*.vals[row], desc, col, @ptrCast(&nd.isnull));
     try checkStatus(pg.SPI_result);
-    return try datum.fromNullableDatum(T, nd);
+    const attr_desc = &desc.*.attrs()[@intCast(col - 1)];
+    const oid = attr_desc.atttypid;
+    return try datum.fromNullableDatumWithOID(T, nd, oid);
 }
 
 fn checkStatus(st: c_int) err.PGError!void {
