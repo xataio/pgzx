@@ -90,11 +90,14 @@ fn hello_world_zig_null(name: ?[:0]const u8) !?[:0]const u8 {
 }
 
 // It is also possible to capture the FunctionCallInfo as an argument to your function. You want to do this if
-// you want to use the configured collation, check the context node, or
-// manually parse arguments manually.
+// you want to use the string collation, check the context node, or
+// parse arguments manually.
 //
-// In this example we will accept and return a Datum. This requires to mark a
+// In this example we will also accept and return a Datum. This requires us to mark a
 // NULL return in the FunctionCallInfo.
+//
+// Note: alternatively we could returns a `?pg.Datum` and just return `null`.
+// We use the FunctionCallInfo to demonstrate access how to access them.
 
 comptime {
     pgzx.PG_FUNCTION_V1("hello_world_zig_datum", hello_world_zig_datum);
@@ -115,9 +118,11 @@ fn hello_world_zig_datum(fcinfo: pg.FunctionCallInfo, arg: ?pg.Datum) !pg.Datum 
 // ====================================================
 
 // Exporting a number of functions can become a bit tedious over time.
-// The `PG_EXPORT` function can be used to automatically export all public functions from a struct.
+// The `PG_EXPORT` function can be used to automatically export all public
+// functions from a struct.
 
 // Here we export a function from an anonymous struct.
+
 comptime {
     pgzx.PG_EXPORT(struct {
         pub fn hello_world_anon(name: ?[:0]const u8) ![:0]const u8 {
@@ -129,7 +134,7 @@ comptime {
     });
 }
 
-// Or a names struct:
+// We can also export functions from a named struct:
 
 comptime {
     pgzx.PG_EXPORT(mod_hello_world);
@@ -144,7 +149,7 @@ const mod_hello_world = struct {
     }
 };
 
-// In Zig when importing a file, the file is treated as a struct. Let's try this:
+// In Zig when importing a file, the file is also treated as a struct. Let's try this:
 
 comptime {
     pgzx.PG_EXPORT(@import("hello_world.zig"));
