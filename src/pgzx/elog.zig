@@ -157,14 +157,11 @@ pub const api = struct {
         return struct {
             args: Args,
 
-            const Self = @This();
-
-            pub inline fn init(args: Args) Self {
-                return .{ .args = args };
-            }
-
-            pub inline fn call(self: Self) void {
+            pub inline fn call(self: @This()) void {
                 var memctx = mem.getErrorContextThrowOOM();
+
+                //@compileLog("FmtMessage:", fmt, self.args);
+
                 const msg = std.fmt.allocPrintZ(memctx.allocator(), fmt, self.args) catch unreachable();
                 _ = msgtype(msg.ptr);
             }
@@ -172,19 +169,19 @@ pub const api = struct {
     }
 
     pub inline fn errmsg(comptime fmt: []const u8, args: anytype) FmtMessage(pg.errmsg, fmt, @TypeOf(args)) {
-        return FmtMessage(pg.errmsg, fmt, @TypeOf(args)).init(args);
+        return .{ .args = args };
     }
 
     pub inline fn errdetail(comptime fmt: []const u8, args: anytype) FmtMessage(pg.errdetail, fmt, @TypeOf(args)) {
-        return FmtMessage(pg.errdetail, fmt, @TypeOf(args)).init(args);
+        return .{ .args = args };
     }
 
     pub inline fn errdetail_log(comptime fmt: []const u8, args: anytype) FmtMessage(pg.errdetail_log, fmt, @TypeOf(args)) {
-        return FmtMessage(pg.errdetail_log, fmt, @TypeOf(args)).init(args);
+        return .{ .args = args };
     }
 
     pub inline fn errhint(comptime fmt: []const u8, args: anytype) FmtMessage(pg.errhint, fmt, @TypeOf(args)) {
-        return FmtMessage(pg.errhint, fmt, @TypeOf(args)).init(args);
+        return .{ .args = args };
     }
 
     const SpecialErrCode = enum {
@@ -348,6 +345,31 @@ pub fn logFn(
 
     const src = std.mem.zeroInit(SourceLocation, .{});
     api.errfinish(src, .{ .allow_longjmp = false }) catch {};
+}
+
+/// Use PostgreSQL elog to log a formatted message using the `DEBUG5` level.
+pub fn Debug5(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
+    sendElog(src, pg.DEBUG5, fmt, args);
+}
+
+/// Use PostgreSQL elog to log a formatted message using the `DEBUG4` level.
+pub fn Debug4(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
+    sendElog(src, pg.DEBUG4, fmt, args);
+}
+
+/// Use PostgreSQL elog to log a formatted message using the `DEBUG3` level.
+pub fn Debug3(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
+    sendElog(src, pg.DEBUG3, fmt, args);
+}
+
+/// Use PostgreSQL elog to log a formatted message using the `DEBUG2` level.
+pub fn Debug2(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
+    sendElog(src, pg.DEBUG2, fmt, args);
+}
+
+/// Use PostgreSQL elog to log a formatted message using the `DEBUG1` level.
+pub fn Debug1(src: SourceLocation, comptime fmt: []const u8, args: anytype) void {
+    sendElog(src, pg.DEBUG1, fmt, args);
 }
 
 /// Use PostgreSQL elog to log a formatted message using the `LOG` level.
