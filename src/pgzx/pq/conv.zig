@@ -177,6 +177,7 @@ const textzconv = struct {
 
     pub fn write(writer: anytype, value: [:0]const u8) !void {
         _ = try writer.write(value);
+        try writer.writeByte(0);
     }
 
     pub fn parse(buf: [:0]const u8) ![:0]const u8 {
