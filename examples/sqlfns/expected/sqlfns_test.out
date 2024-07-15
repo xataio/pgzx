@@ -1,0 +1,99 @@
+CREATE EXTENSION sqlfns;
+SET search_path TO sqlfns;
+SELECT hello_world_c(NULL);
+ hello_world_c 
+---------------
+ Hello World
+(1 row)
+
+SELECT hello_world_c('pgzx');
+ hello_world_c 
+---------------
+ Hello, pgzx!
+(1 row)
+
+SELECT hello_world_zig(NULL);
+ hello_world_zig 
+-----------------
+ Hello World
+(1 row)
+
+SELECT hello_world_zig('pgzx');
+ hello_world_zig 
+-----------------
+ Hello, pgzx!
+(1 row)
+
+SELECT hello_world_zig(NULL);
+ hello_world_zig 
+-----------------
+ Hello World
+(1 row)
+
+SELECT hello_world_zig('pgzx');
+ hello_world_zig 
+-----------------
+ Hello, pgzx!
+(1 row)
+
+SELECT hello_world_zig_null(NULL);
+ hello_world_zig_null 
+----------------------
+ 
+(1 row)
+
+SELECT hello_world_zig_null('pgzx');
+ hello_world_zig_null 
+----------------------
+ Hello, pgzx!
+(1 row)
+
+SELECT hello_world_zig_datum(NULL);
+ hello_world_zig_datum 
+-----------------------
+ 
+(1 row)
+
+SELECT hello_world_zig_datum('pgzx');
+ hello_world_zig_datum 
+-----------------------
+ Hello, pgzx!
+(1 row)
+
+SELECT hello_world_anon(NULL);
+ hello_world_anon 
+------------------
+ Hello World
+(1 row)
+
+SELECT hello_world_anon('pgzx');
+ hello_world_anon 
+------------------
+ Hello, pgzx!
+(1 row)
+
+SELECT hello_world_mod(NULL);
+ hello_world_mod 
+-----------------
+ Hello World
+(1 row)
+
+SELECT hello_world_mod('pgzx');
+ hello_world_mod 
+-----------------
+ Hello, pgzx!
+(1 row)
+
+SELECT hello_world_file(NULL);
+ hello_world_file 
+------------------
+ Hello World
+(1 row)
+
+SELECT hello_world_file('pgzx');
+ hello_world_file 
+------------------
+ Hello, pgzx!
+(1 row)
+
+DROP EXTENSION sqlfns;

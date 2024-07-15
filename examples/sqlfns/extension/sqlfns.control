@@ -1,0 +1,6 @@
+comment = 'pgzx: SQL Functions test extension'
+default_version = '0.1'
+module_pathname = '$libdir/sqlfns'
+relocatable = false
+superuser = false
+schema = 'sqlfns'
