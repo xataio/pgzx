@@ -93,8 +93,6 @@ EOF
 configure() {
 	echo "Configuring postgres build"
 
-	patch
-
 	meson setup "$PG_BUILD_DIR" "$PG_SRC_DIR" \
 		--debug \
 		-Dprefix="${PG_INSTALL_DIR}" \
