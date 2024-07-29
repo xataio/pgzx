@@ -10,6 +10,7 @@ const includes = @cImport({
 
     @cInclude("access/reloptions.h");
     @cInclude("access/tsmapi.h");
+    @cInclude("access/xact.h");
 
     @cInclude("commands/event_trigger.h");
 
@@ -159,6 +160,7 @@ const includes = @cImport({
     @cInclude("optimizer/tlist.h");
 
     @cInclude("parser/parser.h");
+    @cInclude("parser/parse_utilcmd.h");
 
     @cInclude("postmaster/bgworker.h");
     @cInclude("postmaster/interrupt.h");
@@ -182,8 +184,13 @@ const includes = @cImport({
     @cInclude("utils/lsyscache.h");
     @cInclude("utils/varlena.h");
     @cInclude("utils/regproc.h");
+    @cInclude("utils/queryenvironment.h");
 
-    @cInclude("access/xact.h");
+    @cInclude("tcop/cmdtag.h");
+    @cInclude("tcop/dest.h");
+    @cInclude("tcop/pquery.h");
+    @cInclude("tcop/tcopprot.h");
+    @cInclude("tcop/utility.h");
 
     // libpq support
     @cInclude("libpq-fe.h");
