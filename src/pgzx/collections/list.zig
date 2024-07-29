@@ -102,8 +102,16 @@ pub fn PointerListOf(comptime T: type) type {
             }.c_cmp);
         }
 
-        pub fn len(self: Self) usize {
+        pub inline fn len(self: Self) usize {
             return @intCast(pg.list_length(self.list));
+        }
+
+        pub fn items(self: Self) []*T {
+            if (self.list) |l| {
+                const elements: [*c]*T = @ptrCast(@alignCast(l.*.elements));
+                return elements[0..self.len()];
+            }
+            return &.{};
         }
 
         pub fn at(self: Self, n: usize) ?*T {
