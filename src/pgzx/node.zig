@@ -44,6 +44,11 @@ pub inline fn safeCastNode(comptime T: type, node: anytype) ?*T {
     return castNode(T, node);
 }
 
+pub inline fn copy(node: anytype) *pg.Node {
+    const raw = pg.copyObjectImpl(node);
+    return @ptrCast(@alignCast(raw));
+}
+
 inline fn asNodePtr(node: anytype) *pg.Node {
     checkIsPotentialNodePtr(node);
     return @ptrCast(@alignCast(node));
@@ -51,7 +56,7 @@ inline fn asNodePtr(node: anytype) *pg.Node {
 
 inline fn checkIsPotentialNodePtr(node: anytype) void {
     const nodeType = @typeInfo(@TypeOf(node));
-    if (nodeType != .Pointer or nodeType.Pointer.size != .One) {
+    if (nodeType != .Pointer or (nodeType.Pointer.size != .One and nodeType.Pointer.size != .C)) {
         @compileError("Expected single node pointer");
     }
 }
