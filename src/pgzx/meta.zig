@@ -17,6 +17,13 @@ pub inline fn sliceElemType(comptime T: type) type {
     };
 }
 
+pub inline fn pointerElemType(comptime T: type) type {
+    return switch (@typeInfo(T)) {
+        .Pointer => |p| p.child,
+        else => @compileError("Expected a pointer type"),
+    };
+}
+
 pub inline fn hasSentinal(comptime T: type) bool {
     return switch (@typeInfo(T)) {
         .Pointer => |p| p.size == .Slice and p.sentinel != null,
