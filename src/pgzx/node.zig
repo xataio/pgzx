@@ -49,6 +49,10 @@ pub inline fn copy(node: anytype) *pg.Node {
     return @ptrCast(@alignCast(raw));
 }
 
+pub inline fn copyTypedNode(node: anytype) @TypeOf(node) {
+    return @ptrCast(@alignCast(copy(node)));
+}
+
 inline fn asNodePtr(node: anytype) *pg.Node {
     checkIsPotentialNodePtr(node);
     return @ptrCast(@alignCast(node));
