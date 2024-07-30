@@ -5,76 +5,73 @@ const std = @import("std");
 const PGBuild = @import("pgzx").Build;
 
 pub fn build(b: *std.Build) void {
-    // Project meta data
-    const name = "char_count_zig";
-    const version = .{ .major = 0, .minor = 1 };
+    const NAME = "char_count_zig";
+    const VERSION = .{ .major = 0, .minor = 1 };
 
-    const target = b.standardTargetOptions(.{});
-    const optimize = b.standardOptimizeOption(.{});
-
-    // Load the pgzx module and initialize the build utilities
-    const dep_pgzx = b.dependency("pgzx", .{ .target = target, .optimize = optimize });
-    const pgzx = dep_pgzx.module("pgzx");
-    var pgbuild = PGBuild.create(b, .{
-        .target = target,
-        .optimize = optimize,
-        .debug = .{
-            .pg_config = false,
-            .extension_dir = true,
-            .extension_lib = false,
-        },
-    });
+    const DB_TEST_USER = "postgres";
+    const DB_TEST_PORT = 5432;
 
     const build_options = b.addOptions();
     build_options.addOption(bool, "testfn", b.option(bool, "testfn", "Register test function") orelse false);
 
-    // Register the dependency with the build system
-    // and add pgzx as module dependency.
-    const ext = pgbuild.addInstallExtension(.{
-        .name = name,
-        .version = version,
-        .root_source_file = b.path("src/main.zig"),
-        .root_dir = ".",
+    var proj = PGBuild.Project.init(b, .{
+        .name = NAME,
+        .version = VERSION,
+        .root_dir = "src/",
+        .root_source_file = "src/main.zig",
     });
-    ext.lib.root_module.addImport("pgzx", pgzx);
-    ext.lib.root_module.addOptions("build_options", build_options);
+    proj.addOptions("build_options", build_options);
 
-    b.getInstallStep().dependOn(&ext.step);
+    const steps = .{
+        .check = b.step("check", "Check if project compiles"),
+        .install = b.getInstallStep(),
+        .pg_regress = b.step("pg_regress", "Run regression tests"),
+        .unit = b.step("unit", "Run unit tests"),
+    };
 
-    // Configure pg_regress based testing for the current extension.
-    const extest = pgbuild.addRegress(.{
-        .db_user = "postgres",
-        .db_port = 5432,
-        .root_dir = ".",
-        .scripts = &[_][]const u8{
-            "char_count_test",
-        },
-    });
+    { // build and install extension
+        steps.install.dependOn(&proj.installExtensionLib().step);
+        steps.install.dependOn(&proj.installExtensionDir().step);
+    }
 
-    // Make regression tests available to `zig build`
-    var regress = b.step("pg_regress", "Run regression tests");
-    regress.dependOn(&extest.step);
+    { // check extension Zig source code only. No linkage or installation for faster development.
+        const lib = proj.extensionLib();
+        lib.linkage = null;
+        steps.check.dependOn(&lib.step);
+    }
 
-    // Extension build for unit tests. Same as above, but with testfn for sure true.
-    const test_options = b.addOptions();
-    test_options.addOption(bool, "testfn", true);
-    const test_ext = pgbuild.addInstallExtension(.{
-        .name = name,
-        .version = version,
-        .root_source_file = b.path("src/main.zig"),
-        .root_dir = ".",
-    });
-    test_ext.lib.root_module.addImport("pgzx", pgzx);
-    test_ext.lib.root_module.addOptions("build_options", test_options);
+    { // pg_regress tests (regression tests use the default build)
+        var regress = proj.pgbuild.addRegress(.{
+            .db_user = DB_TEST_USER,
+            .db_port = DB_TEST_PORT,
+            .root_dir = ".",
+            .scripts = &[_][]const u8{
+                "char_count_test",
+            },
+        });
+        regress.step.dependOn(steps.install);
 
-    // Step for running the unit tests.
-    const psql_run_tests = pgbuild.addRunTests(.{
-        .name = name,
-        .db_user = "postgres",
-        .db_port = 5432,
-    });
-    psql_run_tests.step.dependOn(&test_ext.step);
+        steps.pg_regress.dependOn(&regress.step);
+    }
 
-    var unit = b.step("unit", "Run unit tests");
-    unit.dependOn(&psql_run_tests.step);
+    { // unit testing. We install an alternative version of the lib build with test_fn = true
+        const test_options = b.addOptions();
+        test_options.addOption(bool, "testfn", true);
+
+        const lib = proj.extensionLib();
+        lib.root_module.addOptions("build_options", test_options);
+
+        // Step for running the unit tests.
+        const psql_run_tests = proj.pgbuild.addRunTests(.{
+            .name = NAME,
+            .db_user = DB_TEST_USER,
+            .db_port = DB_TEST_PORT,
+        });
+
+        // Build and install extension before running the tests.
+        psql_run_tests.step.dependOn(&proj.pgbuild.addInstallExtensionLibArtifact(lib, NAME).step);
+        psql_run_tests.step.dependOn(&proj.installExtensionLib().step);
+
+        steps.unit.dependOn(&psql_run_tests.step);
+    }
 }
