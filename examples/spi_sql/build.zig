@@ -41,7 +41,7 @@ pub fn build(b: *std.Build) void {
             .db_port = DB_TEST_PORT,
             .root_dir = ".",
             .scripts = &[_][]const u8{
-                "char_count_test",
+                "spi_sql_test",
             },
         });
         regress.step.dependOn(steps.install);
