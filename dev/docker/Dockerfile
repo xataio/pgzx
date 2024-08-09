@@ -28,15 +28,21 @@ RUN curl -L https://nixos.org/nix/install -o /nix/install-nix && \
     /nix/install-nix --no-daemon --no-channel-add && \
     rm /nix/install-nix
 
+
 ENV PATH="$PATH:/home/dev/.nix-profile/bin:/home/dev/.nix-profile/bin/nix"
 
 # Prebuild development environment
 
 RUN mkdir -p /home/dev/workdir && chown -R $USERNAME /home/dev/workdir
 WORKDIR /home/dev/workdir
+
 COPY *.nix .
 COPY *.lock .
 COPY nix nix
 RUN nix develop -c true
 
-ENTRYPOINT ["nix", "develop"]
+# Setup entrypoint. The entrypoint script will ensure that the `workdir` folders owner is `dev` and switch to the `dev` user
+
+USER root
+COPY dev/docker/entrypoint.sh /entrypoint.sh
+ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]

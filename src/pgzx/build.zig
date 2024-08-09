@@ -241,8 +241,8 @@ pub const RunExec = struct {
         return true;
     }
 
-    fn make(step: *Step, prog_node: std.Progress.Node) anyerror!void {
-        _ = prog_node;
+    fn make(step: *Step, options: Step.MakeOptions) anyerror!void {
+        _ = options;
 
         const r: *RunExec = @fieldParentPtr("step", step);
         const b = r.owner.std_build;
@@ -261,56 +261,6 @@ pub const RunExec = struct {
         if (exit_code != 0) {
             return step.fail("{s} failed. Exit code: {d}\n", .{ r.step.name, exit_code });
         }
-    }
-};
-
-/// This runs the following SQL commands:
-///
-///  DROP FUNCTION IF EXISTS run_tests;
-///  CREATE FUNCTION run_tests() RETURNS INTEGER AS '\''$libdir/{name}'\'' LANGUAGE C IMMUTABLE;
-///  SELECT run_tests();
-pub const RunTests = struct {
-    pub const Options = struct {
-        name: []const u8,
-
-        db_user: ?[]const u8 = null,
-        db_host: ?[]const u8 = null,
-        db_port: ?u16 = null,
-        db_name: ?[]const u8 = null,
-    };
-
-    pub fn create(b: *Build, options: Options) *RunExec {
-        const sql = std.fmt.allocPrint(
-            b.std_build.allocator,
-            \\ DROP FUNCTION IF EXISTS run_tests;
-            \\ CREATE FUNCTION run_tests() RETURNS INTEGER AS '$libdir/{s}' LANGUAGE C IMMUTABLE;
-            \\ SELECT run_tests();
-        ,
-            .{options.name},
-        ) catch @panic("OOM");
-        const psql_exe = b.getPsqlPath();
-        var runner = RunExec.create(b, "run_tests_psql", &[_][]const u8{
-            psql_exe,
-            "-c",
-            sql,
-        });
-
-        if (options.db_host) |db_host| {
-            runner.addArgs(&[_][]const u8{ "--host", db_host });
-        }
-        if (options.db_port) |db_port| {
-            runner.addArgs(&[_][]const u8{
-                "--port",
-                std.fmt.allocPrint(b.std_build.allocator, "{d}", .{db_port}) catch @panic("OOM"),
-            });
-        }
-        if (options.db_user) |db_user| {
-            runner.addArgs(&[_][]const u8{ "--user", db_user });
-        }
-        if (options.db_name) |db_name| {
-            runner.addArgs(&[_][]const u8{ "--dbname", db_name });
-        }
-        return runner;
     }
 };
 
@@ -562,8 +512,52 @@ pub fn addRegress(b: *Build, options: PGRegressOptions) *RunExec {
     return runner;
 }
 
-pub fn addRunTests(self: *Build, options: RunTests.Options) *RunExec {
-    return RunTests.create(self, options);
+pub const RunTestsOptions = struct {
+    name: []const u8,
+
+    db_user: ?[]const u8 = null,
+    db_host: ?[]const u8 = null,
+    db_port: ?u16 = null,
+    db_name: ?[]const u8 = null,
+};
+
+/// This runs the following SQL commands:
+///
+///  DROP FUNCTION IF EXISTS run_tests;
+///  CREATE FUNCTION run_tests() RETURNS INTEGER AS '\''$libdir/{name}'\'' LANGUAGE C IMMUTABLE;
+///  SELECT run_tests();
+pub fn addRunTests(b: *Build, options: RunTestsOptions) *RunExec {
+    const sql = std.fmt.allocPrint(
+        b.std_build.allocator,
+        \\ DROP FUNCTION IF EXISTS run_tests;
+        \\ CREATE FUNCTION run_tests() RETURNS INTEGER AS '$libdir/{s}' LANGUAGE C IMMUTABLE;
+        \\ SELECT run_tests();
+    ,
+        .{options.name},
+    ) catch @panic("OOM");
+    const psql_exe = b.getPsqlPath();
+    var runner = RunExec.create(b, "run_tests_psql", &[_][]const u8{
+        psql_exe,
+        "-c",
+        sql,
+    });
+
+    if (options.db_host) |db_host| {
+        runner.addArgs(&[_][]const u8{ "--host", db_host });
+    }
+    if (options.db_port) |db_port| {
+        runner.addArgs(&[_][]const u8{
+            "--port",
+            std.fmt.allocPrint(b.std_build.allocator, "{d}", .{db_port}) catch @panic("OOM"),
+        });
+    }
+    if (options.db_user) |db_user| {
+        runner.addArgs(&[_][]const u8{ "--user", db_user });
+    }
+    if (options.db_name) |db_name| {
+        runner.addArgs(&[_][]const u8{ "--dbname", db_name });
+    }
+    return runner;
 }
 
 fn getPath(b: *Build, path: *?[]const u8, question: []const u8, relative: bool) []const u8 {
