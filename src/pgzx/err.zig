@@ -35,6 +35,10 @@ pub const PGError = error{
     OperationCanceled,
 };
 
+pub const ElogIndicator = error{
+    PGErrorStack,
+};
+
 /// Rethrow a postgres error.
 /// Do not use PG_RE_THROW directly. Use `pg_re_throw` instead to ensure
 /// that the PostgreSQL error handlers find the correct error state and
@@ -167,7 +171,7 @@ pub const Context = struct {
     }
 };
 
-pub inline fn wrap(comptime f: anytype, args: anytype) error{PGErrorStack}!wrap_ret(@TypeOf(f)) {
+pub inline fn wrap(comptime f: anytype, args: anytype) ElogIndicator!wrap_ret(@TypeOf(f)) {
     var errctx = Context.init();
     defer errctx.deinit();
     if (errctx.pg_try()) {

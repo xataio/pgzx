@@ -58,7 +58,7 @@ pub const api = struct {
         ereportDomain(src, level, null, opts);
     }
 
-    pub inline fn ereportNoJump(src: SourceLocation, level: Level, opts: anytype) err.PGError!void {
+    pub inline fn ereportNoJump(src: SourceLocation, level: Level, opts: anytype) err.ElogIndicator!void {
         try ereportDomainNoJump(src, level, null, opts);
     }
 
@@ -66,7 +66,7 @@ pub const api = struct {
         errsaveDomain(src, context, null, opts);
     }
 
-    pub inline fn errsaveNoJump(src: SourceLocation, context: ?*pg.Node, opts: anytype) err.PGError!void {
+    pub inline fn errsaveNoJump(src: SourceLocation, context: ?*pg.Node, opts: anytype) err.ElogIndicator!void {
         try errsaveDomainNoJump(src, context, null, opts);
     }
 
@@ -75,7 +75,7 @@ pub const api = struct {
         return value;
     }
 
-    pub inline fn errsaveValueNoJump(comptime T: type, src: SourceLocation, context: ?*pg.Node, value: T, opts: anytype) err.PGError!T {
+    pub inline fn errsaveValueNoJump(comptime T: type, src: SourceLocation, context: ?*pg.Node, value: T, opts: anytype) err.ElogIndicator!T {
         try errsaveNoJump(src, context, opts);
         return value;
     }
@@ -87,7 +87,7 @@ pub const api = struct {
         }
     }
 
-    pub inline fn ereportDomainNoJump(src: SourceLocation, level: Level, domain: ?[:0]const u8, opts: anytype) err.PGError!void {
+    pub inline fn ereportDomainNoJump(src: SourceLocation, level: Level, domain: ?[:0]const u8, opts: anytype) err.ElogIndicator!void {
         if (errstart(level, domain)) {
             inline for (opts) |opt| opt.call();
             try errfinish(src, .{ .allow_longjmp = false });
@@ -101,7 +101,7 @@ pub const api = struct {
         }
     }
 
-    pub inline fn errsaveDomainNoJump(src: SourceLocation, context: ?*pg.Node, domain: ?[:0]const u8, opts: anytype) err.PGError!void {
+    pub inline fn errsaveDomainNoJump(src: SourceLocation, context: ?*pg.Node, domain: ?[:0]const u8, opts: anytype) err.ElogIndicator!void {
         if (errsave_start(context, domain)) {
             inline for (opts) |opt| opt.call();
             try errsave_finish(src, context, .{ .allow_longjmp = false });
@@ -113,7 +113,7 @@ pub const api = struct {
         return value;
     }
 
-    pub inline fn errsaveDomainValueNoJump(src: SourceLocation, context: ?*pg.Node, value: anytype, domain: ?[:0]const u8, opts: anytype) err.PGError!@TypeOf(value) {
+    pub inline fn errsaveDomainValueNoJump(src: SourceLocation, context: ?*pg.Node, value: anytype, domain: ?[:0]const u8, opts: anytype) err.ElogIndicator!@TypeOf(value) {
         try errsaveDomainNoJump(src, context, domain, opts);
         return value;
     }
@@ -123,7 +123,7 @@ pub const api = struct {
     }
 
     /// Finalize the current error report and raise a Postgres error if the error level is `ERROR`.
-    pub inline fn errfinish(src: SourceLocation, kargs: struct { allow_longjmp: bool }) err.PGError!void {
+    pub inline fn errfinish(src: SourceLocation, kargs: struct { allow_longjmp: bool }) err.ElogIndicator!void {
         if (kargs.allow_longjmp) {
             return pg.errfinish(src.file, @as(c_int, @intCast(src.line)), src.fn_name);
         }
@@ -134,7 +134,7 @@ pub const api = struct {
         return pg.errsave_start(context, if (domain) |d| d.ptr else null);
     }
 
-    pub inline fn errsave_finish(src: SourceLocation, context: ?*pg.Node, kargs: struct { allow_longjmp: bool }) err.PGError!void {
+    pub inline fn errsave_finish(src: SourceLocation, context: ?*pg.Node, kargs: struct { allow_longjmp: bool }) err.ElogIndicator!void {
         if (kargs.allow_longjmp) {
             pg.errsave_finish(context, src.file, @as(c_int, @intCast(src.line)), src.fn_name);
         }
