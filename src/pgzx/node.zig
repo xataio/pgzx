@@ -1,8 +1,12 @@
 const pg = @import("pgzx_pgsys");
 
-const gen = @import("gen_node_tags");
+const generated = @import("gen_node_tags");
 
-pub const Tag = gen.Tag;
+const collections = @import("collections.zig");
+
+pub const Tag = generated.Tag;
+
+pub const List = collections.list.PointerListOf(pg.Node);
 
 pub inline fn make(comptime T: type) *T {
     const node: *pg.Node = @ptrCast(@alignCast(pg.palloc0fast(@sizeOf(T))));
@@ -18,7 +22,7 @@ pub inline fn create(initFrom: anytype) *@TypeOf(initFrom) {
 }
 
 fn mustFindTag(comptime T: type) Tag {
-    return gen.findTag(T) orelse @compileError("No tag found for type");
+    return generated.findTag(T) orelse @compileError("No tag found for type");
 }
 
 pub inline fn tag(node: anytype) Tag {
@@ -38,7 +42,7 @@ pub inline fn castNode(comptime T: type, node: anytype) *T {
 }
 
 pub inline fn safeCastNode(comptime T: type, node: anytype) ?*T {
-    if (tag(node) != gen.findTag(T)) {
+    if (tag(node) != generated.findTag(T)) {
         return null;
     }
     return castNode(T, node);
