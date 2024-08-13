@@ -21,6 +21,12 @@ pub inline fn create(initFrom: anytype) *@TypeOf(initFrom) {
     return node;
 }
 
+pub inline fn initNode(initFrom: anytype) @TypeOf(initFrom) {
+    var node = initFrom;
+    setTag(&node, mustFindTag(@TypeOf(initFrom)));
+    return node;
+}
+
 fn mustFindTag(comptime T: type) Tag {
     return generated.findTag(T) orelse @compileError("No tag found for type");
 }
@@ -57,7 +63,7 @@ pub inline fn copyTypedNode(node: anytype) @TypeOf(node) {
     return @ptrCast(@alignCast(copy(node)));
 }
 
-inline fn asNodePtr(node: anytype) *pg.Node {
+pub inline fn asNodePtr(node: anytype) *pg.Node {
     checkIsPotentialNodePtr(node);
     return @ptrCast(@alignCast(node));
 }
