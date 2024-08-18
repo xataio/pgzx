@@ -4,5 +4,6 @@
     .paths = .{
         "build.zig",
         "src",
+        "tools/gennodetags/main.zig",
     },
 }
