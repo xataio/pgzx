@@ -1,3 +1,5 @@
+const std = @import("std");
+
 const pg = @import("pgzx_pgsys");
 
 const generated = @import("gen_node_tags");
@@ -48,6 +50,12 @@ pub inline fn castNode(comptime T: type, node: anytype) *T {
 }
 
 pub inline fn safeCastNode(comptime T: type, node: anytype) ?*T {
+    if (@typeInfo(@TypeOf(node)) == .Optional) {
+        if (node == null) {
+            return null;
+        }
+    }
+
     if (tag(node) != generated.findTag(T)) {
         return null;
     }
@@ -76,8 +84,6 @@ inline fn checkIsPotentialNodePtr(node: anytype) void {
 }
 
 pub const TestSuite_Node = struct {
-    const std = @import("std");
-
     pub fn testMakeAndTag() !void {
         const node = make(pg.FdwRoutine);
         try std.testing.expectEqual(tag(node), .FdwRoutine);
