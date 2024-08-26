@@ -10,6 +10,34 @@ pub const Tag = generated.Tag;
 
 pub const List = collections.list.PointerListOf(pg.Node);
 
+pub inline fn intVal(node: anytype) c_int {
+    const n = safeCastNode(pg.Integer, node) orelse {
+        @panic("Expected Integer node");
+    };
+    return n.ival;
+}
+
+pub inline fn floatVal(node: anytype) f64 {
+    const n = safeCastNode(pg.Float, node) orelse {
+        @panic("Expected Float node");
+    };
+    return std.fmt.parseFloat(f64, std.mem.span(n.fval));
+}
+
+pub inline fn strVal(node: anytype) [:0]const u8 {
+    const n = safeCastNode(pg.String, node) orelse {
+        @panic("Expected String node");
+    };
+    return std.mem.span(n.sval);
+}
+
+pub inline fn boolVal(node: anytype) bool {
+    const n = safeCastNode(pg.Boolean, node) orelse {
+        @panic("Expected Boolean node");
+    };
+    return n.boolval;
+}
+
 pub inline fn make(comptime T: type) *T {
     const node: *pg.Node = @ptrCast(@alignCast(pg.palloc0fast(@sizeOf(T))));
     node.*.type = @intFromEnum(mustFindTag(T));
