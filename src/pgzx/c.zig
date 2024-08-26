@@ -174,6 +174,7 @@ const includes = @cImport({
 
     @cInclude("utils/builtins.h");
     @cInclude("utils/datum.h");
+    @cInclude("utils/datetime.h");
     @cInclude("utils/guc.h");
     @cInclude("utils/guc_hooks.h");
     @cInclude("utils/guc_tables.h");
