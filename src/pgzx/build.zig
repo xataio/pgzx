@@ -2,6 +2,7 @@ const std = @import("std");
 
 const Step = std.Build.Step;
 const LazyPath = std.Build.LazyPath;
+const AddCSourceFilesOptions = std.Build.Module.AddCSourceFilesOptions;
 
 const Build = @This();
 
@@ -50,6 +51,11 @@ pub const Project = struct {
     options: std.StringArrayHashMapUnmanaged(*Step.Options),
     config: Config,
 
+    // C support
+    includePaths: std.ArrayList(LazyPath),
+    libraryPaths: std.ArrayList(LazyPath),
+    cSourcesFiles: std.ArrayList(AddCSourceFilesOptions),
+
     pub const Config = struct {
         name: []const u8,
         version: ExtensionVersion,
@@ -88,6 +94,9 @@ pub const Project = struct {
             },
             .config = proj_config,
             .options = std.StringArrayHashMapUnmanaged(*Step.Options).init(b.allocator, &.{}, &.{}) catch unreachable,
+            .includePaths = std.ArrayList(LazyPath).init(b.allocator),
+            .libraryPaths = std.ArrayList(LazyPath).init(b.allocator),
+            .cSourcesFiles = std.ArrayList(AddCSourceFilesOptions).init(b.allocator),
         };
     }
 
@@ -98,11 +107,22 @@ pub const Project = struct {
             .root_dir = proj.config.root_dir,
             .root_source_file = proj.build.path(proj.config.root_source_file.?),
         });
-        lib.root_module.addImport("pgzx", proj.deps.pgzx);
+        var mod = &lib.root_module;
+        mod.addImport("pgzx", proj.deps.pgzx);
 
         var it = proj.options.iterator();
         while (it.next()) |kv| {
-            lib.root_module.addOptions(kv.key_ptr.*, kv.value_ptr.*);
+            mod.addOptions(kv.key_ptr.*, kv.value_ptr.*);
+        }
+
+        for (proj.includePaths.items) |path| {
+            mod.addIncludePath(path);
+        }
+        for (proj.libraryPaths.items) |path| {
+            mod.addLibraryPath(path);
+        }
+        for (proj.cSourcesFiles.items) |options| {
+            mod.addCSourceFiles(options);
         }
 
         return lib;
@@ -118,6 +138,18 @@ pub const Project = struct {
 
     pub fn addOptions(proj: *Project, module_name: []const u8, options: *Step.Options) void {
         proj.options.put(proj.build.allocator, module_name, options) catch unreachable;
+    }
+
+    pub fn addIncludePath(proj: *Project, path: LazyPath) void {
+        proj.includePaths.append(path) catch unreachable;
+    }
+
+    pub fn addLibraryPath(proj: *Project, path: LazyPath) void {
+        proj.libraryPaths.append(path) catch unreachable;
+    }
+
+    pub fn addCSourceFiles(proj: *Project, options: AddCSourceFilesOptions) void {
+        proj.cSourcesFiles.append(options) catch unreachable;
     }
 };
 
