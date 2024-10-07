@@ -1,3 +1,5 @@
+const std = @import("std");
+
 const pg = @import("pgzx_pgsys");
 
 const generated = @import("gen_node_tags");
@@ -7,6 +9,34 @@ const collections = @import("collections.zig");
 pub const Tag = generated.Tag;
 
 pub const List = collections.list.PointerListOf(pg.Node);
+
+pub inline fn intVal(node: anytype) c_int {
+    const n = safeCastNode(pg.Integer, node) orelse {
+        @panic("Expected Integer node");
+    };
+    return n.ival;
+}
+
+pub inline fn floatVal(node: anytype) f64 {
+    const n = safeCastNode(pg.Float, node) orelse {
+        @panic("Expected Float node");
+    };
+    return std.fmt.parseFloat(f64, std.mem.span(n.fval));
+}
+
+pub inline fn strVal(node: anytype) [:0]const u8 {
+    const n = safeCastNode(pg.String, node) orelse {
+        @panic("Expected String node");
+    };
+    return std.mem.span(n.sval);
+}
+
+pub inline fn boolVal(node: anytype) bool {
+    const n = safeCastNode(pg.Boolean, node) orelse {
+        @panic("Expected Boolean node");
+    };
+    return n.boolval;
+}
 
 pub inline fn make(comptime T: type) *T {
     const node: *pg.Node = @ptrCast(@alignCast(pg.palloc0fast(@sizeOf(T))));
@@ -48,6 +78,12 @@ pub inline fn castNode(comptime T: type, node: anytype) *T {
 }
 
 pub inline fn safeCastNode(comptime T: type, node: anytype) ?*T {
+    if (@typeInfo(@TypeOf(node)) == .Optional) {
+        if (node == null) {
+            return null;
+        }
+    }
+
     if (tag(node) != generated.findTag(T)) {
         return null;
     }
@@ -76,8 +112,6 @@ inline fn checkIsPotentialNodePtr(node: anytype) void {
 }
 
 pub const TestSuite_Node = struct {
-    const std = @import("std");
-
     pub fn testMakeAndTag() !void {
         const node = make(pg.FdwRoutine);
         try std.testing.expectEqual(tag(node), .FdwRoutine);
