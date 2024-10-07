@@ -14,6 +14,7 @@ pub const bgworker = @import("pgzx/bgworker.zig");
 
 pub const collections = @import("pgzx/collections.zig");
 pub const PointerListOf = collections.list.PointerListOf;
+pub const listItemsOf = collections.list.listItemsOf;
 pub const SList = collections.slist.SList;
 pub const DList = collections.dlist.DList;
 pub const HTab = collections.htab.HTab;

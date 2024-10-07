@@ -27,6 +27,10 @@ pub fn PointerListOf(comptime T: type) type {
             return Self{ .list = from };
         }
 
+        pub fn itemsOf(list: ?*pg.List) []*T {
+            return Self.initFrom(list).items();
+        }
+
         pub fn init1(v: *T) Self {
             return Self.initFrom(pg.list_make1_impl(
                 pg.T_List,
@@ -211,6 +215,10 @@ pub fn PointerListOf(comptime T: type) type {
             return Self.initFrom(pg.list_difference_ptr(self.list, other.list));
         }
     };
+}
+
+pub fn listItemsOf(comptime T: type, list: ?*pg.List) []*T {
+    return PointerListOf(T).initFrom(list).items();
 }
 
 pub fn IteratorOf(comptime T: type) type {
