@@ -13,8 +13,8 @@ pub fn find(comptime T: type) type {
     }
 
     return switch (@typeInfo(T)) {
-        .Bool => boolconv,
-        .Int => |i| switch (i.signedness) {
+        .bool => boolconv,
+        .int => |i| switch (i.signedness) {
             .signed => switch (i.bits) {
                 8 => i8conv,
                 16 => i16conv,
@@ -35,7 +35,7 @@ pub fn find(comptime T: type) type {
                 },
             },
         },
-        .Float => |f| switch (f.bits) {
+        .float => |f| switch (f.bits) {
             32 => f32conv,
             64 => f64conv,
             else => {
@@ -43,9 +43,9 @@ pub fn find(comptime T: type) type {
                 @compileError("unsupported float type");
             },
         },
-        .Optional => |opt| optconv(find(opt.child)),
-        .Array => @compileLog("fixed size arrays not supported"),
-        .Pointer => blk: {
+        .optional => |opt| optconv(find(opt.child)),
+        .array => @compileLog("fixed size arrays not supported"),
+        .pointer => blk: {
             if (!meta.isStringLike(T)) {
                 @compileLog("type:", T);
                 @compileError("unsupported ptr type");
@@ -60,7 +60,7 @@ pub fn find(comptime T: type) type {
 }
 
 fn isConv(comptime T: type) bool {
-    if (@typeInfo(T) != .Struct) {
+    if (@typeInfo(T) != .@"struct") {
         return false;
     }
 

@@ -129,15 +129,15 @@ fn scanField(
     column: c_int,
 ) !c_int {
     const field_info = @typeInfo(fieldType);
-    if (field_info != .Pointer) {
+    if (field_info != .pointer) {
         @compileError("scanField requires a pointer");
     }
-    if (field_info.Pointer.size == .Slice) {
+    if (field_info.pointer.size == .Slice) {
         @compileError("scanField requires a single pointer, not a slice");
     }
 
-    const child_type = field_info.Pointer.child;
-    if (@typeInfo(child_type) == .Struct) {
+    const child_type = field_info.pointer.child;
+    if (@typeInfo(child_type) == .@"struct") {
         var struct_column = column;
         inline for (std.meta.fields(child_type)) |field| {
             const child_ptr = &@field(to.*, field.name);

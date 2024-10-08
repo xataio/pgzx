@@ -24,19 +24,19 @@
 //     pub fn build(self: *const Self, params: anytype) !Params {
 //         const paramType = @TypeOf(params);
 //         const paramInfo = @typeInfo(paramType);
-//         if (paramInfo != .Struct or !paramInfo.Struct.is_tuple) {
+//         if (paramInfo != .@"struct" or !paramInfo.@"struct".is_tuple) {
 //             return std.debug.panic("params must be a tuple");
 //         }
 //
 //         var buffer = std.ArrayList(u8).init(self.allocator);
 //         const writer: std.ArrayList(u8).Writer = buffer.writer();
 //
-//         var value_indices = try self.allocator.alloc(i32, paramInfo.Struct.fields.len);
+//         var value_indices = try self.allocator.alloc(i32, paramInfo.@"struct".fields.len);
 //         defer self.allocator.free(value_indices);
 //
-//         var types = try self.allocator.alloc(c.Oid, paramInfo.Struct.fields.len);
+//         var types = try self.allocator.alloc(c.Oid, paramInfo.@"struct".fields.len);
 //
-//         inline for (paramInfo.Struct.fields, 0..) |field, idx| {
+//         inline for (paramInfo.@"struct".fields, 0..) |field, idx| {
 //             const codec = conv.find(field.type);
 //             types[idx] = codec.OID;
 //             const initPos = buffer.items.len;

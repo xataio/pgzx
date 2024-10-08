@@ -78,7 +78,7 @@ pub inline fn castNode(comptime T: type, node: anytype) *T {
 }
 
 pub inline fn safeCastNode(comptime T: type, node: anytype) ?*T {
-    if (@typeInfo(@TypeOf(node)) == .Optional) {
+    if (@typeInfo(@TypeOf(node)) == .optional) {
         if (node == null) {
             return null;
         }
@@ -106,7 +106,7 @@ pub inline fn asNodePtr(node: anytype) *pg.Node {
 
 inline fn checkIsPotentialNodePtr(node: anytype) void {
     const nodeType = @typeInfo(@TypeOf(node));
-    if (nodeType != .Pointer or (nodeType.Pointer.size != .One and nodeType.Pointer.size != .C)) {
+    if (nodeType != .pointer or (nodeType.pointer.size != .One and nodeType.pointer.size != .C)) {
         @compileError("Expected single node pointer");
     }
 }

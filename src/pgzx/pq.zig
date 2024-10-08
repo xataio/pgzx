@@ -649,7 +649,7 @@ pub fn buildParams(
 ) !PGQueryParams {
     const argsType = @TypeOf(args);
     const argsInfo = @typeInfo(argsType);
-    if (argsInfo != .Struct or !argsInfo.Struct.is_tuple) {
+    if (argsInfo != .@"struct" or !argsInfo.@"struct".is_tuple) {
         return std.debug.panic("params must be a tuple");
     }
 
@@ -660,12 +660,12 @@ pub fn buildParams(
     // The buffer might grow and pointers might get invalidated.
     // Let's collect the positions of the values in the buffer so we can
     // collect the pointers after the encoding buffer has been fully written.
-    var value_indices = try local_allocator.alloc(i32, argsInfo.Struct.fields.len);
+    var value_indices = try local_allocator.alloc(i32, argsInfo.@"struct".fields.len);
 
     const writer: std.ArrayList(u8).Writer = buffer.writer();
-    var types = try allocator.alloc(pg.Oid, argsInfo.Struct.fields.len);
+    var types = try allocator.alloc(pg.Oid, argsInfo.@"struct".fields.len);
 
-    inline for (argsInfo.Struct.fields, 0..) |field, idx| {
+    inline for (argsInfo.@"struct".fields, 0..) |field, idx| {
         const codec = conv.find(field.type);
         types[idx] = codec.OID;
 

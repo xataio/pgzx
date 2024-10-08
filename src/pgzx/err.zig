@@ -183,8 +183,8 @@ pub inline fn wrap(comptime f: anytype, args: anytype) ElogIndicator!wrap_ret(@T
 
 inline fn wrap_ret(comptime f: type) type {
     const ti = @typeInfo(f);
-    if (ti != .Fn) {
+    if (ti != .@"fn") {
         @compileError("wrap only works with functions");
     }
-    return ti.Fn.return_type.?;
+    return ti.@"fn".return_type.?;
 }

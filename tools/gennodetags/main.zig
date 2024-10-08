@@ -47,7 +47,7 @@ pub fn main() !void {
     @setEvalBranchQuota(50000);
     var node_tags = std.ArrayList([]const u8).init(arena);
     defer node_tags.deinit();
-    const pg_mod = @typeInfo(pg).Struct;
+    const pg_mod = @typeInfo(pg).@"struct";
     inline for (pg_mod.decls) |decl| {
         const name = decl.name;
         if (std.mem.startsWith(u8, name, "T_")) {
