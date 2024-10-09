@@ -42,7 +42,7 @@ pub const PG_FINFO_V1_RECORD = Pg_finfo_record{
 ///   }
 ///
 pub inline fn PG_MODULE_MAGIC() void {
-    @export(Pg_magic_func, .{ .name = "Pg_magic_func" });
+    @export(&Pg_magic_func, .{ .name = "Pg_magic_func" });
 }
 
 fn Pg_magic_func() callconv(.C) [*c]const Pg_magic_struct {
@@ -55,26 +55,26 @@ pub fn FunctionV1() callconv(.C) [*c]const Pg_finfo_record {
 
 pub inline fn PG_FUNCTION_INFO_V1(comptime fun: []const u8) void {
     const finfo_name = "pg_finfo_" ++ fun;
-    @export(FunctionV1, .{ .name = finfo_name });
+    @export(&FunctionV1, .{ .name = finfo_name });
 }
 
 pub inline fn PG_FUNCTION_V1(comptime name: []const u8, comptime callback: anytype) void {
     PG_FUNCTION_INFO_V1(name);
 
     const reg = genFnCall(callback);
-    @export(reg.call, .{ .name = name });
+    @export(&reg.call, .{ .name = name });
 }
 
 pub inline fn PG_EXPORT(comptime mod: type) void {
     const decls = switch (@typeInfo(mod)) {
-        .Struct => |s| s.decls,
+        .@"struct" => |s| s.decls,
         else => @compileError("PG_EXPORT requires a struct"),
     };
 
     inline for (decls) |decl| {
         const value = @field(mod, decl.name);
         const ft = @typeInfo(@TypeOf(value));
-        if (ft != .Fn or ft.Fn.is_generic or ft.Fn.is_var_args) {
+        if (ft != .@"fn" or ft.@"fn".is_generic or ft.@"fn".is_var_args) {
             continue;
         }
         PG_FUNCTION_V1(decl.name, value);
@@ -112,7 +112,7 @@ pub inline fn pgCall(
     }
 
     const value = switch (@typeInfo(meta.fnReturnType(fnType))) {
-        .ErrorUnion, .ErrorSet => @call(.no_async, impl, callArgs) catch |e| elog.throwAsPostgresError(src, e),
+        .error_union, .error_set => @call(.no_async, impl, callArgs) catch |e| elog.throwAsPostgresError(src, e),
         else => @call(.no_async, impl, callArgs),
     };
 

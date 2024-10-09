@@ -150,9 +150,9 @@ pub fn findConv(comptime T: type) type {
     // Conv
 
     return switch (@typeInfo(T)) {
-        .Void => Void,
-        .Bool => Bool,
-        .Int => |i| switch (i.signedness) {
+        .void => Void,
+        .bool => Bool,
+        .int => |i| switch (i.signedness) {
             .signed => switch (i.bits) {
                 8 => Int8,
                 16 => Int16,
@@ -168,14 +168,14 @@ pub fn findConv(comptime T: type) type {
                 else => @compileError("unsupported unsigned int type"),
             },
         },
-        .Float => |f| switch (f.bits) {
+        .float => |f| switch (f.bits) {
             32 => Float32,
             64 => Float64,
             else => @compileError("unsupported float type"),
         },
-        .Optional => |opt| OptConv(findConv(opt.child)),
-        .Array => @compileLog("fixed size arrays not supported"),
-        .Pointer => blk: {
+        .optional => |opt| OptConv(findConv(opt.child)),
+        .array => @compileLog("fixed size arrays not supported"),
+        .pointer => blk: {
             if (!meta.isStringLike(T)) {
                 @compileLog("type:", T);
                 @compileError("unsupported ptr type");
@@ -195,7 +195,7 @@ inline fn isConv(comptime T: type) bool {
     // fromDatum: fn(d: pg.Datum) !Type
     // toDatum: fn(v: Type) !pg.Datum
 
-    if (@typeInfo(T) != .Struct) {
+    if (@typeInfo(T) != .@"struct") {
         return false;
     }
 

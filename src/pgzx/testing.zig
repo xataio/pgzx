@@ -39,7 +39,7 @@ pub const pgzx_err = @import("err.zig");
 /// Note that you can only call this function once in the extension.
 pub inline fn registerTests(comptime testfn: bool, comptime testsuites: anytype) void {
     const T = @TypeOf(testsuites);
-    if (@typeInfo(T) != .Struct) {
+    if (@typeInfo(T) != .@"struct") {
         @compileError("registerTests: testsuites must be an array of test suites. Found '" ++ @typeName(T) ++ "'");
     }
 
@@ -75,7 +75,7 @@ fn runTestSuite(T: anytype) !u32 {
 
     elog.Info(@src(), "Running test suite: {s}\n", .{@typeName(T)});
 
-    inline for (@typeInfo(T).Struct.decls) |f| {
+    inline for (@typeInfo(T).@"struct".decls) |f| {
         if (comptime std.mem.startsWith(u8, f.name, "test")) {
             elog.Info(@src(), "Running test: {s}\n", .{f.name});
 

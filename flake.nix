@@ -2,11 +2,7 @@
   description = "Description for the project";
 
   inputs = {
-    # For now let's use stable nixpkgs. `libxml2` is introducing breaking
-    # changes that break postgres compilation
-    #
-    # nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1.0.tar.gz";
-    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.2311.554738.tar.gz";
+    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.2405.635732.tar.gz";
 
     parts.url = "github:hercules-ci/flake-parts";
 

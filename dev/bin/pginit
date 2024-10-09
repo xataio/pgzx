@@ -23,6 +23,9 @@ postgres_conf=
 
 POSITIONAL_ARGS=()
 
+rootdir=${PRJ_ROOT:-$(git rev-parse --show-toplevel)}
+outdir="$rootdir/out"
+
 while [[ $# -gt 0 ]]; do
 	case $1 in
 		-h)
@@ -49,6 +52,10 @@ while [[ $# -gt 0 ]]; do
 			postgres_conf="$2"
 			shift 2
 			;;
+		--proj)
+			outdir="$2"
+			shift 2
+			;;
 		--* | -*)
 			echo "Unknown option $1"
 			echo "$USAGE"
@@ -70,9 +77,6 @@ user=${3:-"postgres"}
 # - configurable init scipts
 # - custom postgresql.conf
 
-rootdir=${PRJ_ROOT:-$(git rev-parse --show-toplevel)}
-outdir=${1:-$rootdir/out}
-
 PG_HOME=${PG_HOME:-$outdir/default}
 PG_BIN=$PG_HOME/bin
 PATH=$PG_BIN:$PATH
@@ -86,11 +90,11 @@ log_file=$log_dir/server.log
 mkdir -p "$cluster_dir"
 mkdir -p "$data_dir"
 mkdir -p "$log_dir"
-pg_ctl initdb -D "$data_dir" -o "--encoding=UTF8"
+"$PG_BIN"/pg_ctl initdb -D "$data_dir" -o "--encoding=UTF8"
 
 # create database user
 date
-pg_ctl -t 60 -D "$data_dir" -l "$log_file" start || {
+"$PG_BIN"/pg_ctl -t 60 -D "$data_dir" -l "$log_file" start || {
 	echo "Failed to start PostgreSQL"
 	date
 	cat "$log_file"
@@ -107,7 +111,7 @@ if [ -n "$init_path" ]; then
 	psql -U "$user" -d "$database" <"$init_path"/*.sql
 fi
 
-pg_ctl -D "$data_dir" stop
+"$PG_BIN"/pg_ctl -D "$data_dir" stop
 
 # update postgresql.conf
 if [ -n "$postgres_conf" ]; then

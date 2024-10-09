@@ -1,13 +1,13 @@
 pub inline fn isSlice(comptime T: type) bool {
     return switch (@typeInfo(T)) {
-        .Pointer => |p| p.size == .Slice,
+        .pointer => |p| p.size == .Slice,
         else => false,
     };
 }
 
 pub inline fn sliceElemType(comptime T: type) type {
     return switch (@typeInfo(T)) {
-        .Pointer => |p| {
+        .pointer => |p| {
             if (p.size != .Slice) {
                 @compileError("Expected a slice type");
             }
@@ -19,42 +19,42 @@ pub inline fn sliceElemType(comptime T: type) type {
 
 pub inline fn pointerElemType(comptime T: type) type {
     return switch (@typeInfo(T)) {
-        .Pointer => |p| p.child,
+        .pointer => |p| p.child,
         else => @compileError("Expected a pointer type"),
     };
 }
 
 pub inline fn hasSentinal(comptime T: type) bool {
     return switch (@typeInfo(T)) {
-        .Pointer => |p| p.size == .Slice and p.sentinel != null,
+        .pointer => |p| p.size == .Slice and p.sentinel != null,
         else => false,
     };
 }
 
 pub inline fn isStringLike(comptime T: type) bool {
     return switch (@typeInfo(T)) {
-        .Pointer => |p| p.size == .Slice and p.child == u8,
+        .pointer => |p| p.size == .Slice and p.child == u8,
         else => false,
     };
 }
 
 pub inline fn isStringLikeZ(comptime T: type) bool {
     return switch (@typeInfo(T)) {
-        .Pointer => |p| p.size == .Slice and p.child == u8 and p.sentinel != null,
+        .pointer => |p| p.size == .Slice and p.child == u8 and p.sentinel != null,
         else => false,
     };
 }
 
 pub inline fn isPrimitive(comptime T: type) bool {
     return switch (@typeInfo(T)) {
-        .Bool, .Int, .Float => true,
+        .bool, .int, .float => true,
         else => false,
     };
 }
 
 pub inline fn getFnType(comptime T: type, name: []const u8) ?type {
     switch (@typeInfo(T)) {
-        .Struct, .Union, .Enum, .Opaque => {},
+        .@"struct", .@"union", .@"enum", .@"opaque" => {},
         else => return null,
     }
     if (!@hasDecl(T, name)) {
@@ -62,7 +62,7 @@ pub inline fn getFnType(comptime T: type, name: []const u8) ?type {
     }
 
     const maybeFn = @TypeOf(@field(T, name));
-    return if (@typeInfo(maybeFn) == .Fn)
+    return if (@typeInfo(maybeFn) == .@"fn")
         maybeFn
     else
         null;
@@ -70,7 +70,7 @@ pub inline fn getFnType(comptime T: type, name: []const u8) ?type {
 
 pub inline fn getMethodType(comptime T: type, name: []const u8) ?type {
     return switch (@typeInfo(T)) {
-        .Pointer => |p| switch (p.size) {
+        .pointer => |p| switch (p.size) {
             .One => getFnType(p.child, name),
             else => null,
         },
@@ -80,7 +80,7 @@ pub inline fn getMethodType(comptime T: type, name: []const u8) ?type {
 
 pub inline fn fnReturnType(comptime T: type) type {
     return switch (@typeInfo(T)) {
-        .Fn => |f| f.return_type.?,
+        .@"fn" => |f| f.return_type.?,
         else => @compileError("Expected a function type"),
     };
 }

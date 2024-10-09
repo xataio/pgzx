@@ -230,7 +230,7 @@ pub fn HTab(comptime Context: type) type {
 
         inline fn conextHasValue() bool {
             switch (@typeInfo(Context)) {
-                .Struct => {},
+                .@"struct" => {},
                 else => return false,
             }
             if (!@hasDecl(Context, "Value")) {
