@@ -10,7 +10,6 @@ comptime {
 fn pghostname_zig() ![]const u8 {
     var buffer: [std.posix.HOST_NAME_MAX]u8 = undefined;
     const hostname = try std.posix.gethostname(&buffer);
-    pgzx.elog.Info(@src(), "hostname: {s}\n", .{hostname});
     return hostname;
 }
 
