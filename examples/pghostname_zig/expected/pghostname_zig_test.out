@@ -1,0 +1,9 @@
+CREATE EXTENSION pghostname_zig;
+SELECT COALESCE(length(pghostname_zig()), 0) > 0;
+INFO:  hostname: ubuntu
+
+ ?column? 
+----------
+ t
+(1 row)
+

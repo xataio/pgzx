@@ -1,0 +1,13 @@
+.{
+    .name = "pg_audit_zig",
+    .version = "0.1.0",
+    .paths = .{
+        "extension",
+        "src",
+    },
+    .dependencies = .{
+        .pgzx = .{
+            .path = "./../..",
+        },
+    },
+}
