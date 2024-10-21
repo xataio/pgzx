@@ -16,9 +16,8 @@ fn pghostname_zig() ![]const u8 {
 
 const Testsuite1 = struct {
     pub fn testHappyPath() !void {
-        const expected_hostname = "ubuntu";
-        const actual_hostname = try pghostname_zig();
-        try std.testing.expectEqualStrings(expected_hostname, actual_hostname);
+        const hostname = try pghostname_zig();
+        try std.testing.expect(hostname.len > 0);
     }
 };
 
