@@ -18,7 +18,7 @@ pub fn pghostname_zig() ![]const u8 {
             return "unknown";
         },
     };
-    pgzx.elog.Info(@src(), "hostname: {s} buffer:{s}", .{ hostname, buffer });
+    std.debug.print("buffer: {s}", .{buffer});
     return hostname;
 }
 
