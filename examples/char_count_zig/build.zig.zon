@@ -1,5 +1,5 @@
 .{
-    .name = "pg_audit_zig",
+    .name = "char_count_zig",
     .version = "0.1.0",
     .paths = .{
         "extension",
