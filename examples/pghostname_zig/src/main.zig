@@ -1,15 +1,24 @@
 const std = @import("std");
+const builtin = @import("builtin");
 const pgzx = @import("pgzx");
 
 comptime {
     pgzx.PG_MODULE_MAGIC();
 
-    pgzx.PG_FUNCTION_V1("pghostname_zig", pghostname_zig);
+    pgzx.PG_EXPORT(@This());
 }
 
-fn pghostname_zig() ![]const u8 {
+pub fn pghostname_zig() ![]const u8 {
     var buffer: [std.posix.HOST_NAME_MAX]u8 = undefined;
-    const hostname = try std.posix.gethostname(&buffer);
+    const hostname = std.posix.gethostname(&buffer) catch |err| switch (err) {
+        error.PermissionDenied => {
+            return "unknown";
+        },
+        error.Unexpected => {
+            return "unknown";
+        },
+    };
+    pgzx.elog.Info(@src(), "hostname: {s} buffer:{s}", .{ hostname, buffer });
     return hostname;
 }
 
