@@ -22,7 +22,7 @@ extension_drop() {
 
 regression_tests() {
 	echo "Run regression tests: $EXTENSION_NAME"
-	zig build pg_regress --verbose || cat /home/runner/work/pgzx/pgzx/examples/pghostname_zig/regression.diffs && return 1
+	zig build pg_regress --verbose || return 1
 }
 
 unit_tests() {

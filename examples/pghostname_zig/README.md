@@ -72,15 +72,12 @@ The [pgzx.PG_FUNCTION_V1][docs_PG_FUNCTION_V1] macro defines the `pghostname_zig
 This means the implementation of the `pghostname_zig` function is quite simple:
 
 ```zig
-fn pghostname_zig() ![]const u8 {
+pub fn pghostname_zig() ![]const u8 {
     var buffer: [std.posix.HOST_NAME_MAX]u8 = undefined;
-    const hostname = try std.posix.gethostname(&buffer);
-    pgzx.elog.Info(@src(), "hostname: {s}\n", .{hostname});
-    return hostname;
+    const hostname = std.posix.gethostname(&buffer) catch "unknown";
+    return try pgzx.mem.PGCurrentContextAllocator.dupeZ(u8, hostname);
 }
 ```
-
-In the above, note the use of [pgzx.elog.Error][docs_Error] and [pgzx.elog.Info][docs_Info] to report errors and info back to the user. The rest of the function is idiomatic Zig code.
 
 ### Testing
 

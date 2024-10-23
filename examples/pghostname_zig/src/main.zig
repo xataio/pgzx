@@ -9,16 +9,8 @@ comptime {
 
 pub fn pghostname_zig() ![]const u8 {
     var buffer: [std.posix.HOST_NAME_MAX]u8 = undefined;
-    const hostname = std.posix.gethostname(&buffer) catch |err| switch (err) {
-        error.PermissionDenied => {
-            return "unknown";
-        },
-        error.Unexpected => {
-            return "unknown";
-        },
-    };
-    std.debug.print("buffer: {s}", .{buffer});
-    return hostname;
+    const hostname = std.posix.gethostname(&buffer) catch "unknown";
+    return try pgzx.mem.PGCurrentContextAllocator.dupeZ(u8, hostname);
 }
 
 const Testsuite1 = struct {
