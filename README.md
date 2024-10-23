@@ -29,7 +29,8 @@ The following sample extensions (ordered from simple to complex) show how to use
 | Extension                                  | Description |
 |--------------------------------------------|-------------|
 | [char_count_zig](examples/char_count_zig/) | Adds a function that counts how many times a particular character shows up in a string. Shows how to register a function and how to interpret the parameters. |
-| [pg_audit_zig](examples/pgaudit_zig/)      | Inspired by the pgaudit C extension, this one registers callbacks to multiple hooks and uses more advanced error handling and memory allocation patterns |
+| [pghostname_zig](examples/pghostname_zig/) | Adds a function that returns the database server's host name. |
+| [pg_audit_zig](examples/pgaudit_zig/)      | Inspired by the pgaudit C extension, this one registers callbacks to multiple hooks and uses more advanced error handling and memory allocation patterns. |
 
 ## Docs
 

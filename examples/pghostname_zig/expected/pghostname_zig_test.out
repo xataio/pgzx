@@ -1,0 +1,7 @@
+CREATE EXTENSION pghostname_zig;
+SELECT COALESCE(length(pghostname_zig()), 0) > 0;
+ ?column? 
+----------
+ t
+(1 row)
+
