@@ -7,7 +7,7 @@ comptime {
     pgzx.PG_EXPORT(@This());
 }
 
-pub fn pghostname_zig() ![]const u8 {
+pub fn pghostname_zig() ![:0]const u8 {
     var buffer: [std.posix.HOST_NAME_MAX]u8 = undefined;
     const hostname = std.posix.gethostname(&buffer) catch "unknown";
     return try pgzx.mem.PGCurrentContextAllocator.dupeZ(u8, hostname);
