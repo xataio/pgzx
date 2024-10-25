@@ -1,0 +1,5 @@
+# pghostname_zig extension
+comment = 'zig function to get the system hostname'
+default_version = '0.1'
+module_pathname = '$libdir/pghostname_zig'
+relocatable = true
