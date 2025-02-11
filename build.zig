@@ -11,12 +11,16 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    // docs step
-    {
-        const build_docs = b.addSystemCommand(&[_][]const u8{ "zig", "test", "src/pgzx.zig", "-femit-docs", "-fno-emit-bin" });
-        const docs = b.step("docs", "Generate documentation");
-        docs.dependOn(&build_docs.step);
-    }
+    const steps = .{
+        .docs = b.step("docs", "Generate documentation"),
+        .serve_docs = b.step("serve_docs", "Docs HTTP server http://localhost:8080/#docs.pgzx"),
+
+        // Unit tests installer target
+        // Optionally build and install the extension, so we can hook up with t a debugger and run tests manually.
+        .install_unit = b.step("install-unit", "Install unit tests extension (for manual testing)"),
+
+        .unit = b.step("unit", "Run pgzx unit tests"),
+    };
 
     // pgzx_pgsys module: C bindings to Postgres
     const pgzx_pgsys = blk: {
@@ -61,7 +65,7 @@ pub fn build(b: *std.Build) void {
         const tool = b.addExecutable(.{
             .name = "gennodetags",
             .root_source_file = b.path("./tools/gennodetags/main.zig"),
-            .target = b.host,
+            .target = b.graph.host,
             .link_libc = true,
         });
         tool.root_module.addIncludePath(.{ .cwd_relative = pgbuild.getIncludeServerDir() });
@@ -90,6 +94,40 @@ pub fn build(b: *std.Build) void {
         break :blk module;
     };
 
+    // docs step
+    {
+        // Internal target to build the docs from the document. The generated
+        // documentation is installed in the <prefix>/share/pgzx/doc folder.
+        const obj = b.addObject(.{
+            .name = "docs",
+            .root_module = pgzx,
+        });
+        const install_docs = b.addInstallDirectory(.{
+            .source_dir = obj.getEmittedDocs(),
+            .install_dir = .prefix,
+            .install_subdir = "share/pgzx/docs",
+        });
+        steps.docs.dependOn(&install_docs.step);
+
+        const del_docs = b.addSystemCommand(&[_][]const u8{
+            "rm", "-fr", "./docs",
+        });
+        const copy_docs = b.addSystemCommand(&[_][]const u8{
+            "cp", "-fr", "./zig-out/share/pgzx/docs", ".",
+        });
+
+        copy_docs.step.dependOn(&del_docs.step);
+        copy_docs.step.dependOn(&install_docs.step);
+        steps.docs.dependOn(&copy_docs.step);
+
+        // Use python to serve the docs via http.
+        const serve_docs = b.addSystemCommand(&[_][]const u8{
+            "python3", "-m", "http.server", "8080", "--directory", "./docs",
+        });
+        serve_docs.step.dependOn(&copy_docs.step);
+        steps.serve_docs.dependOn(&serve_docs.step);
+    }
+
     // Unit test extension
     const test_ext = blk: {
         const test_options = b.addOptions();
@@ -116,15 +154,10 @@ pub fn build(b: *std.Build) void {
             },
         });
 
+        steps.install_unit.dependOn(&tests.step);
+
         break :blk tests;
     };
-
-    // Unit tests installer target
-    // Optionally build and install the extension, so we can hook up with t a debugger and run tests manually.
-    {
-        var install_unit = b.step("install-unit", "Install unit tests extension (for manual testing)");
-        install_unit.dependOn(&test_ext.step);
-    }
 
     // Unit test runner
     {
@@ -135,8 +168,6 @@ pub fn build(b: *std.Build) void {
         });
 
         psql_run_tests.step.dependOn(&test_ext.step);
-
-        var unit = b.step("unit", "Run pgzx unit tests");
-        unit.dependOn(&psql_run_tests.step);
+        steps.unit.dependOn(&psql_run_tests.step);
     }
 }

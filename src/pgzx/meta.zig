@@ -1,48 +1,49 @@
+pub inline fn isPointer(comptime T: type) bool {
+    return @typeInfo(T) == .pointer and !isSlice(T);
+}
+
+pub inline fn isCPointer(comptime T: type) bool {
+    @compileLog("isCPointer: {}", T, @typeInfo(T));
+    return @typeInfo(T) == .pointer and @typeInfo(T).pointer.size == .c;
+}
+
 pub inline fn isSlice(comptime T: type) bool {
     return switch (@typeInfo(T)) {
-        .pointer => |p| p.size == .Slice,
+        .pointer => |p| p.size == .slice,
         else => false,
     };
 }
 
+pub inline fn maybeSliceElemType(comptime T: type) ?type {
+    if (!isSlice(T)) return null;
+    return @typeInfo(T).pointer.child;
+}
+
 pub inline fn sliceElemType(comptime T: type) type {
+    return maybeSliceElemType(T) orelse @compileError("Expected a slice type");
+}
+
+pub inline fn maybePointerElemType(comptime T: type) ?type {
     return switch (@typeInfo(T)) {
-        .pointer => |p| {
-            if (p.size != .Slice) {
-                @compileError("Expected a slice type");
-            }
-            return p.child;
-        },
-        else => @compileError("Expected a slice type"),
+        .pointer => |p| p.child,
+        else => null,
     };
 }
 
 pub inline fn pointerElemType(comptime T: type) type {
-    return switch (@typeInfo(T)) {
-        .pointer => |p| p.child,
-        else => @compileError("Expected a pointer type"),
-    };
+    return maybePointerElemType(T) orelse @compileError("Expected a pointer type");
 }
 
 pub inline fn hasSentinal(comptime T: type) bool {
-    return switch (@typeInfo(T)) {
-        .pointer => |p| p.size == .Slice and p.sentinel != null,
-        else => false,
-    };
+    return isSlice(T) and @typeInfo(T).pointer.sentinel() != null;
 }
 
 pub inline fn isStringLike(comptime T: type) bool {
-    return switch (@typeInfo(T)) {
-        .pointer => |p| p.size == .Slice and p.child == u8,
-        else => false,
-    };
+    return isSlice(T) and sliceElemType(T) == u8;
 }
 
 pub inline fn isStringLikeZ(comptime T: type) bool {
-    return switch (@typeInfo(T)) {
-        .pointer => |p| p.size == .Slice and p.child == u8 and p.sentinel != null,
-        else => false,
-    };
+    return isStringLike(T) and hasSentinal(T);
 }
 
 pub inline fn isPrimitive(comptime T: type) bool {
@@ -71,7 +72,7 @@ pub inline fn getFnType(comptime T: type, name: []const u8) ?type {
 pub inline fn getMethodType(comptime T: type, name: []const u8) ?type {
     return switch (@typeInfo(T)) {
         .pointer => |p| switch (p.size) {
-            .One => getFnType(p.child, name),
+            .one => getFnType(p.child, name),
             else => null,
         },
         else => getFnType(T, name),

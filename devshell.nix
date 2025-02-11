@@ -52,9 +52,11 @@ in {
       pkgs.openssl
       pkgs.gss
       pkgs.krb5
+      pkgs.python3
 
       pkgs.pkg-config
 
+      # pkgs.zigpkgs.master
       pkgs.zigpkgs.master
       pkgs.zls
     ];

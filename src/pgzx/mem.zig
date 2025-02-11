@@ -241,16 +241,9 @@ pub const MemoryContextAllocator = struct {
     }
 
     pub fn registerAllocResetCallback(self: *Self, data: anytype, f: fn (@TypeOf(data)) void) !void {
-        const data_type = @typeInfo(@TypeOf(data));
-        if (data_type != .pointer) {
+        if (!meta.isPointer(@TypeOf(data)) and !meta.isCPointer(@TypeOf(data))) {
             @compileError("data must be a pointer");
         }
-        switch (data_type.pointer.size) {
-            .One => {},
-            .C => {}, // allow C pointer types to raw Postgres data types.
-            else => @compileError("data must be a pointer, found slice"),
-        }
-
         try self.registerAllocResetCallbackFn(@ptrCast(data), struct {
             fn wrapper(data_ptr: ?*anyopaque) callconv(.C) void {
                 f(@ptrCast(@alignCast(data_ptr)));
