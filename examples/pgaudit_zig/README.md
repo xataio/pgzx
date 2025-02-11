@@ -93,7 +93,7 @@ comptime {
 pgrx provides an elog utility that integrates with Postgres' logging system. It is initialized like this:
 
 ```zig
-pub const std_options = .{
+pub const std_options = std.Options{
     .log_level = .debug,
     .logFn = pgzx.elog.logFn,
 ```

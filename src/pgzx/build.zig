@@ -107,7 +107,7 @@ pub const Project = struct {
             .root_dir = proj.config.root_dir,
             .root_source_file = proj.build.path(proj.config.root_source_file.?),
         });
-        var mod = &lib.root_module;
+        var mod = lib.root_module;
         mod.addImport("pgzx", proj.deps.pgzx);
 
         var it = proj.options.iterator();
@@ -625,11 +625,11 @@ pub fn runPGConfig(b: *Build, question: []const u8) []const u8 {
     var child = std.process.Child.init(&argv, allocator);
     child.stdout_behavior = .Pipe;
     child.stderr_behavior = .Pipe;
-    var stdout = std.ArrayList(u8).init(allocator);
-    var stderr = std.ArrayList(u8).init(allocator);
+    var stdout = std.ArrayListUnmanaged(u8).initCapacity(allocator, 1024) catch @panic("OOM");
+    var stderr = std.ArrayListUnmanaged(u8).initCapacity(allocator, 1024) catch @panic("OOM");
 
     child.spawn() catch @panic("failed to start pg_config");
-    child.collectOutput(&stdout, &stderr, 1024) catch @panic("error while reading from pg_config");
+    child.collectOutput(allocator, &stdout, &stderr, 10 * 1024) catch @panic("error while reading from pg_config");
     const term = child.wait() catch @panic("awaiting pg_config exit");
     if (!check_exec(term)) {
         @panic("pg_config failed");

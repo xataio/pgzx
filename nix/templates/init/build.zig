@@ -7,7 +7,7 @@ const PGBuild = @import("pgzx").Build;
 pub fn build(b: *std.Build) void {
     // Project meta data
     const name = "my_extension";
-    const version = .{ .major = 0, .minor = 1 };
+    const version = PGBuild.ExtensionVersion{ .major = 0, .minor = 1 };
 
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});

@@ -10,7 +10,7 @@ var prev_ExecutorStart_hook: pg.ExecutorStart_hook_type = null;
 var prev_ExecutorFinish_hook: pg.ExecutorFinish_hook_type = null;
 var prev_ExecutorCheckPerms_hook: pg.ExecutorCheckPerms_hook_type = null;
 
-pub const std_options = .{
+pub const std_options = std.Options{
     .log_level = .debug,
     .logFn = pgzx.elog.logFn,
 };

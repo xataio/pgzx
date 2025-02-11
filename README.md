@@ -35,7 +35,7 @@ The following sample extensions (ordered from simple to complex) show how to use
 ## Docs
 
 
-The reference documentation is available at [here](https://xataio.github.io/pgzx/).
+The reference documentation is available at [here](https://xataio.github.io/pgzx/#docs.pgzx).
 
 We recommend checking the examples in the section above to understand how to use pgzx. The next sections contain a high-level walkthrough of the most important utilities and how they relate to the Postgres internals.
 

@@ -1,10 +1,10 @@
 const std = @import("std");
 
 const pg = @import("pgzx_pgsys");
+const collections = @import("collections.zig");
+const meta = @import("meta.zig");
 
 const generated = @import("gen_node_tags");
-
-const collections = @import("collections.zig");
 
 pub const Tag = generated.Tag;
 
@@ -105,8 +105,8 @@ pub inline fn asNodePtr(node: anytype) *pg.Node {
 }
 
 inline fn checkIsPotentialNodePtr(node: anytype) void {
-    const nodeType = @typeInfo(@TypeOf(node));
-    if (nodeType != .pointer or (nodeType.pointer.size != .One and nodeType.pointer.size != .C)) {
+    const tn = @TypeOf(node);
+    if (!meta.isPointer(tn) and !meta.isCPointer(tn)) {
         @compileError("Expected single node pointer");
     }
 }

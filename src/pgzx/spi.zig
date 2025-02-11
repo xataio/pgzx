@@ -128,15 +128,11 @@ fn scanField(
     row: usize,
     column: c_int,
 ) !c_int {
-    const field_info = @typeInfo(fieldType);
-    if (field_info != .pointer) {
+    if (!meta.isPointer(fieldType)) {
         @compileError("scanField requires a pointer");
     }
-    if (field_info.pointer.size == .Slice) {
-        @compileError("scanField requires a single pointer, not a slice");
-    }
 
-    const child_type = field_info.pointer.child;
+    const child_type = meta.pointerElemType(fieldType);
     if (@typeInfo(child_type) == .@"struct") {
         var struct_column = column;
         inline for (std.meta.fields(child_type)) |field| {

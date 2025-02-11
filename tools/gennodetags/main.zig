@@ -2,6 +2,7 @@ const std = @import("std");
 
 const pg = @cImport({
     @cInclude("c.h");
+    @cInclude("utils/palloc.h");
     @cInclude("nodes/nodes.h");
 });
 
@@ -14,6 +15,7 @@ const tagsOnly = std.StaticStringMap(void).initComptime([_]struct { []const u8 }
     .{"T_GenerationContext"},
     .{"T_SlabContext"},
     .{"T_WindowObjectData"},
+    .{"T_BumpContext"},
 
     // List types (only tags, all use the `List` type)
     .{"T_IntList"},

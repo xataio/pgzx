@@ -6,7 +6,7 @@ const PGBuild = @import("pgzx").Build;
 
 pub fn build(b: *std.Build) void {
     const NAME = "spi_sql";
-    const VERSION = .{ .major = 0, .minor = 1 };
+    const VERSION = PGBuild.ExtensionVersion{ .major = 0, .minor = 1 };
 
     const DB_TEST_USER = "postgres";
     const DB_TEST_PORT = 5432;
