@@ -1,5 +1,6 @@
 .{
-    .name = "char_count_zig",
+    .name = .char_count_zig,
+    .fingerprint = 0x6969c22ee1da70c0,
     .version = "0.1.0",
     .paths = .{
         "extension",

@@ -1,5 +1,6 @@
 .{
-    .name = "pgzx",
+    .name = .pgzx,
+    .fingerprint = 0x8cedca5730bac13e,
     .version = "0.1.0",
     .paths = .{
         "build.zig",
