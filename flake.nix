@@ -26,7 +26,25 @@
     self,
     nixpkgs,
     ...
-  }:
+  }: let
+    zig-stable = "0.14.0";
+
+    zig-overlay = _final: prev: let
+      orig = inputs.zig-overlay.packages.${prev.system};
+    in {
+      zigpkgs =
+        orig
+        // {
+          stable = orig.${zig-stable};
+        };
+    };
+
+    zls-overlay = final: prev: {
+      zls = inputs.zls.packages.${prev.system}.zls.overrideAttrs (_oldAttrs: {
+        nativeBuildInputs = [final.zigpkgs.stable];
+      });
+    };
+  in
     inputs.parts.lib.mkFlake {inherit inputs;} {
       debug = true;
 
@@ -41,10 +59,8 @@
           zls
           pgzx_scripts
         ];
-        zigpkgs = inputs.zig-overlay.overlays.default;
-        zls = _final: prev: {
-          zls = inputs.zls.packages.${prev.system}.zls;
-        };
+        zigpkgs = zig-overlay;
+        zls = zls-overlay;
         pgzx_scripts = _final: prev: {
           pgzx_scripts = self.packages.${prev.system}.pgzx_scripts;
         };
@@ -61,7 +77,6 @@
       systems = ["x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin"];
 
       perSystem = {
-        system,
         config,
         lib,
         pkgs,
@@ -70,10 +85,8 @@
         nixpkgs = {
           config.allowBroken = true;
           overlays = [
-            inputs.zig-overlay.overlays.default
-            (_final: _prev: {
-              zls = inputs.zls.packages.${system}.zls;
-            })
+            zig-overlay
+            zls-overlay
           ];
         };
 
@@ -103,7 +116,7 @@
             zigfmt = {
               enable = true;
               name = "Zig fmt";
-              entry = "${pkgs.zigpkgs.master}/bin/zig fmt --check";
+              entry = "${pkgs.zigpkgs.stable}/bin/zig fmt --check";
               files = "\\.zig$|\\.zon$";
             };
           };

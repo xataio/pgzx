@@ -22,36 +22,44 @@ const err = @import("err.zig");
 pub const PGCurrentContextAllocator: std.mem.Allocator = .{
     .ptr = undefined,
     .vtable = &.{
-        .alloc = &pg_alloc,
-        .free = &pg_free,
-        .resize = &pg_resize,
+        .alloc = &pgAlloc,
+        .free = &pgFree,
+        .resize = &pgResize,
+        .remap = &pgRemap,
     },
 };
 
-fn pg_alloc(ctx: *anyopaque, len: usize, ptr_align: u8, ret_addr: usize) ?[*]u8 {
+fn pgAlloc(ctx: *anyopaque, len: usize, ptr_align: std.mem.Alignment, ret_addr: usize) ?[*]u8 {
     _ = ret_addr;
     _ = ctx;
-    return @ptrCast(pg.palloc_aligned(len, ptr_align, pg.MCXT_ALLOC_NO_OOM));
+    return @ptrCast(pg.palloc_aligned(len, @intFromEnum(ptr_align), pg.MCXT_ALLOC_NO_OOM));
 }
 
-fn pg_free(ctx: *anyopaque, buf: []u8, buf_align: u8, ret_addr: usize) void {
+fn pgFree(ctx: *anyopaque, buf: []u8, buf_align: std.mem.Alignment, ret_addr: usize) void {
     _ = ret_addr;
     _ = buf_align;
     _ = ctx;
     pg.pfree(@ptrCast(buf));
 }
 
-fn pg_resize(ctx: *anyopaque, buf: []u8, buf_align: u8, new_len: usize, ret_addr: usize) bool {
+fn pgResize(ctx: *anyopaque, buf: []u8, buf_align: std.mem.Alignment, new_len: usize, ret_addr: usize) bool {
     _ = ret_addr;
-    _ = new_len;
     _ = buf_align;
-    _ = buf;
     _ = ctx;
 
-    // Postgres API only support realloc and might therefore relocate the buffer.
-    // resize is not allowed to relocate the buffer, so we have to return false
-    // and force the zig allocator to allocate a new buffer.
+    // allow shrinking only. We set all unused bytes to 0.
+    if (new_len < buf.len) {
+        @memset(buf[new_len..], 0);
+        return true;
+    }
     return false;
+}
+
+fn pgRemap(ctx: *anyopaque, memory: []u8, alignment: std.mem.Alignment, new_len: usize, ret_addr: usize) ?[*]u8 {
+    _ = ctx;
+    _ = alignment;
+    _ = ret_addr;
+    return @ptrCast(pg.repalloc(memory.ptr, new_len));
 }
 
 pub fn getErrorContext() MemoryContextAllocator {
@@ -260,15 +268,16 @@ pub const MemoryContextAllocator = struct {
 
     const vtable = std.mem.Allocator.VTable{
         .alloc = context_alloc,
-        .free = pg_free, // pg_free ignores the pointer.
-        .resize = pg_resize, // pg_resize ignores the pointer.
+        .free = pgFree, // pg_free ignores the pointer.
+        .resize = pgResize, // pg_resize ignores the pointer.
+        .remap = pgRemap, // pg_remap ignores the pointer.
     };
 
-    fn context_alloc(ctx: *anyopaque, len: usize, ptr_align: u8, ret_addr: usize) ?[*]u8 {
+    fn context_alloc(ctx: *anyopaque, len: usize, ptr_align: std.mem.Alignment, ret_addr: usize) ?[*]u8 {
         _ = ret_addr;
         const self: *MemoryContextAllocator = @ptrCast(@alignCast(ctx));
         const memctx = self.ctx;
-        const ptr = pg.MemoryContextAllocAligned(memctx, len, ptr_align, self.flags);
+        const ptr = pg.MemoryContextAllocAligned(memctx, len, @intFromEnum(ptr_align), self.flags);
         return @ptrCast(ptr);
     }
 };

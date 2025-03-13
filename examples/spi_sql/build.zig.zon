@@ -1,5 +1,6 @@
 .{
-    .name = "spi_sql",
+    .name = .spi_sql,
+    .fingerprint = 0x6815a10c7341ea27,
     .version = "0.1.0",
     .paths = .{
         "extension",

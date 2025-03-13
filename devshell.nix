@@ -56,8 +56,7 @@ in {
 
       pkgs.pkg-config
 
-      # pkgs.zigpkgs.master
-      pkgs.zigpkgs.master
+      pkgs.zigpkgs.stable
       pkgs.zls
     ];
 

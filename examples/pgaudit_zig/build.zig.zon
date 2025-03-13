@@ -1,5 +1,6 @@
 .{
-    .name = "pgzx",
+    .name = .pgaudit_zig,
+    .fingerprint = 0xf8875009244b02f6,
     .version = "0.1.0",
     .paths = .{
         "extension",

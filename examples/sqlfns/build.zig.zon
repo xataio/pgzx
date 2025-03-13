@@ -1,5 +1,6 @@
 .{
-    .name = "sqlfns",
+    .name = .sqlfns,
+    .fingerprint = 0xf71e8e3592a1c0e8,
     .version = "0.1.0",
     .paths = .{
         "extension",
